@@ -135,8 +135,8 @@ export default function ContactForm() {
     <section id="lien-he" className="max-w-7xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
 
-        {/* Contact info ben trai */}
-        <div className="lg:col-span-5 reveal">
+        {/* Contact info ben trai (ap dung reveal-left de truot tu trai sang) */}
+        <div className="lg:col-span-5 reveal-left">
           <span className="section-label">Kết nối phương xa</span>
           <h2 className="font-serif text-white mt-5 mb-6" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 600, lineHeight: 1.1 }}>
             Liên Hệ Với<br />Ban Tư Vấn
@@ -182,8 +182,8 @@ export default function ContactForm() {
           </div>
         </div>
 
-        {/* Form lien he ben phai */}
-        <div className="lg:col-span-7 reveal" style={{ transitionDelay: '200ms' }}>
+        {/* Form lien he ben phai (ap dung reveal-right va delay-200 de truot tu phai sang voi do tre nhe) */}
+        <div className="lg:col-span-7 reveal-right delay-200">
           <div className="relative rounded-2xl p-8 md:p-10 overflow-hidden"
             style={{ background: 'linear-gradient(160deg, rgba(10,17,32,0.8) 0%, rgba(4,8,15,0.9) 100%)', border: '1px solid rgba(255,255,255,0.06)' }}>
 

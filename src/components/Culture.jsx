@@ -84,11 +84,11 @@ export default function Culture() {
           <div style={{ width: '40px', height: '1px', background: 'linear-gradient(90deg, transparent, #0f9d8a, transparent)', margin: '24px auto 0' }} />
         </div>
 
-        {/* Main Interactive Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 reveal">
+        {/* Main Interactive Layout (bo reveal o day de chia cho cac cot con) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-          {/* === COT TRAI: Anh lon cua muc dang chon === */}
-          <div className="lg:col-span-7 relative rounded-3xl overflow-hidden group cursor-pointer"
+          {/* === COT TRAI: Anh lon cua muc dang chon (ap dung reveal-left truot tu trai sang) === */}
+          <div className="lg:col-span-7 relative rounded-3xl overflow-hidden group cursor-pointer reveal-left"
             style={{ height: 'clamp(400px, 50vw, 580px)' }}>
             {/* Anh chinh */}
             {CULTURE_ITEMS.map((item, idx) => (
@@ -135,8 +135,8 @@ export default function Culture() {
             </div>
           </div>
 
-          {/* === COT PHAI: Danh sach thumbnail de chon === */}
-          <div className="lg:col-span-5 flex flex-col gap-3">
+          {/* === COT PHAI: Danh sach thumbnail de chon (ap dung reveal-right truot tu phai sang voi tre 200ms) === */}
+          <div className="lg:col-span-5 flex flex-col gap-3 reveal-right delay-200">
             {CULTURE_ITEMS.map((item, idx) => {
               const isActive = activeItem === idx;
               return (

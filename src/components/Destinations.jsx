@@ -230,7 +230,8 @@ const DESTINATIONS = [
 ];
 
 // === DESTINATION CARD COMPONENT ===
-const DestinationCard = ({ data, onViewDetail }) => {
+// truyen index vao de tinh toan hieu ung cuon trang xoay trai/phai xen ke
+const DestinationCard = ({ data, onViewDetail, index }) => {
   const [tilt, setTilt] = useState({ x: 0, y: 0, scale: 1 });
   const [shinePos, setShinePos] = useState({ x: 50, y: 50 });
 
@@ -245,9 +246,12 @@ const DestinationCard = ({ data, onViewDetail }) => {
   };
   const handleMouseLeave = () => setTilt({ x: 0, y: 0, scale: 1 });
 
+  // xac dinh class reveal xoay trai hoac xoay phai dua tren index
+  const revealClass = index % 2 === 0 ? 'reveal-rotate-left' : 'reveal-rotate-right';
+
   return (
     <div
-      className="tilt-container reveal"
+      className={`tilt-container ${revealClass}`}
       style={{ transitionDelay: data.delay }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -539,7 +543,8 @@ export default function Destinations() {
           {/* Grid 6 diem den */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {DESTINATIONS.map((item, idx) => (
-              <DestinationCard key={idx} data={item} onViewDetail={setSelectedDest} />
+              // truyen them index vao component con
+              <DestinationCard key={idx} data={item} onViewDetail={setSelectedDest} index={idx} />
             ))}
           </div>
         </div>

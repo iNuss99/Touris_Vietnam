@@ -85,10 +85,11 @@ export default function Navbar() {
           {/* ===== DESKTOP NAVIGATION ===== */}
           <nav className="hidden lg:flex items-center gap-10">
             {navLinks.map(({ href, label, id }) => (
+              // ap dung class active-nav-link khi section dang active de gach chan cung sang len
               <a
                 key={id}
                 href={href}
-                className={`nav-link ${activeSection === id ? 'text-luxury-gold' : ''}`}
+                className={`nav-link ${activeSection === id ? 'active-nav-link' : ''}`}
               >
                 {label}
               </a>
@@ -97,11 +98,8 @@ export default function Navbar() {
 
           {/* ===== CTA BUTTON ===== */}
           <div className="hidden lg:flex items-center gap-4">
-            {/* Dường hotline nho */}
-            <span className="text-[10px] text-white/40 tracking-widest hidden xl:block">
-              +84 24 3824 3636
-            </span>
-            <div className="w-px h-5 bg-white/10 hidden xl:block" />
+            {/* bo sung class active-nav-link cho link dang chon tren menu de lam sang duong gach chan */}
+            {/* da bo so hotline nho va thanh gach chia de navbar rong rai va sach se hon */}
             <a
               href="#dat-tour"
               className="btn-glow btn-ripple inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] font-semibold text-luxury-dark bg-gradient-to-r from-luxury-gold-light via-luxury-gold to-luxury-gold-dim px-7 py-3 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-luxury-gold/20"

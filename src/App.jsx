@@ -24,7 +24,8 @@ export default function App() {
 
     // tri hoan nhe de cho toan bo DOM duoc render xong
     const timer = setTimeout(() => {
-      const selectors = '.reveal, .reveal-left, .reveal-right, .reveal-scale';
+      // danh sach cac class hieu ung cuon trang duoc ho tro trong du an
+      const selectors = '.reveal, .reveal-up, .reveal-down, .reveal-left, .reveal-right, .reveal-scale, .reveal-blur, .reveal-rotate-left, .reveal-rotate-right';
       const els = document.querySelectorAll(selectors);
 
       // thiet lap intersection observer de theo doi cuon trang
@@ -52,10 +53,27 @@ export default function App() {
     };
   }, [isLoading]);
 
+  // hieu ung theo doi con tro chuot (glow follower) dang cap Web 5.0
+  useEffect(() => {
+    // kiem tra neu thiet bi ho tro pointer dang fine (chuot) thi moi chay
+    if (window.matchMedia('(pointer: fine)').matches) {
+      const handleMouseMove = (e) => {
+        // cap nhat vi tri chuot vao bien CSS de hoat hoa bang GPU cuc ky muot ma
+        document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+        document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+      };
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+      return () => window.removeEventListener('mousemove', handleMouseMove);
+    }
+  }, []);
+
   return (
     <>
       {/* Loading Screen — hien khi F5/reload */}
       {isLoading && <LoadingScreen onComplete={handleLoadingComplete} />}
+
+      {/* quan sang vang theo duoi chuot phong cach Web 5.0 */}
+      <div className="cursor-glow" />
 
       <div
         className="min-h-screen antialiased"

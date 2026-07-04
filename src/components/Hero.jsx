@@ -117,15 +117,19 @@ export default function Hero() {
           </div>
 
           {/* Tieu de chinh (H1) */}
+          {/* ap dung hieu ung cuon chu truot tu duoi len (line reveal) phong cach sang trong cua Web 5.0 */}
           <h1 className="font-serif text-white mb-6 leading-[1.05]"
             style={{ fontSize: 'clamp(2.8rem, 8vw, 6.5rem)', fontWeight: 600, letterSpacing: '-0.01em' }}
           >
-            KHÁM PHÁ VẺ ĐẸP
-            <br />
-            <span className="text-gradient-gold italic font-light"
-              style={{ fontSize: 'clamp(3rem, 9vw, 7rem)' }}
-            >
-              Vượt Thời Gian
+            <span className="line-reveal-container">
+              <span className="line-reveal">KHÁM PHÁ VẺ ĐẸP</span>
+            </span>
+            <span className="line-reveal-container">
+              <span className="line-reveal text-gradient-gold italic font-light delay-200"
+                style={{ fontSize: 'clamp(3rem, 9vw, 7rem)' }}
+              >
+                Vượt Thời Gian
+              </span>
             </span>
           </h1>
 
@@ -155,7 +159,8 @@ export default function Hero() {
       >
         <div className="max-w-screen-xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
           {STATS.map(({ value, label }, i) => (
-            <div key={i} className="text-center relative reveal">
+            // ap dung hieu ung reveal-blur (lam mo nhe va truot len) staggered delay giup stats hien thi lan luot rat dep mat
+            <div key={i} className={`text-center relative reveal-blur delay-${(i + 1) * 100}`}>
               <div className="stat-number">{value}</div>
               <div className="text-[10px] uppercase tracking-[0.22em] text-white/45 mt-2 font-medium">{label}</div>
               {/* Vach chia cot doc giua cac cot */}

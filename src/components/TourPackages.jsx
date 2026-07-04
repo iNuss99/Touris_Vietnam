@@ -110,7 +110,8 @@ export default function TourPackages() {
             return (
               <div
                 key={idx}
-                className="reveal relative group"
+                // ap dung reveal-blur de tao cam giac mo nhe va sac net dan khi cuon trang
+                className="reveal-blur relative group"
                 style={{ transitionDelay: `${idx * 120}ms` }}
                 onMouseEnter={() => setHoveredIndex(idx)}
                 onMouseLeave={() => setHoveredIndex(null)}
