@@ -1,0 +1,561 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+  
+  --color-luxury-dark:    #04080f;
+  --color-luxury-surface: #0a1120;
+  --color-luxury-card:    rgba(12, 20, 40, 0.6);
+  --color-luxury-gold:    #c9a84c;
+  --color-luxury-gold-light: #f0d080;
+  --color-luxury-gold-dim: #8a6e2a;
+  --color-luxury-emerald: #0f9d8a;
+  --color-luxury-emerald-light: #34d0be;
+  --color-luxury-rose:    #c0392b;
+}
+
+/* ==============================================
+   1. BASE STYLES & RESET
+   ============================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: #04080f;
+  color: #e8e4d8;
+  overflow-x: hidden;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+/* Responsive font base */
+@media (max-width: 640px) {
+  html { font-size: 15px; }
+}
+
+/* ==============================================
+   2. CUSTOM SCROLLBAR
+   ============================================== */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #04080f; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c9a84c, #8a6e2a);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover { background: #c9a84c; }
+
+/* ==============================================
+   3. SCROLL REVEAL ANIMATIONS
+   ============================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-left.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-right.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-scale.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Fade in generic (dung cho tab switching) */
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==============================================
+   4. HERO PARALLAX
+   ============================================== */
+.parallax-container {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+.parallax-bg {
+  position: absolute;
+  top: -10%;
+  left: 0;
+  width: 100%;
+  height: 120%;
+  background-size: cover;
+  background-position: center 30%;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+/* ==============================================
+   5. GLOW BUTTON
+   ============================================== */
+.btn-glow {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  cursor: pointer;
+}
+.btn-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #f0d080, #c9a84c, #8a6e2a);
+  border-radius: inherit;
+  filter: blur(16px);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: -1;
+  transform: scale(1.15);
+}
+.btn-glow:hover::after { opacity: 0.7; }
+.btn-glow-emerald::after {
+  background: linear-gradient(135deg, #34d0be, #0f9d8a);
+}
+
+/* Ripple effect */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.btn-ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  background: rgba(255,255,255,0.12);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.5s ease, height 0.5s ease, opacity 0.5s ease;
+  opacity: 0;
+}
+.btn-ripple:hover::before {
+  width: 280px; height: 280px; opacity: 1;
+}
+
+/* ==============================================
+   6. GLASSMORPHISM CARDS
+   ============================================== */
+.glass-card {
+  background: rgba(12, 20, 40, 0.5);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(201, 168, 76, 0.1);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+}
+.glass-card:hover {
+  border-color: rgba(201, 168, 76, 0.3);
+  box-shadow: 0 20px 60px -15px rgba(201, 168, 76, 0.15);
+}
+.glass-card-dark {
+  background: rgba(4, 8, 15, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ==============================================
+   7. 3D TILT CARD SYSTEM
+   ============================================== */
+.tilt-container {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: box-shadow 0.4s ease;
+}
+.tilt-content {
+  transform: translateZ(35px);
+}
+.tilt-shine {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.06) 0%, transparent 55%);
+  border-radius: inherit;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+.tilt-container:hover .tilt-shine { opacity: 1; }
+
+/* ==============================================
+   8. SECTION DECORATORS
+   ============================================== */
+.gold-divider {
+  width: 48px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #c9a84c, transparent);
+  margin: 0 auto;
+}
+.gold-divider-left { margin: 0; }
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  font-weight: 600;
+  color: #c9a84c;
+}
+.section-label::before,
+.section-label::after {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 1px;
+  background: #c9a84c;
+  opacity: 0.4;
+}
+
+@media (max-width: 640px) {
+  .section-label { font-size: 9px; letter-spacing: 0.25em; }
+  .section-label::before,
+  .section-label::after { width: 18px; }
+}
+
+/* ==============================================
+   9. LOGO
+   ============================================== */
+.logo-img {
+  filter: drop-shadow(0 2px 12px rgba(201, 168, 76, 0.35));
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+.logo-img:hover {
+  filter: drop-shadow(0 2px 18px rgba(201, 168, 76, 0.6));
+  transform: scale(1.03);
+}
+
+/* ==============================================
+   10. NAV LINK
+   ============================================== */
+.nav-link {
+  position: relative;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+  color: rgba(232, 228, 216, 0.7);
+  transition: color 0.3s ease;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, #c9a84c, #f0d080);
+  transition: width 0.3s ease;
+}
+.nav-link:hover { color: #c9a84c; }
+.nav-link:hover::after { width: 100%; }
+
+/* ==============================================
+   11. STAT NUMBERS
+   ============================================== */
+.stat-number {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1;
+  background: linear-gradient(135deg, #f0d080, #c9a84c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ==============================================
+   12. TOUR PACKAGE CARD
+   ============================================== */
+.package-card {
+  background: rgba(10, 17, 32, 0.9);
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.4s ease,
+              box-shadow 0.4s ease;
+}
+.package-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(201, 168, 76, 0.35);
+  box-shadow: 0 25px 60px -15px rgba(201, 168, 76, 0.18);
+}
+.package-popular {
+  border-color: rgba(201, 168, 76, 0.45);
+  box-shadow: 0 0 35px -8px rgba(201, 168, 76, 0.12);
+}
+
+/* ==============================================
+   13. TESTIMONIAL CARD
+   ============================================== */
+.testimonial-card {
+  background: rgba(10, 17, 32, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 28px;
+  transition: border-color 0.3s ease, transform 0.4s ease;
+}
+.testimonial-card:hover {
+  border-color: rgba(201, 168, 76, 0.2);
+  transform: translateY(-3px);
+}
+
+/* ==============================================
+   14. TICKER / MARQUEE
+   ============================================== */
+.ticker-wrapper { overflow: hidden; width: 100%; }
+.ticker-track {
+  display: flex;
+  gap: 0;
+  animation: ticker 30s linear infinite;
+  white-space: nowrap;
+}
+.ticker-track:hover { animation-play-state: paused; }
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ==============================================
+   15. GRADIENT TEXT + SHIMMER
+   ============================================== */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #f0d080 0%, #c9a84c 50%, #f0d080 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+  animation: shimmer 4s linear infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ==============================================
+   16. FORM INPUTS
+   ============================================== */
+.form-input {
+  background: rgba(4, 8, 15, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 14px 16px 14px 44px;
+  font-size: 14px;
+  color: #e8e4d8;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+.form-input::placeholder { color: rgba(255,255,255,0.18); }
+.form-input:focus {
+  border-color: #c9a84c;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.08);
+  background: rgba(10, 17, 32, 0.7);
+}
+
+/* ==============================================
+   17. FLOATING PARTICLES
+   ============================================== */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  animation: float-particle 8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes float-particle {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+  50%      { transform: translateY(-18px) scale(1.08); opacity: 0.7; }
+}
+
+/* ==============================================
+   18. BORDER GLOW SPIN
+   ============================================== */
+@keyframes border-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.border-glow-animate {
+  position: relative;
+}
+.border-glow-animate::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, transparent 0deg, #c9a84c 60deg, #f0d080 120deg, transparent 180deg);
+  animation: border-spin 4s linear infinite;
+  z-index: -1;
+  opacity: 0.35;
+}
+
+/* ==============================================
+   19. 3D FLOATING CARD HOVER
+   ============================================== */
+.float-3d {
+  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1),
+              box-shadow 0.5s ease;
+}
+.float-3d:hover {
+  transform: translateY(-8px) perspective(600px) rotateX(2deg);
+  box-shadow: 0 30px 70px -15px rgba(0,0,0,0.4),
+              0 0 30px -8px rgba(201,168,76,0.12);
+}
+
+/* ==============================================
+   20. RESPONSIVE UTILITIES
+   ============================================== */
+
+/* Mobile navigation overlay */
+@media (max-width: 768px) {
+  .mobile-menu-open {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(4,8,15,0.98);
+    backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+  }
+}
+
+/* Global section padding and layout flow */
+section {
+  position: relative;
+  padding-top: 7rem !important;
+  padding-bottom: 7rem !important;
+}
+
+@media (max-width: 768px) {
+  section {
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  section {
+    padding-top: 5.5rem !important;
+    padding-bottom: 5.5rem !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+}
+
+
+/* Responsive grid adjustments */
+@media (max-width: 640px) {
+  .grid.grid-cols-1.sm\:grid-cols-2.xl\:grid-cols-3 {
+    gap: 1rem !important;
+  }
+}
+
+/* Responsive modal */
+@media (max-width: 640px) {
+  .fixed.inset-0.z-\[100\] > div {
+    margin: 0.5rem !important;
+    border-radius: 1rem !important;
+    max-height: 95vh !important;
+  }
+}
+
+/* Responsive hero text */
+@media (max-width: 480px) {
+  .parallax-container h1 {
+    font-size: 2rem !important;
+  }
+  .parallax-container p {
+    font-size: 0.85rem !important;
+  }
+}
+
+/* Responsive footer */
+@media (max-width: 768px) {
+  footer .grid {
+    gap: 2rem !important;
+  }
+}
+
+/* Touch device improvements */
+@media (hover: none) {
+  .tilt-container:hover .tilt-shine { opacity: 0; }
+  .btn-glow::after { display: none; }
+  .package-card:hover { transform: none; }
+  .float-3d:hover { transform: none; }
+}
+
+/* ==============================================
+   21. SMOOTH LINE CLAMP
+   ============================================== */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ==============================================
+   22. PRINT STYLES (for production)
+   ============================================== */
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  .parallax-container { height: auto !important; min-height: auto !important; }
+  nav, footer, .btn-glow { display: none !important; }
+}
