@@ -2,7 +2,8 @@
 
 @theme {
   --font-sans: 'Plus Jakarta Sans', sans-serif;
-  --font-serif: 'Playfair Display', serif;
+  /* thay the font serif cu bang Cormorant Garamond giup hien thi tieng viet muot ma hon */
+  --font-serif: 'Cormorant Garamond', serif;
   
   --color-luxury-dark:    #04080f;
   --color-luxury-surface: #0a1120;

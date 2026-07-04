@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 
-// Du lieu cac chi so thong ke noi bat
+// Du lieu cac chi so thong ke noi bat (sua lai loi phong chu va loi chinh ta tieng viet)
 const STATS = [
   { value: '15+', label: 'Năm kinh nghiệm' },
   { value: '50K+', label: 'Du khách tin tưởng' },
-  { value: '120+', label: 'Điểm đến khải phá' },
+  { value: '120+', label: 'Điểm đến khám phá' },
   { value: '4.9', label: 'Đánh giá trung bình' },
 ];
 

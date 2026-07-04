@@ -34,6 +34,9 @@ export default function App() {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               entry.target.classList.add('active');
+            } else {
+              // xoa class active khi phan tu cuon ra khoi khung nhin de khi cuon lai van co hoat canh
+              entry.target.classList.remove('active');
             }
           });
         },

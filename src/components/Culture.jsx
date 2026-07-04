@@ -8,13 +8,13 @@ import imgAoDai from '../assets/images/culture/ao-dai.webp';
 import imgLantern from '../assets/images/culture/lantern-festival.webp';
 import imgBanhMi from '../assets/images/culture/banh-mi.webp';
 
-// Du lieu cac muc van hoa
+// Du lieu cac muc van hoa (da sua cac loi chinh ta tieng viet de phu hop hon)
 const CULTURE_ITEMS = [
   {
     id: 'pho',
     title: 'Hương Vị Phở Việt',
     subtitle: 'Tinh hoa ẩm thực quốc gia',
-    description: 'Không chỉ là một món ăn, Phở là tác phẩm nghệ thuật ẩm thực. Nước dùng trong, ngọt từ xương hầm niêm nhỏ lửa, thoang thoảng hương quế hồi — phối hợp hài hòa cùng bánh phở tươi và thịt bò thơm ngon.',
+    description: 'Không chỉ là một món ăn, Phở là tác phẩm nghệ thuật ẩm thực. Nước dùng trong, ngọt từ xương hầm ninh nhỏ lửa, thoang thoảng hương quế hồi — phối hợp hài hòa cùng bánh phở tươi và thịt bò thơm ngon.',
     image: imgPho,
     icon: <UtensilsCrossed size={16} />,
     accent: '#c9a84c',
@@ -23,7 +23,7 @@ const CULTURE_ITEMS = [
     id: 'cafe',
     title: 'Cà Phê Phin',
     subtitle: 'Nét sống thường nhật',
-    description: 'Những giọt cà phê nhỉ nhàn, hòa quyện ngọt ngào cùng sữa đặc — một phần ký niệm của bất cứ ai đã từng đến Việt Nam.',
+    description: 'Những giọt cà phê nhẹ nhàng, hòa quyện ngọt ngào cùng sữa đặc — một phần kỷ niệm của bất cứ ai đã từng đến Việt Nam.',
     image: imgCafePhin,
     icon: <Coffee size={16} />,
     accent: '#8B6914',
