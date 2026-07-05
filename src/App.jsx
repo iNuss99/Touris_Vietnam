@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { LanguageProvider } from './i18n/LanguageContext';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
 import LoadingScreen from './components/LoadingScreen';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -9,8 +9,77 @@ import TourPackages from './components/TourPackages';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 
+function MainContent({ isLoading, isPageVisible, handleReveal, handleLoadingComplete }) {
+  const { lang } = useLanguage();
+  const [isLangChanging, setIsLangChanging] = useState(false);
+  const isFirstRender = useRef(true);
+
+  // Hieu ung chuyen doi ngon ngu hoa quyen (Cross-dissolve Transition)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    setIsLangChanging(true);
+    const timer = setTimeout(() => {
+      setIsLangChanging(false);
+    }, 280); // 280ms duration
+    return () => clearTimeout(timer);
+  }, [lang]);
+
+  return (
+    <>
+      {/* Loading Screen — hien khi F5/reload */}
+      {isLoading && (
+        <LoadingScreen 
+          onReveal={handleReveal} 
+          onComplete={handleLoadingComplete} 
+        />
+      )}
+
+      {/* quan sang vang theo duoi chuot phong cach Web 5.0 */}
+      <div className="cursor-glow" />
+
+      <div
+        className={`min-h-screen antialiased transition-all duration-[1.2s] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isPageVisible ? 'opacity-100 translate-y-0 scale-100 blur-0' : 'opacity-0 translate-y-4 scale-[0.98] blur-[2px]'
+        }`}
+        style={{
+          background: '#04080f',
+          color: '#e8e4d8',
+        }}
+      >
+        {/* Lớp mat na hoa quyen khi doi ngon ngu */}
+        <div
+          className="transition-all duration-300 ease-out"
+          style={{
+            opacity: isLangChanging ? 0.35 : 1,
+            filter: isLangChanging ? 'blur(5px)' : 'blur(0)',
+            transform: isLangChanging ? 'scale(0.995)' : 'scale(1)',
+            transitionProperty: 'opacity, filter, transform',
+          }}
+        >
+          <Navbar />
+          <Hero isPageVisible={isPageVisible} />
+          <Destinations />
+          <Culture />
+          <TourPackages />
+          <ContactForm />
+          <Footer />
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [isPageVisible, setIsPageVisible] = useState(false);
+
+  const handleReveal = useCallback(() => {
+    setIsPageVisible(true);
+  }, []);
 
   const handleLoadingComplete = useCallback(() => {
     setIsLoading(false);
@@ -18,7 +87,7 @@ export default function App() {
 
   // khoi tao scroll reveal khi loading hoan tat
   useEffect(() => {
-    if (isLoading) return;
+    if (!isPageVisible) return;
 
     // bien de luu tru doi tuong observer giup disconnect luc don dep
     let observer;
@@ -55,7 +124,7 @@ export default function App() {
         observer.disconnect();
       }
     };
-  }, [isLoading]);
+  }, [isPageVisible]);
 
   // hieu ung theo doi con tro chuot (glow follower) dang cap Web 5.0
   useEffect(() => {
@@ -73,29 +142,12 @@ export default function App() {
 
   return (
     <LanguageProvider>
-      {/* Loading Screen — hien khi F5/reload */}
-      {isLoading && <LoadingScreen onComplete={handleLoadingComplete} />}
-
-      {/* quan sang vang theo duoi chuot phong cach Web 5.0 */}
-      <div className="cursor-glow" />
-
-      <div
-        className="min-h-screen antialiased"
-        style={{
-          background: '#04080f',
-          color: '#e8e4d8',
-          opacity: isLoading ? 0 : 1,
-          transition: 'opacity 0.5s ease',
-        }}
-      >
-        <Navbar />
-        <Hero />
-        <Destinations />
-        <Culture />
-        <TourPackages />
-        <ContactForm />
-        <Footer />
-      </div>
+      <MainContent 
+        isLoading={isLoading}
+        isPageVisible={isPageVisible}
+        handleReveal={handleReveal}
+        handleLoadingComplete={handleLoadingComplete}
+      />
     </LanguageProvider>
   );
 }

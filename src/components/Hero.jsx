@@ -4,7 +4,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 // URL anh nen tĩnh Ha Long - fallback khi video chua load xong
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1920&q=85';
 
-export default function Hero() {
+export default function Hero({ isPageVisible }) {
   const [scrollY, setScrollY] = useState(0);
   const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef(null);
@@ -105,7 +105,7 @@ export default function Hero() {
 
           {/* Label tren tieu de */}
           <div className="flex justify-center mb-8">
-            <span className="section-label">
+            <span className={`section-label reveal-down ${isPageVisible ? 'active' : ''}`}>
               {hero.label}
             </span>
           </div>
@@ -116,11 +116,11 @@ export default function Hero() {
             style={{ fontSize: 'clamp(2.8rem, 8vw, 6.5rem)', fontWeight: 600, letterSpacing: '-0.01em' }}
           >
             <span className="line-reveal-container">
-              <span className="line-reveal">{hero.titleLine1}</span>
+              <span className={`line-reveal ${isPageVisible ? 'active' : ''}`}>{hero.titleLine1}</span>
             </span>
             <span className="line-reveal-container">
-              <span className="line-reveal text-gradient-gold italic font-light delay-200"
-                style={{ fontSize: 'clamp(3rem, 9vw, 7rem)' }}
+              <span className={`line-reveal text-gradient-gold italic font-light ${isPageVisible ? 'active' : ''}`}
+                style={{ fontSize: 'clamp(3rem, 9vw, 7rem)', animationDelay: '0.2s' }}
               >
                 {hero.titleLine2}
               </span>
@@ -128,7 +128,7 @@ export default function Hero() {
           </h1>
 
           {/* Mo ta ngan */}
-          <p className="text-white/55 font-light leading-loose mx-auto mb-10"
+          <p className={`text-white/55 font-light leading-loose mx-auto mb-10 reveal-blur delay-300 ${isPageVisible ? 'active' : ''}`}
             style={{ fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', maxWidth: '580px', fontWeight: 300 }}
           >
             {hero.description}
@@ -138,7 +138,7 @@ export default function Hero() {
           <div className="flex items-center justify-center">
             <a
               href="#kham-pha"
-              className="btn-glow btn-ripple w-full sm:w-auto text-[12px] uppercase tracking-[0.25em] font-semibold text-luxury-dark bg-gradient-to-r from-luxury-gold-light via-luxury-gold to-luxury-gold-dim px-10 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl shadow-luxury-gold/20"
+              className={`btn-glow btn-ripple w-full sm:w-auto text-[12px] uppercase tracking-[0.25em] font-semibold text-luxury-dark bg-gradient-to-r from-luxury-gold-light via-luxury-gold to-luxury-gold-dim px-10 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl shadow-luxury-gold/20 reveal-blur delay-400 ${isPageVisible ? 'active' : ''}`}
               style={{ paddingTop: '14px', paddingBottom: '14px' }}
             >
               {hero.ctaButton}
@@ -154,7 +154,7 @@ export default function Hero() {
         <div className="max-w-screen-xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
           {hero.stats?.map(({ value, label }, i) => (
             // ap dung hieu ung reveal-blur (lam mo nhe va truot len) staggered delay giup stats hien thi lan luot rat dep mat
-            <div key={i} className={`text-center relative reveal-blur delay-${(i + 1) * 100}`}>
+            <div key={i} className={`text-center relative reveal-blur delay-${(i + 2) * 100} ${isPageVisible ? 'active' : ''}`}>
               <div className="stat-number">{value}</div>
               <div className="text-[10px] uppercase tracking-[0.22em] text-white/45 mt-2 font-medium">{label}</div>
               {/* Vach chia cot doc giua cac cot */}

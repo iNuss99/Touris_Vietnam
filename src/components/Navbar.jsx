@@ -102,21 +102,49 @@ export default function Navbar() {
 
           {/* ===== LANGUAGE TOGGLE + CTA BUTTON ===== */}
           <div className="hidden lg:flex items-center gap-4">
-            {/* Language Toggle Button */}
-            <button
-              onClick={toggleLang}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 group"
+            {/* Premium Language Switcher */}
+            <div 
+              className="relative flex items-center p-0.5 rounded-full select-none"
               style={{
-                background: 'rgba(201,168,76,0.08)',
-                border: '1px solid rgba(201,168,76,0.25)',
+                background: 'rgba(255, 255, 255, 0.02)',
+                border: '1px solid rgba(201, 168, 76, 0.25)',
+                height: '38px',
+                width: '92px',
               }}
-              aria-label="Toggle Language"
             >
-              <Globe size={14} className="text-luxury-gold transition-transform duration-500 group-hover:rotate-180" />
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-luxury-gold-light">
-                {lang === 'en' ? 'EN' : 'VI'}
-              </span>
-            </button>
+              {/* Sliding Gold Background Pill */}
+              <div 
+                className="absolute top-0.5 bottom-0.5 rounded-full transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]"
+                style={{
+                  background: 'linear-gradient(135deg, #f0d080, #c9a84c)',
+                  width: '42px',
+                  left: lang === 'vi' ? '2px' : '46px',
+                  boxShadow: '0 2px 10px rgba(201, 168, 76, 0.3)',
+                }}
+              />
+              
+              {/* VI Button */}
+              <button
+                onClick={() => setLang('vi')}
+                className="relative z-10 w-1/2 h-full text-[10px] font-bold uppercase tracking-wider transition-colors duration-300 outline-none cursor-pointer"
+                style={{
+                  color: lang === 'vi' ? '#04080f' : 'rgba(232, 228, 216, 0.5)',
+                }}
+              >
+                VI
+              </button>
+              
+              {/* EN Button */}
+              <button
+                onClick={() => setLang('en')}
+                className="relative z-10 w-1/2 h-full text-[10px] font-bold uppercase tracking-wider transition-colors duration-300 outline-none cursor-pointer"
+                style={{
+                  color: lang === 'en' ? '#04080f' : 'rgba(232, 228, 216, 0.5)',
+                }}
+              >
+                EN
+              </button>
+            </div>
 
             <a
               href="#dat-tour"
@@ -161,20 +189,49 @@ export default function Navbar() {
             </a>
           ))}
 
-          {/* Mobile Language Toggle */}
-          <button
-            onClick={toggleLang}
-            className="flex items-center gap-2 px-5 py-3 rounded-full transition-all duration-300"
+          {/* Mobile Premium Language Switcher */}
+          <div 
+            className="relative flex items-center p-0.5 rounded-full select-none"
             style={{
-              background: 'rgba(201,168,76,0.1)',
-              border: '1px solid rgba(201,168,76,0.3)',
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid rgba(201, 168, 76, 0.25)',
+              height: '44px',
+              width: '180px',
             }}
           >
-            <Globe size={16} className="text-luxury-gold" />
-            <span className="text-sm font-semibold uppercase tracking-widest text-luxury-gold-light">
-              {lang === 'en' ? 'English' : 'Tiếng Việt'}
-            </span>
-          </button>
+            {/* Sliding Gold Background Pill */}
+            <div 
+              className="absolute top-0.5 bottom-0.5 rounded-full transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]"
+              style={{
+                background: 'linear-gradient(135deg, #f0d080, #c9a84c)',
+                width: '86px',
+                left: lang === 'vi' ? '2px' : '90px',
+                boxShadow: '0 2px 10px rgba(201, 168, 76, 0.3)',
+              }}
+            />
+            
+            {/* VI Button */}
+            <button
+              onClick={() => setLang('vi')}
+              className="relative z-10 w-1/2 h-full text-xs font-semibold uppercase tracking-widest transition-colors duration-300 outline-none cursor-pointer"
+              style={{
+                color: lang === 'vi' ? '#04080f' : 'rgba(232, 228, 216, 0.5)',
+              }}
+            >
+              Tiếng Việt
+            </button>
+            
+            {/* EN Button */}
+            <button
+              onClick={() => setLang('en')}
+              className="relative z-10 w-1/2 h-full text-xs font-semibold uppercase tracking-widest transition-colors duration-300 outline-none cursor-pointer"
+              style={{
+                color: lang === 'en' ? '#04080f' : 'rgba(232, 228, 216, 0.5)',
+              }}
+            >
+              English
+            </button>
+          </div>
 
           <a
             href="#dat-tour"
