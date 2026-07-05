@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { User, Mail, Phone, Calendar, Users, Briefcase, MessageSquare, Send, CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 // Dinh nghia URL Google Apps Script de lien ket sheet
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPEtkA2xnO83NfViqUBA3y0EPt7CBgoBXrUOc0VNtq06o2VzvftiyAANbIR_NFRCUF/exec";
 
 // Thanh cong animation component — hien thi khi gui form thanh cong
 const SuccessOverlay = ({ onReset }) => {
+  const { t } = useLanguage();
+  const c = t('contact');
+
   return (
     <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-8 text-center rounded-2xl"
       style={{
@@ -38,24 +42,24 @@ const SuccessOverlay = ({ onReset }) => {
       </div>
 
       <h3 className="font-serif text-white mb-3" style={{ fontSize: '1.8rem', fontWeight: 600 }}>
-        Gửi Thành Công!
+        {c.successTitle}
       </h3>
       <p className="text-white/50 text-sm font-light leading-relaxed max-w-sm mb-2" style={{ fontWeight: 300 }}>
-        Yêu cầu của bạn đã được tiếp nhận. Đội ngũ tư vấn viên cao cấp sẽ liên hệ lại trong vòng
+        {c.successMsg}
       </p>
       <div className="flex items-center gap-2 mb-6">
         <span className="font-serif text-luxury-emerald-light font-semibold text-2xl">24</span>
-        <span className="text-white/40 text-xs uppercase tracking-widest">giờ tới</span>
+        <span className="text-white/40 text-xs uppercase tracking-widest">{c.successHours}</span>
       </div>
 
       <div className="flex items-center gap-3 p-3 rounded-xl mb-8" style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.15)' }}>
         <Sparkles size={14} className="text-luxury-gold shrink-0" />
-        <span className="text-white/45 text-xs font-light">Mã yêu cầu: <span className="text-luxury-gold font-medium">VNT-{Date.now().toString(36).toUpperCase()}</span></span>
+        <span className="text-white/45 text-xs font-light">{c.successReqLabel}<span className="text-luxury-gold font-medium">VNT-{Date.now().toString(36).toUpperCase()}</span></span>
       </div>
 
       <button onClick={onReset}
         className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-luxury-emerald/70 hover:text-luxury-emerald-light transition-colors font-medium">
-        Gửi yêu cầu mới
+        {c.newRequest}
         <ArrowRight size={12} />
       </button>
 
@@ -85,7 +89,8 @@ const SuccessOverlay = ({ onReset }) => {
           0% { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1); }
           100% { opacity: 0; transform: translate(-50%, -50%) translate(25px, 40px) scale(0); }
         }
-      `}</style>
+      `}
+      </style>
     </div>
   );
 };
@@ -97,6 +102,8 @@ export default function ContactForm() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState(null);
+  const { lang, t } = useLanguage();
+  const c = t('contact');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -108,7 +115,7 @@ export default function ContactForm() {
     setIsLoading(true);
     setStatus(null);
 
-    const payload = { ...formData, submittedAt: new Date().toLocaleString('vi-VN') };
+    const payload = { ...formData, submittedAt: new Date().toLocaleString(lang === 'vi' ? 'vi-VN' : 'en-US') };
 
     try {
       if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_URL_HERE")) {
@@ -135,14 +142,14 @@ export default function ContactForm() {
     <section id="lien-he" className="max-w-7xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
 
-        {/* Contact info ben trai (ap dung reveal-left de truot tu trai sang) */}
+        {/* Contact info ben trai */}
         <div className="lg:col-span-5 reveal-left">
-          <span className="section-label">Kết nối phương xa</span>
+          <span className="section-label">{c.sectionLabel}</span>
           <h2 className="font-serif text-white mt-5 mb-6" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 600, lineHeight: 1.1 }}>
-            Liên Hệ Với<br />Ban Tư Vấn
+            {c.sectionTitle1}<br />{c.sectionTitle2}
           </h2>
           <p className="text-white/40 font-light text-sm leading-relaxed mb-10" style={{ maxWidth: '380px', fontWeight: 300 }}>
-            Điền đầy đủ thông tin hành trình mong muốn của bạn. Đội ngũ chuyên viên chăm sóc khách hàng cao cấp sẽ phản hồi trong vòng 24 giờ.
+            {c.sectionDesc}
           </p>
 
           <div className="space-y-5">
@@ -152,7 +159,7 @@ export default function ContactForm() {
                 <Phone size={16} className="text-luxury-emerald-light" />
               </div>
               <div>
-                <h4 className="font-medium text-white text-sm">Hotline tư vấn</h4>
+                <h4 className="font-medium text-white text-sm">{c.hotlineTitle}</h4>
                 <p className="text-white/40 text-xs mt-1 font-light">+84 0931 143 830</p>
               </div>
             </div>
@@ -163,7 +170,7 @@ export default function ContactForm() {
                 <Mail size={16} className="text-luxury-emerald-light" />
               </div>
               <div>
-                <h4 className="font-medium text-white text-sm">Email hỗ trợ</h4>
+                <h4 className="font-medium text-white text-sm">{c.emailTitle}</h4>
                 <p className="text-white/40 text-xs mt-1 font-light">domjnhkhoa@gmail.com</p>
               </div>
             </div>
@@ -172,7 +179,7 @@ export default function ContactForm() {
           {/* Trust signal */}
           <div className="mt-10 pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
             <div className="flex items-center gap-6">
-              {['Phản hồi 24h', 'Bảo mật thông tin', 'Tư vấn miễn phí'].map((item, i) => (
+              {(c.trustItems || []).map((item, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <div className="w-1 h-1 rounded-full bg-luxury-emerald" />
                   <span className="text-white/25 text-[10px] uppercase tracking-widest">{item}</span>
@@ -182,7 +189,7 @@ export default function ContactForm() {
           </div>
         </div>
 
-        {/* Form lien he ben phai (ap dung reveal-right va delay-200 de truot tu phai sang voi do tre nhe) */}
+        {/* Form lien he ben phai */}
         <div className="lg:col-span-7 reveal-right delay-200">
           <div className="relative rounded-2xl p-8 md:p-10 overflow-hidden"
             style={{ background: 'linear-gradient(160deg, rgba(10,17,32,0.8) 0%, rgba(4,8,15,0.9) 100%)', border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -193,23 +200,23 @@ export default function ContactForm() {
             {/* Success Overlay */}
             {status === 'success' && <SuccessOverlay onReset={() => setStatus(null)} />}
 
-            <h3 className="font-serif text-white mb-7" style={{ fontSize: '1.5rem', fontWeight: 600 }}>Lên Kế Hoạch Cho Chuyến Đi</h3>
+            <h3 className="font-serif text-white mb-7" style={{ fontSize: '1.5rem', fontWeight: 600 }}>{c.formTitle}</h3>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Row 1 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <label htmlFor="fullName" className={labelClass}>Họ và tên (*)</label>
+                  <label htmlFor="fullName" className={labelClass}>{c.labelFullName}</label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-white/20"><User size={15} /></span>
-                    <input type="text" id="fullName" name="fullName" required value={formData.fullName} onChange={handleChange} placeholder="Nguyễn Văn A" className={inputClass} />
+                    <input type="text" id="fullName" name="fullName" required value={formData.fullName} onChange={handleChange} placeholder={c.placeholderName} className={inputClass} />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="zalo" className={labelClass}>Số điện thoại / Zalo (*)</label>
+                  <label htmlFor="zalo" className={labelClass}>{c.labelPhone}</label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-white/20"><Phone size={15} /></span>
-                    <input type="tel" id="zalo" name="zalo" required value={formData.zalo} onChange={handleChange} placeholder="0931143830" className={inputClass} />
+                    <input type="tel" id="zalo" name="zalo" required value={formData.zalo} onChange={handleChange} placeholder={c.placeholderPhone} className={inputClass} />
                   </div>
                 </div>
               </div>
@@ -217,26 +224,22 @@ export default function ContactForm() {
               {/* Row 2 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <label htmlFor="email" className={labelClass}>Địa chỉ Email (*)</label>
+                  <label htmlFor="email" className={labelClass}>{c.labelEmail}</label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-white/20"><Mail size={15} /></span>
-                    <input type="email" id="email" name="email" required value={formData.email} onChange={handleChange} placeholder="email@example.com" className={inputClass} />
+                    <input type="email" id="email" name="email" required value={formData.email} onChange={handleChange} placeholder={c.placeholderEmail} className={inputClass} />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="destination" className={labelClass}>Điểm đến mong muốn (*)</label>
+                  <label htmlFor="destination" className={labelClass}>{c.labelDestination}</label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-white/20"><Sparkles size={15} /></span>
                     <select id="destination" name="destination" required value={formData.destination} onChange={handleChange}
                       className="w-full bg-luxury-dark border border-white/10 focus:border-luxury-gold focus:ring-1 focus:ring-luxury-gold rounded-xl py-3.5 pl-11 pr-4 text-sm text-white outline-none transition-all duration-300 appearance-none">
-                      <option value="" disabled>Chọn điểm đến...</option>
-                      <option value="Vịnh Hạ Long">Vịnh Hạ Long</option>
-                      <option value="Hội An">Hội An</option>
-                      <option value="Tràng An">Tràng An</option>
-                      <option value="Phú Quốc">Phú Quốc</option>
-                      <option value="Sa Pa">Sa Pa</option>
-                      <option value="Đà Nẵng">Đà Nẵng</option>
-                      <option value="Khác">Khác (Yêu cầu riêng)</option>
+                      <option value="" disabled>{c.placeholderDest}</option>
+                      {(c.destOptions || []).map((opt, i) => (
+                        <option key={i} value={opt.value}>{opt.label}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -245,28 +248,28 @@ export default function ContactForm() {
               {/* Row 3 */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div className="space-y-2">
-                  <label htmlFor="date" className={labelClass}>Ngày khởi hành</label>
+                  <label htmlFor="date" className={labelClass}>{c.labelDate}</label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-white/20"><Calendar size={15} /></span>
                     <input type="date" id="date" name="date" required value={formData.date} onChange={handleChange} className={inputClass} />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="guests" className={labelClass}>Số lượng khách</label>
+                  <label htmlFor="guests" className={labelClass}>{c.labelGuests}</label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-white/20"><Users size={15} /></span>
                     <input type="number" id="guests" name="guests" min="1" required value={formData.guests} onChange={handleChange} className={inputClass} />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="serviceClass" className={labelClass}>Hạng dịch vụ</label>
+                  <label htmlFor="serviceClass" className={labelClass}>{c.labelService}</label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-white/20"><Briefcase size={15} /></span>
                     <select id="serviceClass" name="serviceClass" value={formData.serviceClass} onChange={handleChange}
                       className="w-full bg-luxury-dark border border-white/10 focus:border-luxury-gold focus:ring-1 focus:ring-luxury-gold rounded-xl py-3.5 pl-11 pr-4 text-sm text-white outline-none transition-all duration-300 appearance-none">
-                      <option value="Standard">Tiêu Chuẩn (Explorer)</option>
-                      <option value="Premium">Cao Cấp (Signature)</option>
-                      <option value="Luxury">Sang Trọng (Prestige)</option>
+                      {(c.serviceOptions || []).map((opt, i) => (
+                        <option key={i} value={opt.value}>{opt.label}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -274,11 +277,11 @@ export default function ContactForm() {
 
               {/* Row 4 */}
               <div className="space-y-2">
-                <label htmlFor="message" className={labelClass}>Yêu cầu đặc biệt / Lời nhắn</label>
+                <label htmlFor="message" className={labelClass}>{c.labelMessage}</label>
                 <div className="relative">
                   <span className="absolute top-3.5 left-3.5 text-white/20"><MessageSquare size={15} /></span>
                   <textarea id="message" name="message" rows="3" value={formData.message} onChange={handleChange}
-                    placeholder="Ví dụ: Tôi đi tour hưởng tuần trăng mật, muốn phòng hướng biển..."
+                    placeholder={c.placeholderMsg}
                     className="w-full bg-luxury-dark/40 border border-white/10 focus:border-luxury-gold focus:ring-1 focus:ring-luxury-gold rounded-xl py-3.5 pl-11 pr-4 text-sm text-white placeholder-gray-600 outline-none transition-all duration-300 resize-none" />
                 </div>
               </div>
@@ -288,12 +291,12 @@ export default function ContactForm() {
                 className="btn-glow w-full flex items-center justify-center gap-2.5 text-[12px] uppercase tracking-[0.2em] font-semibold text-luxury-dark bg-gradient-to-r from-luxury-gold-light via-luxury-gold to-luxury-gold-dim py-4 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-luxury-gold/10">
                 {isLoading ? (
                   <>
-                    <span>Đang gửi yêu cầu...</span>
+                    <span>{c.submitting}</span>
                     <div className="w-4 h-4 border-2 border-luxury-dark border-t-transparent rounded-full animate-spin" />
                   </>
                 ) : (
                   <>
-                    <span>Gửi Yêu Cầu</span>
+                    <span>{c.submitButton}</span>
                     <Send size={14} />
                   </>
                 )}
@@ -302,7 +305,7 @@ export default function ContactForm() {
               {/* Error alert */}
               {status === 'error' && (
                 <div className="rounded-xl p-4 text-sm text-center font-medium mt-4" style={{ background: 'rgba(192,57,43,0.08)', border: '1px solid rgba(192,57,43,0.2)', color: '#e74c3c' }}>
-                  Có lỗi xảy ra. Vui lòng thử lại sau hoặc liên hệ hotline.
+                  {c.errorMsg}
                 </div>
               )}
             </form>

@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Globe } from 'lucide-react';
 // Import anh logo da chuyen sang webp de tang toc do tai trang
 import logoImg from '../assets/images/logo.webp';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
+  const { lang, setLang, t } = useLanguage();
+  const nav = t('nav');
 
   // Xu ly doi nen navbar va active section khi cuon trang
   useEffect(() => {
@@ -29,12 +32,13 @@ export default function Navbar() {
   }, []);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  const toggleLang = () => setLang(lang === 'en' ? 'vi' : 'en');
 
   const navLinks = [
-    { href: '#kham-pha', label: 'Khám Phá', id: 'kham-pha' },
-    { href: '#van-hoa',   label: 'Văn Hóa',  id: 'van-hoa'  },
-    { href: '#dat-tour',  label: 'Đặt Tour', id: 'dat-tour' },
-    { href: '#lien-he',   label: 'Liên Hệ',  id: 'lien-he'  },
+    { href: '#kham-pha', label: nav.explore,  id: 'kham-pha' },
+    { href: '#van-hoa',  label: nav.culture,  id: 'van-hoa'  },
+    { href: '#dat-tour', label: nav.bookTour, id: 'dat-tour' },
+    { href: '#lien-he',  label: nav.contact,  id: 'lien-he'  },
   ];
 
   return (
@@ -96,15 +100,29 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* ===== CTA BUTTON ===== */}
+          {/* ===== LANGUAGE TOGGLE + CTA BUTTON ===== */}
           <div className="hidden lg:flex items-center gap-4">
-            {/* bo sung class active-nav-link cho link dang chon tren menu de lam sang duong gach chan */}
-            {/* da bo so hotline nho va thanh gach chia de navbar rong rai va sach se hon */}
+            {/* Language Toggle Button */}
+            <button
+              onClick={toggleLang}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 group"
+              style={{
+                background: 'rgba(201,168,76,0.08)',
+                border: '1px solid rgba(201,168,76,0.25)',
+              }}
+              aria-label="Toggle Language"
+            >
+              <Globe size={14} className="text-luxury-gold transition-transform duration-500 group-hover:rotate-180" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-luxury-gold-light">
+                {lang === 'en' ? 'EN' : 'VI'}
+              </span>
+            </button>
+
             <a
               href="#dat-tour"
               className="btn-glow btn-ripple inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] font-semibold text-luxury-dark bg-gradient-to-r from-luxury-gold-light via-luxury-gold to-luxury-gold-dim px-7 py-3 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-luxury-gold/20"
             >
-              Đặt Tour Ngay
+              {nav.ctaButton}
             </a>
           </div>
 
@@ -142,12 +160,28 @@ export default function Navbar() {
               {label}
             </a>
           ))}
+
+          {/* Mobile Language Toggle */}
+          <button
+            onClick={toggleLang}
+            className="flex items-center gap-2 px-5 py-3 rounded-full transition-all duration-300"
+            style={{
+              background: 'rgba(201,168,76,0.1)',
+              border: '1px solid rgba(201,168,76,0.3)',
+            }}
+          >
+            <Globe size={16} className="text-luxury-gold" />
+            <span className="text-sm font-semibold uppercase tracking-widest text-luxury-gold-light">
+              {lang === 'en' ? 'English' : 'Tiếng Việt'}
+            </span>
+          </button>
+
           <a
             href="#dat-tour"
             onClick={toggleMobileMenu}
-            className="mt-6 btn-glow px-10 py-4 rounded-full text-sm font-semibold uppercase tracking-widest text-luxury-dark bg-gradient-to-r from-luxury-gold-light to-luxury-gold"
+            className="mt-2 btn-glow px-10 py-4 rounded-full text-sm font-semibold uppercase tracking-widest text-luxury-dark bg-gradient-to-r from-luxury-gold-light to-luxury-gold"
           >
-            Đặt Tour Ngay
+            {nav.ctaButton}
           </a>
         </div>
         {/* Logo o day mobile drawer */}

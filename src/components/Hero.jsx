@@ -1,21 +1,15 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-
-// Du lieu cac chi so thong ke noi bat (sua lai loi phong chu va loi chinh ta tieng viet)
-const STATS = [
-  { value: '15+', label: 'Năm kinh nghiệm' },
-  { value: '50K+', label: 'Du khách tin tưởng' },
-  { value: '120+', label: 'Điểm đến khám phá' },
-  { value: '4.9', label: 'Đánh giá trung bình' },
-];
+import { useLanguage } from '../i18n/LanguageContext';
 
 // URL anh nen tĩnh Ha Long - fallback khi video chua load xong
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1920&q=85';
 
 export default function Hero() {
   const [scrollY, setScrollY] = useState(0);
-
   const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef(null);
+  const { t } = useLanguage();
+  const hero = t('hero');
 
   // Theo doi scroll y de tao hieu ung Parallax
   useEffect(() => {
@@ -112,7 +106,7 @@ export default function Hero() {
           {/* Label tren tieu de */}
           <div className="flex justify-center mb-8">
             <span className="section-label">
-              Khám phá Việt Nam Huyền Bí
+              {hero.label}
             </span>
           </div>
 
@@ -122,13 +116,13 @@ export default function Hero() {
             style={{ fontSize: 'clamp(2.8rem, 8vw, 6.5rem)', fontWeight: 600, letterSpacing: '-0.01em' }}
           >
             <span className="line-reveal-container">
-              <span className="line-reveal">KHÁM PHÁ VẺ ĐẸP</span>
+              <span className="line-reveal">{hero.titleLine1}</span>
             </span>
             <span className="line-reveal-container">
               <span className="line-reveal text-gradient-gold italic font-light delay-200"
                 style={{ fontSize: 'clamp(3rem, 9vw, 7rem)' }}
               >
-                Vượt Thời Gian
+                {hero.titleLine2}
               </span>
             </span>
           </h1>
@@ -137,7 +131,7 @@ export default function Hero() {
           <p className="text-white/55 font-light leading-loose mx-auto mb-10"
             style={{ fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', maxWidth: '580px', fontWeight: 300 }}
           >
-            Hành trình tìm về bản sắc sống động — kiến tạo những kỷ niệm đáng nhớ giữa thiên nhiên kỳ vĩ và nền văn hóa ngàn năm văn hiến của đất nước hình chữ S.
+            {hero.description}
           </p>
 
           {/* CTA Button */}
@@ -147,7 +141,7 @@ export default function Hero() {
               className="btn-glow btn-ripple w-full sm:w-auto text-[12px] uppercase tracking-[0.25em] font-semibold text-luxury-dark bg-gradient-to-r from-luxury-gold-light via-luxury-gold to-luxury-gold-dim px-10 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl shadow-luxury-gold/20"
               style={{ paddingTop: '14px', paddingBottom: '14px' }}
             >
-              Khám Phá Điểm Đến
+              {hero.ctaButton}
             </a>
           </div>
         </div>
@@ -158,7 +152,7 @@ export default function Hero() {
         style={{ background: 'linear-gradient(180deg, rgba(4,8,15,0.95) 0%, rgba(10,17,32,0.9) 100%)', backdropFilter: 'blur(20px)' }}
       >
         <div className="max-w-screen-xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {STATS.map(({ value, label }, i) => (
+          {hero.stats?.map(({ value, label }, i) => (
             // ap dung hieu ung reveal-blur (lam mo nhe va truot len) staggered delay giup stats hien thi lan luot rat dep mat
             <div key={i} className={`text-center relative reveal-blur delay-${(i + 1) * 100}`}>
               <div className="stat-number">{value}</div>

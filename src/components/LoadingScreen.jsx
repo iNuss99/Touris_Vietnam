@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 // Import logo duoi webp de hien thi nhanh hon o man hinh loading
 import logoImg from '../assets/images/logo.webp';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function LoadingScreen({ onComplete }) {
   const [phase, setPhase] = useState('loading'); // loading -> reveal -> done
+  const { t } = useLanguage();
+  const loading = t('loading');
 
   useEffect(() => {
     // Phase 1: Loading animation plays for 2s
@@ -63,7 +66,7 @@ export default function LoadingScreen({ onComplete }) {
         </div>
 
         <p className="mt-4 text-[9px] uppercase tracking-[0.4em] text-white/20 loader-text" style={{ animationDelay: '0.3s' }}>
-          Đang tải trải nghiệm
+          {loading.text}
         </p>
       </div>
 

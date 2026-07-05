@@ -2,32 +2,15 @@ import React from 'react';
 import { Phone, Mail, Instagram, Facebook, Youtube, ArrowRight } from 'lucide-react';
 // Import logo da chuyen sang webp de toi uu hoa
 import logoImg from '../assets/images/logo.webp';
-
-const FOOTER_LINKS = {
-  'ĐIỂM ĐẾN': [
-    { label: 'Vịnh Hạ Long', href: '#kham-pha' },
-    { label: 'Phố Cổ Hội An', href: '#kham-pha' },
-    { label: 'Tràng An Ninh Bình', href: '#kham-pha' },
-    { label: 'Đảo Ngọc Phú Quốc', href: '#kham-pha' },
-    { label: 'Sa Pa Lào Cai', href: '#kham-pha' },
-    { label: 'Đà Nẵng Cầu Vàng', href: '#kham-pha' },
-  ],
-  'TRẢI NGHIỆM': [
-    { label: 'Hương Vị Phở Việt', href: '#van-hoa' },
-    { label: 'Cà Phê Phin Việt Nam', href: '#van-hoa' },
-    { label: 'Áo Dài Truyền Thống', href: '#van-hoa' },
-    { label: 'Lễ Hội & Đèn Lồng', href: '#van-hoa' },
-    { label: 'Bánh Mì Sài Gòn', href: '#van-hoa' },
-  ],
-  'DỊCH VỤ': [
-    { label: 'Gói Explorer (Khám phá)', href: '#dat-tour' },
-    { label: 'Gói Signature (Dấu ấn)', href: '#dat-tour' },
-    { label: 'Gói Prestige (Đỉnh cao)', href: '#dat-tour' },
-    { label: 'Liên Hệ Đặt Lịch', href: '#lien-he' },
-  ]
-};
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function Footer() {
+  const { t } = useLanguage();
+  const footer = t('footer');
+  const columns = footer.columns || {};
+  const bottomLinks = footer.bottomLinks || [];
+  const bottomHrefs = ['#kham-pha', '#van-hoa', '#lien-he'];
+
   return (
     <footer
       className="relative overflow-hidden pt-20"
@@ -62,7 +45,7 @@ export default function Footer() {
               </div>
 
               <p className="text-white/35 text-xs font-light leading-relaxed mb-8" style={{ fontWeight: 300, maxWidth: '290px' }}>
-                Đồng hành cùng hành trình khám phá tinh hoa văn hóa và những địa danh kỳ vĩ vượt thời gian của Việt Nam.
+                {footer.description}
               </p>
 
               {/* Contact Info */}
@@ -104,7 +87,7 @@ export default function Footer() {
 
           {/* Right Columns: Structured Navigation Links */}
           <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-8">
-            {Object.entries(FOOTER_LINKS).map(([category, links]) => (
+            {Object.entries(columns).map(([category, links]) => (
               <div key={category}>
                 <h4 className="text-[10px] uppercase tracking-[0.25em] font-semibold mb-6"
                   style={{ color: 'rgba(201,168,76,0.65)' }}>
@@ -130,12 +113,12 @@ export default function Footer() {
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
           className="py-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/20 text-[10px] uppercase tracking-wider font-light" style={{ fontWeight: 300 }}>
-            © {new Date().getFullYear()} VIETNAM TOURISM. BẢN QUYỀN ĐÃ ĐƯỢC BẢO HỘ.
+            {footer.copyright}
           </p>
           <div className="flex items-center gap-6 text-[10px] uppercase tracking-widest text-white/20">
-            <a href="#kham-pha" className="hover:text-luxury-gold-light transition-colors">Điểm đến</a>
-            <a href="#van-hoa" className="hover:text-luxury-gold-light transition-colors">Văn hóa</a>
-            <a href="#lien-he" className="hover:text-luxury-gold-light transition-colors">Liên hệ</a>
+            {bottomLinks.map((label, i) => (
+              <a key={i} href={bottomHrefs[i]} className="hover:text-luxury-gold-light transition-colors">{label}</a>
+            ))}
           </div>
         </div>
       </div>

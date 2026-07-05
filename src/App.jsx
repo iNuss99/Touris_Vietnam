@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { LanguageProvider } from './i18n/LanguageContext';
 import LoadingScreen from './components/LoadingScreen';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -71,7 +72,7 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <LanguageProvider>
       {/* Loading Screen — hien khi F5/reload */}
       {isLoading && <LoadingScreen onComplete={handleLoadingComplete} />}
 
@@ -95,6 +96,6 @@ export default function App() {
         <ContactForm />
         <Footer />
       </div>
-    </>
+    </LanguageProvider>
   );
 }
