@@ -677,8 +677,7 @@ section {
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
-  /* di chuyen quan sang bang transform3d su dung GPU de hoat hoa sieu muot */
-  transform: translate3d(calc(var(--mouse-x, -999px) - 250px), calc(var(--mouse-y, -999px) - 250px), 0);
+  /* di chuyen quan sang duoc cap nhat truc tiep tu JS bang GPU de hoat hoa sieu muot */
   will-change: transform;
   mix-blend-mode: screen;
   display: none;

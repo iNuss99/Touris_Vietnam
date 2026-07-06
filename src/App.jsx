@@ -130,10 +130,12 @@ export default function App() {
   useEffect(() => {
     // kiem tra neu thiet bi ho tro pointer dang fine (chuot) thi moi chay
     if (window.matchMedia('(pointer: fine)').matches) {
+      const glowEl = document.querySelector('.cursor-glow');
       const handleMouseMove = (e) => {
-        // cap nhat vi tri chuot vao bien CSS de hoat hoa bang GPU cuc ky muot ma
-        document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
-        document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+        // Cap nhat truc tiep vi tri len phan tu quan sang bang inline style de GPU hoat hoa muot ma
+        if (glowEl) {
+          glowEl.style.transform = `translate3d(${e.clientX - 250}px, ${e.clientY - 250}px, 0)`;
+        }
       };
       window.addEventListener('mousemove', handleMouseMove, { passive: true });
       return () => window.removeEventListener('mousemove', handleMouseMove);

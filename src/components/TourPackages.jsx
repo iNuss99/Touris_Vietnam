@@ -12,7 +12,7 @@ const PACKAGE_META = [
 
 export default function TourPackages() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
-  const { lang, t } = useLanguage();
+  const { t } = useLanguage();
   const tp = t('tourPackages');
   const packages = tp.packages || [];
 

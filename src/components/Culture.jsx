@@ -43,7 +43,6 @@ export default function Culture() {
   const active = items[activeItem];
   if (!active) return null;
 
-  const activeImage = IMAGE_MAP[active.id];
   const activeIcon = ICON_MAP[active.id];
   const activeAccent = ACCENT_MAP[active.id];
 
@@ -93,7 +92,7 @@ export default function Culture() {
             />
 
             {/* Text content */}
-            <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-12">
+            <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center"
                   style={{ background: `${activeAccent}20`, border: `1px solid ${activeAccent}40`, color: activeAccent }}>

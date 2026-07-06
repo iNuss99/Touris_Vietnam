@@ -1,7 +1,8 @@
 // import react va hook useState
 import React, { useState } from 'react';
-// import cac icon can thiet tu lucide-react, dong thoi them CheckCircle va loai bo code thua
-import { ArrowRight, Star, Clock, MapPin, X, Calendar, Compass, Sun, CheckCircle } from 'lucide-react';
+import { createPortal } from 'react-dom';
+// import cac icon can thiet tu lucide-react, dong thoi them Check va loai bo code thua
+import { ArrowRight, Star, Clock, MapPin, X, Calendar, Compass, Sun, Check } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 
 // import cac file hinh anh dia danh phien ban webp da duoc nen de tang toc do load trang
@@ -107,15 +108,15 @@ const DestinationCard = ({ data, onViewDetail, index }) => {
         <div className="absolute bottom-0 left-0 right-0 p-7 flex flex-col gap-2" style={{ transform: 'translateZ(40px)', transformStyle: 'preserve-3d' }}>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
-              <Star size={11} className="fill-luxury-gold text-luxury-gold" />
+              <Star size={13} className="fill-luxury-gold text-luxury-gold" />
               <span className="text-[11px] font-semibold text-luxury-gold-light">{data.rating}</span>
             </div>
             <span className="text-white/20">•</span>
             <div className="flex items-center gap-1 text-white/50">
-              <Clock size={10} /><span className="text-[10px]">{data.duration}</span>
+              <Clock size={13} /><span className="text-[10px]">{data.duration}</span>
             </div>
             <div className="flex items-center gap-1 text-white/50">
-              <MapPin size={10} /><span className="text-[10px]">{data.location}</span>
+              <MapPin size={13} /><span className="text-[10px]">{data.location}</span>
             </div>
           </div>
           <span className="text-[10px] uppercase tracking-[0.25em] font-semibold" style={{ color: 'rgba(201,168,76,0.7)' }}>{data.category}</span>
@@ -140,6 +141,15 @@ const TourDetailModal = ({ destination, onClose }) => {
   const { t } = useLanguage();
   const dest = t('destinations');
 
+  // ngan cuon trang khi modal dang mo
+  React.useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
   // neu khong co thong tin diem den thi tra ve null (dat sau hook de khong bi loi)
   if (!destination) return null;
   
@@ -148,44 +158,74 @@ const TourDetailModal = ({ destination, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto"
-      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-6 md:p-10 overflow-y-auto"
+      style={{ 
+        background: 'rgba(0,0,0,0.85)', 
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        animation: 'modalFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+      }}
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-5xl rounded-3xl overflow-hidden my-8"
+        className="relative w-full max-w-4xl rounded-3xl overflow-hidden my-4 md:my-6 flex flex-col max-h-[85vh] md:max-h-[80vh]"
         style={{
           background: 'linear-gradient(160deg, rgba(15,22,42,0.98) 0%, rgba(4,8,15,0.98) 100%)',
           border: '1px solid rgba(201,168,76,0.2)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          animation: 'modalScaleUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards'
         }}
         onClick={e => e.stopPropagation()}
       >
+        {/* Style block inline de dung keyframes */}
+        <style>{`
+          @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          @keyframes modalScaleUp {
+            from { opacity: 0; transform: scale(0.95) translateY(30px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+          }
+          .custom-scrollbar-modal::-webkit-scrollbar {
+            width: 4px;
+          }
+          .custom-scrollbar-modal::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.01);
+          }
+          .custom-scrollbar-modal::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #c9a84c, #8a6e2a);
+            border-radius: 4px;
+          }
+          .custom-scrollbar-modal::-webkit-scrollbar-thumb:hover {
+            background: #c9a84c;
+          }
+        `}</style>
         {/* Nut dong */}
         <button onClick={onClose} className="absolute top-5 right-5 z-20 w-10 h-10 rounded-full flex items-center justify-center text-white/60 hover:text-white transition-colors" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}>
           <X size={20} />
         </button>
 
         {/* Banner anh */}
-        <div className="relative h-72 md:h-80 overflow-hidden">
+        <div className="relative h-52 md:h-60 overflow-hidden">
           <img src={image} alt={title} className="w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(15,22,42,1) 0%, rgba(15,22,42,0.4) 50%, transparent 100%)' }} />
-          <div className="absolute bottom-6 left-8 right-8">
+          <div className="absolute bottom-5 left-6 right-6">
             <div className="flex flex-wrap items-center gap-3 mb-3">
               <span className="text-[10px] uppercase tracking-widest font-semibold px-3 py-1 rounded-full" style={{ background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.4)', color: '#c9a84c' }}>{category}</span>
-              <div className="flex items-center gap-1"><Star size={12} className="fill-luxury-gold text-luxury-gold" /><span className="text-sm font-semibold text-luxury-gold-light">{rating}</span></div>
-              <div className="flex items-center gap-1 text-white/50 text-xs"><Clock size={11} />{duration}</div>
-              <div className="flex items-center gap-1 text-white/50 text-xs"><MapPin size={11} />{location}</div>
+              <div className="flex items-center gap-1"><Star size={14} className="fill-luxury-gold text-luxury-gold" /><span className="text-sm font-semibold text-luxury-gold-light">{rating}</span></div>
+              <div className="flex items-center gap-1 text-white/50 text-xs"><Clock size={14} />{duration}</div>
+              <div className="flex items-center gap-1 text-white/50 text-xs"><MapPin size={14} />{location}</div>
             </div>
             <h2 className="font-serif text-white leading-tight" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', fontWeight: 600 }}>{title}</h2>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-white/5 bg-luxury-dark/40 px-8">
+        <div className="flex border-b border-white/5 bg-luxury-dark/40 px-6">
           <button
             onClick={() => setActiveTab('about')}
-            className={`py-4 px-4 text-xs uppercase tracking-widest font-semibold border-b-2 transition-all duration-300 ${
+            className={`py-3 px-4 text-xs uppercase tracking-widest font-semibold border-b-2 transition-all duration-300 ${
               activeTab === 'about' ? 'border-luxury-gold text-luxury-gold' : 'border-transparent text-white/40 hover:text-white/70'
             }`}
           >
@@ -193,7 +233,7 @@ const TourDetailModal = ({ destination, onClose }) => {
           </button>
           <button
             onClick={() => setActiveTab('itinerary')}
-            className={`py-4 px-4 text-xs uppercase tracking-widest font-semibold border-b-2 transition-all duration-300 ${
+            className={`py-3 px-4 text-xs uppercase tracking-widest font-semibold border-b-2 transition-all duration-300 ${
               activeTab === 'itinerary' ? 'border-luxury-gold text-luxury-gold' : 'border-transparent text-white/40 hover:text-white/70'
             }`}
           >
@@ -202,7 +242,7 @@ const TourDetailModal = ({ destination, onClose }) => {
         </div>
 
         {/* Noi dung chi tiet */}
-        <div className="p-8 md:p-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-y-auto custom-scrollbar-modal">
 
           {/* Cot trai: Tab Content */}
           <div className="lg:col-span-2 space-y-8">
@@ -226,7 +266,7 @@ const TourDetailModal = ({ destination, onClose }) => {
                     {localHighlights.map((highlight, idx) => (
                       <div key={idx} className="flex items-start gap-3 p-3.5 rounded-2xl" style={{ background: 'rgba(15,157,138,0.03)', border: '1px solid rgba(15,157,138,0.06)' }}>
                         <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-luxury-emerald-light" style={{ background: 'rgba(15,157,138,0.08)' }}>
-                          <CheckCircle size={12} className="fill-current text-luxury-dark" />
+                          <Check size={12} />
                         </div>
                         <span className="text-white/60 text-xs font-light leading-relaxed" style={{ fontWeight: 300 }}>{highlight}</span>
                       </div>
@@ -370,7 +410,7 @@ export default function Destinations() {
       </section>
 
       {/* Modal tour chi tiet */}
-      {selectedDest && <TourDetailModal destination={selectedDest} onClose={() => setSelectedDest(null)} />}
+      {selectedDest && createPortal(<TourDetailModal destination={selectedDest} onClose={() => setSelectedDest(null)} />, document.body)}
     </>
   );
 }

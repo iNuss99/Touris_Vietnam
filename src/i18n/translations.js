@@ -64,6 +64,7 @@ const translations = {
         {
           id: 'halong',
           title: 'Ha Long Bay',
+          rating: '4.9',
           category: 'Natural Heritage',
           description: 'A masterpiece of nature with thousands of majestic limestone islands rising from mystical emerald waters.',
           badge: 'UNESCO',
@@ -97,6 +98,7 @@ const translations = {
         {
           id: 'hoian',
           title: 'Hoi An',
+          rating: '4.8',
           category: 'Cultural Heritage',
           description: 'A poetic ancient town glowing with colorful lanterns, where ancient architecture blends with modern spirit.',
           badge: 'UNESCO',
@@ -130,6 +132,7 @@ const translations = {
         {
           id: 'trangan',
           title: 'Trang An',
+          rating: '4.7',
           category: 'Mixed Heritage',
           description: 'The majestic landscape of Ninh Binh — a world of rice paddies, rivers, and mystical caves.',
           badge: 'Nature',
@@ -162,6 +165,7 @@ const translations = {
         {
           id: 'phuquoc',
           title: 'Phu Quoc',
+          rating: '4.9',
           category: 'Paradise Resort',
           description: 'The Pearl Island with crystal-clear beaches, silky white sand, and world-class 5-star resorts.',
           badge: 'Luxury',
@@ -195,6 +199,7 @@ const translations = {
         {
           id: 'sapa',
           title: 'Sa Pa',
+          rating: '4.8',
           category: 'Cultural Exploration',
           description: 'Exquisite terraced rice fields harmonized with rich Hmong ethnic culture amidst the clouds of Northwest Vietnam.',
           badge: 'Trekking',
@@ -227,6 +232,7 @@ const translations = {
         {
           id: 'danang',
           title: 'Da Nang',
+          rating: '4.9',
           category: 'Coastal City',
           description: 'Vietnam\'s most livable city with the legendary Golden Bridge, My Khe Beach, and outstanding cuisine.',
           badge: 'Hot',
@@ -495,6 +501,7 @@ const translations = {
         {
           id: 'halong',
           title: 'Vịnh Hạ Long',
+          rating: '4.9',
           category: 'Di Sản Thiên Nhiên',
           description: 'Kiệt tác tạo hóa với hàng ngàn hòn đảo đá vôi kỳ vĩ nhô lên giữa làn nước xanh ngọc huyền ảo.',
           badge: 'UNESCO',
@@ -528,6 +535,7 @@ const translations = {
         {
           id: 'hoian',
           title: 'Hội An',
+          rating: '4.8',
           category: 'Di Sản Văn Hóa',
           description: 'Phố cổ thơ mộng lung linh đèn lồng rực rỡ, kiến trúc cổ đô hòa quyện cùng tinh thần hiện đại.',
           badge: 'UNESCO',
@@ -561,6 +569,7 @@ const translations = {
         {
           id: 'trangan',
           title: 'Tràng An',
+          rating: '4.7',
           category: 'Di Sản Hỗn Hợp',
           description: 'Non nước Ninh Bình kỳ vĩ — thế giới của những cánh đồng, sông nước và hang động huyền bí.',
           badge: 'Thiên Nhiên',
@@ -593,6 +602,7 @@ const translations = {
         {
           id: 'phuquoc',
           title: 'Phú Quốc',
+          rating: '4.9',
           category: 'Thiên Đường Nghỉ Dưỡng',
           description: 'Đảo ngọc với bãi biển xanh trong, cát trắng mướt mà và những resort đẳng cấp 5 sao.',
           badge: 'Luxury',
@@ -626,6 +636,7 @@ const translations = {
         {
           id: 'sapa',
           title: 'Sa Pa',
+          rating: '4.8',
           category: 'Khám Phá Văn Hóa',
           description: 'Ruộng bậc thang tuyệt mỹ hòa quyện với nền văn hóa dân tộc Hmông phong phú giữa mây trời Tây Bắc.',
           badge: 'Trekking',
@@ -658,6 +669,7 @@ const translations = {
         {
           id: 'danang',
           title: 'Đà Nẵng',
+          rating: '4.9',
           category: 'Thành Phố Biển',
           description: 'Thành phố đáng sống nhất Việt Nam với Cầu Vàng huyền thoại, bãi biển Mỹ Khê và ẩm thực tuyệt vời.',
           badge: 'Hot',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Globe } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 // Import anh logo da chuyen sang webp de tang toc do tai trang
 import logoImg from '../assets/images/logo.webp';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -32,7 +32,6 @@ export default function Navbar() {
   }, []);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
-  const toggleLang = () => setLang(lang === 'en' ? 'vi' : 'en');
 
   const navLinks = [
     { href: '#kham-pha', label: nav.explore,  id: 'kham-pha' },
@@ -167,7 +166,7 @@ export default function Navbar() {
 
       {/* ===== MOBILE DRAWER ===== */}
       <div
-        className={`fixed inset-0 z-40 flex flex-col transition-all duration-500 ${
+        className={`fixed inset-0 z-[60] flex flex-col transition-all duration-500 ${
           isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         style={{ background: 'rgba(4,8,15,0.97)', backdropFilter: 'blur(24px)' }}
