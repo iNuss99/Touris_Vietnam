@@ -1,19 +1,50 @@
 <!doctype html>
 <html lang="en" class="scroll-smooth">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vietnam Journey - Discover Timeless Beauty</title>
-    <meta name="description" content="Premium Vietnam tourism landing page. Experience stunning destinations like Ha Long Bay, Hoi An, Trang An, Phu Quoc." />
-    
-    <!-- load font chu sang trong Cormorant Garamond ho tro tieng viet tot hon va Plus Jakarta Sans -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-luxury-dark text-slate-100 antialiased">
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vietnam Journey - Discover Timeless Beauty</title>
+  <meta name="description"
+    content="Premium Vietnam tourism landing page. Experience stunning destinations like Ha Long Bay, Hoi An, Trang An, Phu Quoc." />
+
+  <!-- load font chu sang trong Cormorant Garamond ho tro tieng viet tot hon va Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+</head>
+
+<body class="bg-luxury-dark text-slate-100 antialiased">
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+  <!-- Xoa lich su chat cu khi reload trang, dam bao moi phien la cuoc tro chuyen moi -->
+  <script>
+    (function () {
+      var keysToRemove = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (key && (
+          key.startsWith('bp/') ||
+          key.startsWith('botpress') ||
+          key.includes('conversation') ||
+          key.includes('webchat') ||
+          key.includes('bpcontent')
+        )) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(function (key) { localStorage.removeItem(key); });
+    })();
+  </script>
+  <!-- Botpress Webchat -->
+  <script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"></script>
+  <script src="https://files.bpcontent.cloud/2026/07/14/16/20260714161759-MUUBSMOY.js" defer></script>
+
+
+
+</body>
+
 </html>

@@ -36,21 +36,8 @@ const DELAY_MAP = {
 // === DESTINATION CARD COMPONENT ===
 // truyen index vao de tinh toan hieu ung cuon trang xoay trai/phai xen ke
 const DestinationCard = ({ data, onViewDetail, index }) => {
-  const [tilt, setTilt] = useState({ x: 0, y: 0, scale: 1 });
-  const [shinePos, setShinePos] = useState({ x: 50, y: 50 });
   const { t } = useLanguage();
   const dest = t('destinations');
-
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const cx = rect.width / 2;
-    const cy = rect.height / 2;
-    setTilt({ x: -(y - cy) / cy * 8, y: (x - cx) / cx * 8, scale: 1.02 });
-    setShinePos({ x: (x / rect.width) * 100, y: (y / rect.height) * 100 });
-  };
-  const handleMouseLeave = () => setTilt({ x: 0, y: 0, scale: 1 });
 
   // xac dinh class reveal xoay trai hoac xoay phai dua tren index
   const revealClass = index % 2 === 0 ? 'reveal-rotate-left' : 'reveal-rotate-right';
@@ -59,75 +46,49 @@ const DestinationCard = ({ data, onViewDetail, index }) => {
 
   return (
     <div
-      className={`tilt-container ${revealClass}`}
+      className={`flip-card ${revealClass} w-full h-[480px]`}
       style={{ transitionDelay: delay }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
     >
-      <div
-        className="relative rounded-[20px] overflow-hidden cursor-pointer group"
-        style={{
-          transform: `perspective(1200px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(${tilt.scale}, ${tilt.scale}, 1)`,
-          transition: tilt.scale === 1 ? 'transform 0.6s cubic-bezier(0.16,1,0.3,1)' : 'transform 0.08s linear',
-          height: '480px',
-          border: '1px solid rgba(201,168,76,0.12)',
-          transformStyle: 'preserve-3d',
-          boxShadow: tilt.scale > 1 ? '0 30px 70px -20px rgba(0,0,0,0.7), 0 0 40px -15px rgba(201,168,76,0.15)' : '0 10px 40px -15px rgba(0,0,0,0.5)',
-        }}
-        onClick={() => onViewDetail(data)}
-      >
-        {/* Anh nen card */}
-        <img src={image} alt={data.title}
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out"
-          style={{ transform: tilt.scale > 1 ? 'scale(1.06)' : 'scale(1)' }}
-        />
+      <div className="flip-card-inner rounded-[20px] shadow-2xl">
+        {/* MẶT TRƯỚC (FRONT) */}
+        <div className="flip-card-front relative rounded-[20px] overflow-hidden group">
+          <img src={image} alt={data.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(4,8,15,0.97) 0%, rgba(4,8,15,0.5) 45%, rgba(4,8,15,0.1) 75%, transparent 100%)' }} />
+          
+          <div className="absolute top-4 right-4 z-10">
+            <span className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-md"
+              style={{ background: 'linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.05))', border: '1px solid rgba(201,168,76,0.4)', color: '#c9a84c', backdropFilter: 'blur(8px)' }}>
+              {data.badge}
+            </span>
+          </div>
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0"
-          style={{ background: 'linear-gradient(to top, rgba(4,8,15,0.97) 0%, rgba(4,8,15,0.5) 45%, rgba(4,8,15,0.1) 75%, transparent 100%)' }}
-        />
-
-        {/* Shine effect */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `radial-gradient(circle at ${shinePos.x}% ${shinePos.y}%, rgba(255,255,255,0.08) 0%, transparent 55%)`,
-            opacity: tilt.scale > 1 ? 1 : 0,
-            transition: 'opacity 0.2s ease',
-          }}
-        />
-
-        {/* Badge */}
-        <div className="absolute top-4 right-4 z-10">
-          <span className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-md"
-            style={{ background: 'linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.05))', border: '1px solid rgba(201,168,76,0.4)', color: '#c9a84c', backdropFilter: 'blur(8px)' }}>
-            {data.badge}
-          </span>
+          <div className="absolute bottom-0 left-0 right-0 p-7 flex flex-col gap-2">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <Star size={13} className="fill-luxury-gold text-luxury-gold" />
+                <span className="text-[11px] font-semibold text-luxury-gold-light">{data.rating}</span>
+              </div>
+              <span className="text-white/20">•</span>
+              <div className="flex items-center gap-1 text-white/50">
+                <Clock size={13} /><span className="text-[10px]">{data.duration}</span>
+              </div>
+              <div className="flex items-center gap-1 text-white/50">
+                <MapPin size={13} /><span className="text-[10px]">{data.location}</span>
+              </div>
+            </div>
+            <span className="text-[10px] uppercase tracking-[0.25em] font-semibold" style={{ color: 'rgba(201,168,76,0.7)' }}>{data.category}</span>
+            <h3 className="font-serif text-white font-semibold leading-tight" style={{ fontSize: '1.65rem' }}>{data.title}</h3>
+          </div>
         </div>
 
-        {/* Noi dung */}
-        <div className="absolute bottom-0 left-0 right-0 p-7 flex flex-col gap-2" style={{ transform: 'translateZ(40px)', transformStyle: 'preserve-3d' }}>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <Star size={13} className="fill-luxury-gold text-luxury-gold" />
-              <span className="text-[11px] font-semibold text-luxury-gold-light">{data.rating}</span>
-            </div>
-            <span className="text-white/20">•</span>
-            <div className="flex items-center gap-1 text-white/50">
-              <Clock size={13} /><span className="text-[10px]">{data.duration}</span>
-            </div>
-            <div className="flex items-center gap-1 text-white/50">
-              <MapPin size={13} /><span className="text-[10px]">{data.location}</span>
-            </div>
-          </div>
-          <span className="text-[10px] uppercase tracking-[0.25em] font-semibold" style={{ color: 'rgba(201,168,76,0.7)' }}>{data.category}</span>
-          <h3 className="font-serif text-white font-semibold leading-tight" style={{ fontSize: '1.65rem' }}>{data.title}</h3>
-          <p className="text-white/45 text-xs font-light leading-relaxed line-clamp-2">{data.description}</p>
-          <div className="flex items-center gap-2 text-luxury-gold text-[11px] font-semibold uppercase tracking-wider mt-1 transition-all duration-300 group-hover:gap-3">
+        {/* MẶT SAU (BACK) */}
+        <div className="flip-card-back rounded-[20px]" onClick={() => onViewDetail(data)}>
+          <MapPin size={32} className="text-luxury-gold mb-2 opacity-50" />
+          <h3 className="font-serif text-luxury-gold text-2xl mb-2 text-center">{data.title}</h3>
+          <p className="text-white/60 text-xs font-light text-center leading-relaxed line-clamp-4 mb-6">{data.description}</p>
+          <button className="btn-glow px-6 py-2.5 rounded-full border border-luxury-gold/50 text-luxury-gold text-xs uppercase tracking-widest hover:bg-luxury-gold hover:text-luxury-dark transition-colors font-semibold">
             {dest.viewDetail}
-            <div className="w-5 h-5 rounded-full border border-luxury-gold/40 flex items-center justify-center group-hover:bg-luxury-gold group-hover:border-luxury-gold transition-all duration-300">
-              <ArrowRight size={10} className="group-hover:text-luxury-dark transition-colors duration-300" />
-            </div>
-          </div>
+          </button>
         </div>
       </div>
     </div>

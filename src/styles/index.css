@@ -709,3 +709,160 @@ section {
 @keyframes lineRevealUp {
   to { transform: translateY(0); }
 }
+
+/* ==============================================
+   25. GRAIN TEXTURE OVERLAY (Film Analog)
+   ============================================== */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  opacity: 0.032;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+  animation: grainShift 0.15s steps(1) infinite;
+}
+@keyframes grainShift {
+  0%   { background-position: 0 0; }
+  25%  { background-position: -20px -15px; }
+  50%  { background-position: 15px 10px; }
+  75%  { background-position: -10px 20px; }
+  100% { background-position: 20px -10px; }
+}
+
+/* ==============================================
+   26. LIQUID BUTTON
+   ============================================== */
+.btn-liquid {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn-liquid::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(135deg, #f0d080, #c9a84c, #8a6e2a, #c9a84c);
+  background-size: 300% 300%;
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  animation: liquidFlow 3s ease infinite;
+  transition: opacity 0.3s ease;
+  filter: blur(8px);
+}
+.btn-liquid:hover::before { opacity: 1; }
+@keyframes liquidFlow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ==============================================
+   27. MAGNETIC CURSOR
+   ============================================== */
+.cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 10px; height: 10px;
+  background: #c9a84c;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+  display: none;
+  will-change: transform;
+}
+.cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(201, 168, 76, 0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.25s ease, height 0.25s ease, border-color 0.25s;
+  display: none;
+  will-change: transform;
+}
+.cursor-dot.cursor-hover  { width: 16px; height: 16px; }
+.cursor-ring.cursor-hover { width: 56px; height: 56px; border-color: rgba(240, 208, 128, 0.8); }
+@media (pointer: fine) {
+  .cursor-dot, .cursor-ring { display: block; }
+}
+
+/* ==============================================
+   28. TIME-OF-DAY TINT
+   ============================================== */
+[data-timeofday="dawn"]  { --tod-tint: rgba(255, 160,  80, 0.04); }
+[data-timeofday="day"]   { --tod-tint: rgba(201, 168,  76, 0.03); }
+[data-timeofday="dusk"]  { --tod-tint: rgba(200,  80,  60, 0.05); }
+[data-timeofday="night"] { --tod-tint: rgba( 60,  80, 180, 0.04); }
+.tod-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--tod-tint, transparent);
+  pointer-events: none;
+  z-index: 9996;
+  transition: background 8s ease;
+}
+
+/* ==============================================
+   29. SCROLL PROGRESS BAR
+   ============================================== */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, #8a6e2a, #c9a84c, #f0d080);
+  z-index: 10001;
+  transform-origin: left;
+  transform: scaleX(0);
+  will-change: transform;
+}
+
+/* ==============================================
+   30. DESTINATIONS FLIP CARD 3D
+   ============================================== */
+.flip-card {
+  perspective: 1500px;
+  background-color: transparent;
+}
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg);
+}
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 20px;
+}
+.flip-card-front {
+  background-color: transparent;
+}
+.flip-card-back {
+  background: linear-gradient(160deg, rgba(30,24,8,0.95) 0%, rgba(10,17,32,0.98) 100%);
+  border: 1px solid rgba(201,168,76,0.3);
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}

@@ -134,16 +134,17 @@ export default function Hero({ isPageVisible }) {
             {hero.description}
           </p>
 
-          {/* CTA Button */}
+          {/* CTA Button — Liquid Effect */}
           <div className="flex items-center justify-center">
             <a
               href="#kham-pha"
-              className={`btn-glow btn-ripple w-full sm:w-auto text-[12px] uppercase tracking-[0.25em] font-semibold text-luxury-dark bg-gradient-to-r from-luxury-gold-light via-luxury-gold to-luxury-gold-dim px-10 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl shadow-luxury-gold/20 reveal-blur delay-400 ${isPageVisible ? 'active' : ''}`}
+              className={`btn-glow btn-liquid btn-ripple w-full sm:w-auto text-[12px] uppercase tracking-[0.25em] font-semibold text-luxury-dark bg-gradient-to-r from-luxury-gold-light via-luxury-gold to-luxury-gold-dim px-10 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl shadow-luxury-gold/20 reveal-blur delay-400 ${isPageVisible ? 'active' : ''}`}
               style={{ paddingTop: '14px', paddingBottom: '14px' }}
             >
-              {hero.ctaButton}
+              <span className="liquid-inner">{hero.ctaButton}</span>
             </a>
           </div>
+
         </div>
       </section>
 
