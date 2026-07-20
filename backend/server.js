@@ -35,44 +35,7 @@ app.get('/api/destinations', async (req, res) => {
   }
 });
 
-// Sync lead to Google Sheet (CRM)
-const syncToGoogleSheet = async (leadData) => {
-  const sheetUrl = process.env.GOOGLE_SHEETS_URL;
-  if (!sheetUrl) {
-    console.warn('Warning: GOOGLE_SHEETS_URL is not configured in backend .env');
-    return;
-  }
-  
-  try {
-    const payload = {
-      fullName: leadData.fullName,
-      zalo: leadData.zalo,
-      email: leadData.email,
-      destination: leadData.destination,
-      date: leadData.date,
-      guests: leadData.guests,
-      serviceClass: leadData.serviceClass,
-      message: leadData.message,
-      submittedAt: new Date().toLocaleString('vi-VN')
-    };
-
-    const response = await fetch(sheetUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload)
-    });
-    
-    // fetch with mode 'no-cors' (if from browser) is opaque, but from Node it works fine and can be checked
-    // Note: Google Apps Script Web App might return a redirect (302) which fetch follows automatically
-    if (!response.ok) {
-      console.warn(`Google Sheet sync warning: status ${response.status} - check if URL is correct and deployed properly.`);
-    } else {
-      console.log('Successfully synced lead to Google Sheets CRM.');
-    }
-  } catch (error) {
-    console.error('Failed to sync lead to Google Sheets:', error.message);
-  }
-};
+// Google Sheets sync removed per user request
 
 // Add a new lead from the contact form or chatbot
 app.post('/api/leads', async (req, res) => {
@@ -99,11 +62,6 @@ app.post('/api/leads', async (req, res) => {
 
     const values = [safeFullName, safePhone, safeEmail, destination, date, parsedGuests, serviceClass, message];
     const result = await pool.query(query, values);
-    
-    // Gửi đồng bộ sang Google Sheet bất đồng bộ
-    syncToGoogleSheet({ fullName: safeFullName, zalo: safePhone, email: safeEmail, destination, date, guests, serviceClass, message }).catch(err => {
-      console.error('Async Google Sheet sync error:', err);
-    });
 
     res.status(201).json({ success: true, lead: result.rows[0] });
   } catch (err) {
