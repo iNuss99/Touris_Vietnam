@@ -83,11 +83,25 @@ app.post('/api/leads', async (req, res) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
     `;
-    const values = [fullName, zalo, email, destination, date, guests ? parseInt(guests, 10) : null, serviceClass, message];
+
+    // Đảm bảo dữ liệu không bị lỗi NOT NULL hoặc lỗi kiểu dữ liệu (Botpress có thể gửi null/undefined)
+    const safeFullName = fullName || "Khách hàng";
+    const safePhone = zalo || "Chưa cung cấp";
+    const safeEmail = email || "Chưa cung cấp";
+    
+    let parsedGuests = null;
+    if (guests) {
+      const parsed = parseInt(guests, 10);
+      if (!isNaN(parsed)) {
+        parsedGuests = parsed;
+      }
+    }
+
+    const values = [safeFullName, safePhone, safeEmail, destination, date, parsedGuests, serviceClass, message];
     const result = await pool.query(query, values);
     
     // Gửi đồng bộ sang Google Sheet bất đồng bộ
-    syncToGoogleSheet({ fullName, zalo, email, destination, date, guests, serviceClass, message }).catch(err => {
+    syncToGoogleSheet({ fullName: safeFullName, zalo: safePhone, email: safeEmail, destination, date, guests, serviceClass, message }).catch(err => {
       console.error('Async Google Sheet sync error:', err);
     });
 
