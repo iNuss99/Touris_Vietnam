@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
 import LoadingScreen from './components/LoadingScreen';
 import Navbar from './components/Navbar';
@@ -9,6 +10,7 @@ import TourPackages from './components/TourPackages';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import ChatGreeting from './components/ChatGreeting';
+import Dashboard from './components/Dashboard';
 
 // ─── Helper: get time-of-day key ─────────────────────────────────────────────
 function getTimeOfDay() {
@@ -63,7 +65,7 @@ function MainContent({ isLoading, isPageVisible, handleReveal, handleLoadingComp
   );
 }
 
-export default function App() {
+function MainApp() {
   const [isLoading, setIsLoading] = useState(true);
   const [isPageVisible, setIsPageVisible] = useState(false);
 
@@ -155,7 +157,7 @@ export default function App() {
   }, []);
 
   return (
-    <LanguageProvider>
+    <>
       {/* === AWWWARDS LAYER: global overlays === */}
       <div className="grain-overlay" aria-hidden="true" />
       <div className="tod-overlay" aria-hidden="true" />
@@ -169,6 +171,19 @@ export default function App() {
         handleReveal={handleReveal}
         handleLoadingComplete={handleLoadingComplete}
       />
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<MainApp />} />
+          <Route path="/crm" element={<Dashboard />} />
+        </Routes>
+      </BrowserRouter>
     </LanguageProvider>
   );
 }

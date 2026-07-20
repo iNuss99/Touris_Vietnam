@@ -27,27 +27,75 @@ Tài liệu này lưu lại các bước thiết lập luồng thu thập khách
 
 ## Bước 3: Tạo khối "Thu thập Lead"
 1. Click chuột phải ra vùng trống, tạo thêm một **Standard Node** nữa, đặt tên là **Lấy Thông Tin**.
-2. Nối dây từ 3 nút `Tour Hạ Long`, `Tour Phú Quốc`, `Tour Sapa` (nằm ở khối Chào hỏi) sang khối **Lấy Thông Tin** này.
-3. Bấm vào khối **Lấy Thông Tin**, ấn dấu **+** và lần lượt thêm 3 thẻ Capture sau (nằm trong mục *Capture Information*):
+2. Nối dây từ các nút `Tour Hạ Long`, `Tour Phú Quốc`, `Tour Sapa` (nằm ở khối Chào hỏi) sang khối **Lấy Thông Tin** này.
+3. Bấm vào khối **Lấy Thông Tin**, thêm các thẻ Capture (trong mục *Capture Information*) để lấy đủ 8 thông tin:
 
-   **A. Thẻ Person Name (Lấy tên khách):**
-   - *Question:* "Dạ để tiện xưng hô, Anh/Chị cho em xin Tên nhé?"
-   - *Store in Variable* (cột phải): Tạo biến `khach_ten`.
+   **A. Thẻ Person Name (Tên khách):**
+   - *Question:* "Dạ để tiện xưng hô, Anh/Chị cho em xin Họ Tên nhé?" -> Biến: `khach_ten`
 
-   **B. Thẻ Phone Number (Lấy SĐT):**
-   - *Question:* "Em chào anh/chị {{workflow.khach_ten}}, anh/chị cho em xin SĐT Zalo để tư vấn viên gửi chi tiết lịch trình nhé!"
-   - *Store in Variable:* Tạo biến `khach_sdt`.
+   **B. Thẻ Phone Number (SĐT):**
+   - *Question:* "Anh/chị cho em xin SĐT Zalo để tư vấn viên gọi lại nhé!" -> Biến: `khach_sdt`
 
-   **C. Thẻ Raw Input / String (Lấy Text tự do):**
-   - *Question:* "Cuối cùng, gia đình mình dự định đi khoảng bao nhiêu người và vào tháng mấy ạ?"
+   **C. Thẻ Email Address (Email):**
+   - *Question:* "Cho em xin địa chỉ Email để gửi lịch trình chi tiết nhé!" -> Biến: `khach_email`
+
+   **D. Thẻ Single Choice (Điểm đến):**
+   - *Question:* "Anh/Chị đang quan tâm điểm đến nào?" (Tạo các nút: Hạ Long, Phú Quốc, Sapa, Đà Nẵng...) -> Biến: `khach_diem_den`
+
+   **E. Thẻ Date (Ngày đi):**
+   - *Question:* "Anh/Chị dự định đi vào ngày nào?" -> Biến: `khach_ngay_di`
+
+   **F. Thẻ Number (Số lượng khách):**
+   - *Question:* "Đoàn mình đi khoảng bao nhiêu người ạ?" -> Biến: `khach_so_luong`
+
+   **G. Thẻ Single Choice (Hạng dịch vụ):**
+   - *Question:* "Mình muốn trải nghiệm hạng dịch vụ nào?" (Tạo các nút: luxury, standard, economy) -> Biến: `khach_hang_dv`
+
+   **H. Thẻ Raw Input (Lời nhắn):**
+   - *Question:* "Anh/chị có lưu ý hay yêu cầu đặc biệt gì không ạ?" -> Biến: `khach_loi_nhan`
 
 4. Cuối khối này, thêm 1 thẻ **Text** để chốt hạ:
-   > *"Cảm ơn anh/chị {{workflow.khach_ten}}. Tư vấn viên sẽ gọi số {{workflow.khach_sdt}} để báo giá trong vòng 24h tới. Chúc anh/chị một ngày vui vẻ!"*
+   > *"Cảm ơn {{workflow.khach_ten}}. Thông tin của anh/chị đã được ghi nhận. Tư vấn viên sẽ liên hệ sớm nhất!"*
 
-## Bước 4: Chuyển các câu hỏi tự do cho AI trả lời
-Nếu khách không bấm chọn tour mà nhấn nút **"Nhờ tư vấn thêm"** (để hỏi FAQ về giá, lịch trình):
-1. Kéo dây nối từ chữ `Nhờ tư vấn thêm` (ở khối Chào hỏi) sang khối **AutonomousNode** (khối to ở giữa màn hình).
-2. Khi khách vào luồng này, AI sẽ tự động đọc dữ liệu từ file txt bạn đã cung cấp để trả lời.
+## Bước 4: Xây dựng hệ thống FAQ (Hỏi đáp)
+Nếu khách chọn **"Nhờ tư vấn thêm"** ở Bước 1:
+1. **Tạo khối "Menu FAQ" (Quick Replies):**
+   - Tạo Standard Node, nối từ nút `Nhờ tư vấn thêm` sang.
+   - Dùng thẻ **Single Choice**, tạo các nút cho câu hỏi phổ biến: `Quy định hoàn hủy`, `Thanh toán`, `Chat với nhân viên`, và `Hỏi câu khác`.
+   - Các nút cố định này nối thẳng ra các Node trả lời bằng Text dựng sẵn để phản hồi ngay lập tức.
+2. **Nút "Hỏi câu khác" (AI Trả lời):**
+   - Kéo dây từ nút `Hỏi câu khác` vào khối **AutonomousNode** (khối to ở giữa màn hình).
+   - **Tối ưu Knowledge Base:** Mở file `DuLieuTour_Botpress.txt`, cấu trúc lại nội dung thành dạng [Câu hỏi] - [Trả lời] hoặc các đoạn văn ngắn gọn, đánh đầu dòng rõ ràng để AI đọc hiểu tốt nhất. Tránh viết câu quá dài.
+   - **Tối ưu AI Prompt:** Trong AutonomousNode, viết Instructions: *"Bạn là chuyên viên tư vấn du lịch nhiệt tình. Chỉ trả lời dựa trên file tài liệu được cung cấp. Luôn xưng hô 'Dạ/Vâng' và gọi khách là 'Anh/Chị'."*
+
+## Bước 5: Cấu hình Webhook đồng bộ về Backend/Google Sheets
+Sau khối **Lấy Thông Tin** (ở Bước 3):
+1. Thêm một thẻ **Execute Code** (nằm trong mục *Code* của Node Lấy Thông Tin hoặc tạo Node mới).
+2. Dán đoạn mã sau vào thẻ Execute Code:
+   ```javascript
+   const axios = require('axios');
+   
+   const payload = {
+     fullName: workflow.khach_ten,
+     zalo: workflow.khach_sdt,
+     email: workflow.khach_email,
+     destination: workflow.khach_diem_den,
+     date: workflow.khach_ngay_di,
+     guests: workflow.khach_so_luong,
+     serviceClass: workflow.khach_hang_dv,
+     message: workflow.khach_loi_nhan,
+     submittedAt: new Date().toISOString()
+   };
+   
+   // URL Backend đã được kích hoạt public qua localtunnel
+   const WEBHOOK_URL = 'https://upset-spoons-cheer.loca.lt/api/leads';
+   
+   try {
+     await axios.post(WEBHOOK_URL, payload);
+   } catch (error) {
+     console.error("Lỗi khi gửi webhook: ", error);
+   }
+   ```
 
 ---
 

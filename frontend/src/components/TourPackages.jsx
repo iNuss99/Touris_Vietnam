@@ -10,9 +10,22 @@ const PACKAGE_META = [
 
 export default function TourPackages() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [apiPackages, setApiPackages] = useState([]);
   const { t } = useLanguage();
   const tp = t('tourPackages');
-  const packages = tp.packages || [];
+  
+  React.useEffect(() => {
+    fetch('http://localhost:5000/api/tours')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          setApiPackages(data);
+        }
+      })
+      .catch(err => console.error('Failed to fetch tours:', err));
+  }, []);
+
+  const packages = apiPackages.length > 0 ? apiPackages : (tp.packages || []);
 
   const contactPriceValues = ['Contact Us', 'Liên hệ'];
 

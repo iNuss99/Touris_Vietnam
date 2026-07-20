@@ -332,9 +332,22 @@ const TourDetailModal = ({ destination, onClose }) => {
 // === MAIN COMPONENT ===
 export default function Destinations() {
   const [selectedDest, setSelectedDest] = useState(null);
+  const [apiItems, setApiItems] = useState([]);
   const { t } = useLanguage();
   const dest = t('destinations');
-  const items = dest.items || [];
+  
+  React.useEffect(() => {
+    fetch('http://localhost:5000/api/destinations')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          setApiItems(data);
+        }
+      })
+      .catch(err => console.error('Failed to fetch destinations:', err));
+  }, []);
+
+  const items = apiItems.length > 0 ? apiItems : (dest.items || []);
 
   // Khi chon 1 card, tim item tuong ung de truyen vao modal
   const handleViewDetail = (cardData) => {

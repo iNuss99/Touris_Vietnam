@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { User, Mail, Phone, Calendar, Users, Briefcase, MessageSquare, Send, CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 
-// Dinh nghia URL Google Apps Script de lien ket sheet
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPEtkA2xnO83NfViqUBA3y0EPt7CBgoBXrUOc0VNtq06o2VzvftiyAANbIR_NFRCUF/exec";
-
+// Backend sẽ đảm nhận việc lưu vào Neon PostgreSQL và đồng bộ sang Google Sheets
 // Thanh cong animation component — hien thi khi gui form thanh cong
 const SuccessOverlay = ({ onReset }) => {
   const { t } = useLanguage();
@@ -110,6 +108,8 @@ export default function ContactForm() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -118,18 +118,22 @@ export default function ContactForm() {
     const payload = { ...formData, submittedAt: new Date().toLocaleString(lang === 'vi' ? 'vi-VN' : 'en-US') };
 
     try {
-      if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_URL_HERE")) {
-        await new Promise(resolve => setTimeout(resolve, 1800));
-        setStatus('success');
-        setFormData({ fullName: '', zalo: '', email: '', destination: '', date: '', guests: '1', serviceClass: 'Standard', message: '' });
-      } else {
-        await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-        setStatus('success');
-        setFormData({ fullName: '', zalo: '', email: '', destination: '', date: '', guests: '1', serviceClass: 'Standard', message: '' });
+      // Lưu thông tin thông qua Backend API (Backend sẽ lo việc lưu Neon DB và đồng bộ sang Google Sheet)
+      const res = await fetch(`${BACKEND_URL}/api/leads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Lỗi kết nối tới Server: ${res.status}`);
       }
+
+      setStatus({ type: 'success' });
+      setFormData({ fullName: '', zalo: '', email: '', destination: '', date: '', guests: '1', serviceClass: 'Standard', message: '' });
     } catch (error) {
-      console.error("Loi khi gui form:", error);
-      setStatus('error');
+      console.error("Lỗi khi gửi form:", error);
+      setStatus({ type: 'error', message: error.message });
     } finally {
       setIsLoading(false);
     }
@@ -302,10 +306,15 @@ export default function ContactForm() {
                 )}
               </button>
 
-              {/* Error alert */}
-              {status === 'error' && (
+              {status?.type === 'success' && (
+                <div className="rounded-xl p-4 text-sm text-center font-medium mt-4" style={{ background: 'rgba(46,204,113,0.1)', border: '1px solid rgba(46,204,113,0.3)', color: '#2ecc71' }}>
+                  Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ sớm.
+                </div>
+              )}
+
+              {status?.type === 'error' && (
                 <div className="rounded-xl p-4 text-sm text-center font-medium mt-4" style={{ background: 'rgba(192,57,43,0.08)', border: '1px solid rgba(192,57,43,0.2)', color: '#e74c3c' }}>
-                  {c.errorMsg}
+                  {status.message || 'Không thể lưu dữ liệu, vui lòng thử lại.'}
                 </div>
               )}
             </form>
