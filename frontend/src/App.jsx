@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
 import LoadingScreen from './components/LoadingScreen';
 import Navbar from './components/Navbar';
@@ -11,6 +11,15 @@ import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import ChatGreeting from './components/ChatGreeting';
 import Dashboard from './components/Dashboard';
+import Login from './components/Login';
+
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem('touris_token');
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+}
 
 // ─── Helper: get time-of-day key ─────────────────────────────────────────────
 function getTimeOfDay() {
@@ -181,7 +190,12 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<MainApp />} />
-          <Route path="/crm" element={<Dashboard />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/crm" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </LanguageProvider>

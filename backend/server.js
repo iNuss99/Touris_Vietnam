@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -11,6 +13,41 @@ app.use(express.json());
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_ap7OnRLFjZ8q@ep-dark-firefly-azj7ve04-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
+});
+
+// API Login
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({ success: false, error: 'Vui lòng nhập email và mật khẩu' });
+  }
+
+  try {
+    const result = await pool.query('SELECT * FROM admins WHERE email = $1', [email]);
+    
+    if (result.rows.length === 0) {
+      return res.status(401).json({ success: false, error: 'Tài khoản hoặc mật khẩu không chính xác' });
+    }
+
+    const user = result.rows[0];
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+    
+    if (!isMatch) {
+      return res.status(401).json({ success: false, error: 'Tài khoản hoặc mật khẩu không chính xác' });
+    }
+
+    const token = jwt.sign(
+      { role: 'admin', email: user.email, id: user.id }, 
+      process.env.JWT_SECRET || 'touris_secret_key', 
+      { expiresIn: '24h' }
+    );
+    
+    res.json({ success: true, token });
+  } catch (err) {
+    console.error('Lỗi đăng nhập:', err);
+    res.status(500).json({ success: false, error: 'Lỗi máy chủ' });
+  }
 });
 
 // API Get Tours

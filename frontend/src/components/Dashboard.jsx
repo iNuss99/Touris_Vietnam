@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell
+  PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
 import { 
   Users, CheckCircle, Clock, XCircle, ArrowLeft, RefreshCw, PieChart as PieChartIcon, 
-  Settings, Search, Filter, Eye, ChevronLeft, ChevronRight, X, Download, MessageSquare, Briefcase, Calendar
+  Settings, Search, Filter, Eye, ChevronLeft, ChevronRight, X, Download, MessageSquare, Briefcase, Calendar, User, Bell, Shield, Save, LogOut
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-api.vercel.app';
 
@@ -28,6 +28,7 @@ const STATUS_LABELS = {
 const ITEMS_PER_PAGE = 8;
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [leads, setLeads] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,6 +45,31 @@ export default function Dashboard() {
   
   // State cho Sidebar Tabs
   const [activeTab, setActiveTab] = useState('leads'); // 'leads', 'reports', 'settings'
+  
+  // State cho Admin Profile
+  const [adminProfile, setAdminProfile] = useState(() => {
+    const saved = localStorage.getItem('touris_admin_profile');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // ignore JSON parse error
+      }
+    }
+    return {
+      name: 'Administrator',
+      email: 'admin@touris.vn',
+      avatar: null
+    };
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('touris_admin_profile', JSON.stringify(adminProfile));
+    } catch (e) {
+      console.warn('Lỗi khi lưu vào localStorage (có thể do dung lượng ảnh quá lớn):', e);
+    }
+  }, [adminProfile]);
 
   const fetchLeads = async () => {
     setIsLoading(true);
@@ -149,6 +175,20 @@ export default function Dashboard() {
     return Object.keys(counts).map(key => ({ name: key, value: counts[key] })).sort((a,b) => b.value - a.value).slice(0,5);
   }, [leads]);
 
+  // Chart Data: Leads over time (last 14 active days)
+  const leadsByDate = useMemo(() => {
+    const counts = {};
+    leads.forEach(l => {
+      const dateStr = new Date(l.submitted_at).toLocaleDateString('vi-VN');
+      counts[dateStr] = (counts[dateStr] || 0) + 1;
+    });
+    return Object.keys(counts).sort((a, b) => {
+      const [d1, m1, y1] = a.split('/');
+      const [d2, m2, y2] = b.split('/');
+      return new Date(y1, m1-1, d1) - new Date(y2, m2-1, d2);
+    }).slice(-14).map(key => ({ name: key, count: counts[key] }));
+  }, [leads]);
+
   // Luxury Chart Colors
   const PIE_COLORS = ['#c9a84c', '#34d0be', '#3b82f6', '#8b5cf6', '#f59e0b', '#64748b'];
 
@@ -186,16 +226,30 @@ export default function Dashboard() {
 
         <div className="mt-auto pt-6 border-t border-white/5 w-full">
           <div className={`flex items-center ${isSidebarOpen ? 'gap-3' : 'justify-center'} text-white/50 cursor-pointer hover:text-white transition-colors`}>
-            <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-              <span className="text-sm font-bold text-white">AD</span>
+            <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
+              {adminProfile.avatar ? (
+                <img src={adminProfile.avatar} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-sm font-bold text-white">AD</span>
+              )}
             </div>
             {isSidebarOpen && (
               <div className="overflow-hidden">
-                <p className="text-sm font-medium text-white truncate">Administrator</p>
-                <p className="text-[11px] truncate uppercase tracking-wider">admin@touris.vn</p>
+                <p className="text-sm font-medium text-white truncate">{adminProfile.name}</p>
+                <p className="text-[11px] truncate uppercase tracking-wider">{adminProfile.email}</p>
               </div>
             )}
           </div>
+          <button 
+            onClick={() => {
+              localStorage.removeItem('touris_token');
+              navigate('/login');
+            }}
+            className={`mt-4 w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-400/80 hover:bg-red-500/10 hover:text-red-400 transition-all ${!isSidebarOpen && 'justify-center px-0'}`}
+          >
+            <LogOut size={16} />
+            {isSidebarOpen && <span className="text-sm font-medium">Đăng xuất</span>}
+          </button>
         </div>
       </aside>
 
@@ -425,19 +479,66 @@ export default function Dashboard() {
           )}
 
           {activeTab === 'reports' && (
-            <div className="flex flex-col items-center justify-center h-[70vh]">
-              <PieChartIcon size={64} className="text-white/10 mb-6" />
-              <h2 className="text-2xl font-serif font-bold text-white mb-2">Báo cáo & Phân tích</h2>
-              <p className="text-white/40 text-sm">Tính năng này đang được phát triển và sẽ sớm ra mắt.</p>
+            <div className="space-y-8 animate-in fade-in duration-500">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-3xl font-serif font-bold text-white mb-2">Báo cáo & Phân tích</h2>
+                  <p className="text-white/40 text-sm font-light">Theo dõi xu hướng và hiệu suất chuyển đổi khách hàng</p>
+                </div>
+              </div>
+
+              {/* Conversion Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 relative overflow-hidden group">
+                  <p className="text-[13px] font-medium text-white/50 uppercase tracking-wider mb-2">Tỉ lệ chuyển đổi (Lead to Customer)</p>
+                  <h4 className="text-3xl font-serif font-bold text-luxury-gold tracking-tight">
+                    {totalLeads > 0 ? Math.round((converted / totalLeads) * 100) : 0}%
+                  </h4>
+                  <div className="mt-4 w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                    <div className="bg-luxury-gold h-full rounded-full" style={{ width: `${totalLeads > 0 ? (converted / totalLeads) * 100 : 0}%` }}></div>
+                  </div>
+                </div>
+
+                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 relative overflow-hidden group">
+                  <p className="text-[13px] font-medium text-white/50 uppercase tracking-wider mb-2">Trung bình số khách / Booking</p>
+                  <h4 className="text-3xl font-serif font-bold text-luxury-emerald-light tracking-tight">
+                    {totalLeads > 0 ? (leads.reduce((sum, l) => sum + (l.guests || 1), 0) / totalLeads).toFixed(1) : 0}
+                  </h4>
+                  <p className="text-xs text-white/40 mt-4">Khách mỗi yêu cầu</p>
+                </div>
+
+                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 relative overflow-hidden group">
+                  <p className="text-[13px] font-medium text-white/50 uppercase tracking-wider mb-2">Lượng khách hàng quan tâm</p>
+                  <h4 className="text-3xl font-serif font-bold text-blue-400 tracking-tight">
+                    {newLeads + inProgress}
+                  </h4>
+                  <p className="text-xs text-white/40 mt-4">Đang cần tư vấn</p>
+                </div>
+              </div>
+
+              {/* Line Chart */}
+              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6">
+                <h3 className="text-sm font-medium text-white/60 uppercase tracking-widest mb-6">Xu hướng yêu cầu mới (Theo ngày)</h3>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={leadsByDate} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                      <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" tick={{fill: 'rgba(255,255,255,0.5)', fontSize: 12}} axisLine={false} tickLine={false} />
+                      <YAxis stroke="rgba(255,255,255,0.2)" tick={{fill: 'rgba(255,255,255,0.5)', fontSize: 12}} allowDecimals={false} axisLine={false} tickLine={false} />
+                      <RechartsTooltip cursor={{stroke: 'rgba(255,255,255,0.1)'}} content={<CustomTooltip />} />
+                      <Line type="monotone" dataKey="count" stroke="#c9a84c" strokeWidth={3} dot={{r: 4, fill: '#04080f', stroke: '#c9a84c', strokeWidth: 2}} activeDot={{r: 6}} name="Số lượng yêu cầu" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </div>
           )}
 
           {activeTab === 'settings' && (
-            <div className="flex flex-col items-center justify-center h-[70vh]">
-              <Settings size={64} className="text-white/10 mb-6" />
-              <h2 className="text-2xl font-serif font-bold text-white mb-2">Cài đặt hệ thống</h2>
-              <p className="text-white/40 text-sm">Tính năng này đang được phát triển và sẽ sớm ra mắt.</p>
-            </div>
+            <SettingsTab 
+              adminProfile={adminProfile} 
+              setAdminProfile={setAdminProfile} 
+            />
           )}
         </div>
       </main>
@@ -637,6 +738,206 @@ function LeadDetailsModal({ lead, onClose, onStatusChange }) {
             </div>
           </div>
 
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Settings Tab ────────────────────────────────────────────────────────
+
+function SettingsTab({ adminProfile, setAdminProfile }) {
+  const [activeTab, setActiveTab] = useState('profile');
+  
+  const [formData, setFormData] = useState({
+    name: adminProfile.name,
+    email: adminProfile.email,
+    phone: '+84 123 456 789',
+    language: 'vi'
+  });
+
+  const [avatar, setAvatar] = useState(adminProfile.avatar);
+  const fileInputRef = React.useRef(null);
+  const [isSaved, setIsSaved] = useState(false);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          // Nén ảnh bằng Canvas
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 250;
+          const MAX_HEIGHT = 250;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Chuyển sang dạng jpeg nén 70%
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          setAvatar(dataUrl);
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = () => {
+    setAdminProfile({
+      name: formData.name,
+      email: formData.email,
+      avatar: avatar
+    });
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 3000);
+  };
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl">
+      <div>
+        <h2 className="text-3xl font-serif font-bold text-white mb-2">Cài đặt hệ thống</h2>
+        <p className="text-white/40 text-sm font-light">Quản lý tài khoản quản trị và cấu hình CRM</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="md:col-span-1 space-y-2">
+          <button onClick={() => setActiveTab('profile')} className={`w-full flex items-center gap-3 px-4 py-3 border-l-2 rounded-r-lg text-sm transition-all ${activeTab === 'profile' ? 'bg-white/5 border-luxury-gold text-luxury-gold-light font-medium' : 'border-transparent text-white/50 hover:bg-white/5 hover:text-white'}`}>
+            <User size={16} /> Thông tin cá nhân
+          </button>
+          <button onClick={() => setActiveTab('notifications')} className={`w-full flex items-center gap-3 px-4 py-3 border-l-2 rounded-r-lg text-sm transition-all ${activeTab === 'notifications' ? 'bg-white/5 border-luxury-gold text-luxury-gold-light font-medium' : 'border-transparent text-white/50 hover:bg-white/5 hover:text-white'}`}>
+            <Bell size={16} /> Thông báo
+          </button>
+          <button onClick={() => setActiveTab('security')} className={`w-full flex items-center gap-3 px-4 py-3 border-l-2 rounded-r-lg text-sm transition-all ${activeTab === 'security' ? 'bg-white/5 border-luxury-gold text-luxury-gold-light font-medium' : 'border-transparent text-white/50 hover:bg-white/5 hover:text-white'}`}>
+            <Shield size={16} /> Bảo mật
+          </button>
+        </div>
+
+        <div className="md:col-span-3 space-y-6">
+          <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 md:p-8 relative">
+            {isSaved && (
+              <div className="absolute top-4 right-4 bg-luxury-emerald/20 border border-luxury-emerald text-luxury-emerald-light px-4 py-2 rounded-lg text-sm animate-in fade-in slide-in-from-top-2">
+                Đã lưu thay đổi thành công!
+              </div>
+            )}
+            
+            {activeTab === 'profile' && (
+              <>
+                <h3 className="text-lg font-serif font-bold text-white mb-6">Thông tin cá nhân (Admin)</h3>
+                <div className="flex items-center gap-6 mb-8">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-luxury-gold to-luxury-gold-dim flex items-center justify-center text-3xl font-serif font-bold text-black border-4 border-[#0a1423] overflow-hidden">
+                    {avatar ? <img src={avatar} alt="Avatar" className="w-full h-full object-cover" /> : 'AD'}
+                  </div>
+                  <div>
+                    <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                    <button onClick={() => fileInputRef.current.click()} className="px-4 py-2 border border-white/10 hover:border-white/30 rounded-lg text-sm text-white/80 transition-colors">
+                      Thay đổi Avatar
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <label className="text-xs text-white/40 uppercase tracking-wider block mb-2">Tên hiển thị</label>
+                    <input name="name" type="text" value={formData.name} onChange={handleInputChange} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-luxury-gold transition-colors" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-white/40 uppercase tracking-wider block mb-2">Email liên hệ</label>
+                    <input name="email" type="email" value={formData.email} onChange={handleInputChange} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-luxury-gold transition-colors" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-white/40 uppercase tracking-wider block mb-2">Số điện thoại hỗ trợ</label>
+                    <input name="phone" type="text" value={formData.phone} onChange={handleInputChange} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-luxury-gold transition-colors" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-white/40 uppercase tracking-wider block mb-2">Ngôn ngữ mặc định</label>
+                    <select name="language" value={formData.language} onChange={handleInputChange} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-luxury-gold transition-colors appearance-none cursor-pointer">
+                      <option value="vi">Tiếng Việt</option>
+                      <option value="en">English</option>
+                    </select>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {activeTab === 'notifications' && (
+              <>
+                <h3 className="text-lg font-serif font-bold text-white mb-6">Cài đặt Thông báo</h3>
+                <div className="space-y-4 mb-6">
+                  <div className="flex items-center justify-between py-3 border-b border-white/5">
+                    <div>
+                      <h4 className="text-sm font-medium text-white">Email báo cáo hàng ngày</h4>
+                      <p className="text-xs text-white/40 mt-1">Nhận báo cáo tóm tắt số lượng booking vào lúc 8h sáng</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-4 h-4 accent-luxury-gold cursor-pointer" />
+                  </div>
+                  <div className="flex items-center justify-between py-3 border-b border-white/5">
+                    <div>
+                      <h4 className="text-sm font-medium text-white">Thông báo Lead mới</h4>
+                      <p className="text-xs text-white/40 mt-1">Gửi email khi có khách hàng mới để lại thông tin</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-4 h-4 accent-luxury-gold cursor-pointer" />
+                  </div>
+                  <div className="flex items-center justify-between py-3 border-b border-white/5">
+                    <div>
+                      <h4 className="text-sm font-medium text-white">Âm thanh thông báo</h4>
+                      <p className="text-xs text-white/40 mt-1">Phát âm thanh khi hệ thống mở trên trình duyệt</p>
+                    </div>
+                    <input type="checkbox" className="w-4 h-4 accent-luxury-gold cursor-pointer" />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {activeTab === 'security' && (
+              <>
+                <h3 className="text-lg font-serif font-bold text-white mb-6">Bảo mật</h3>
+                <div className="space-y-6 mb-6">
+                  <div>
+                    <label className="text-xs text-white/40 uppercase tracking-wider block mb-2">Mật khẩu hiện tại</label>
+                    <input type="password" placeholder="••••••••" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-luxury-gold transition-colors" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-white/40 uppercase tracking-wider block mb-2">Mật khẩu mới</label>
+                    <input type="password" placeholder="Nhập mật khẩu mới" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-luxury-gold transition-colors" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-white/40 uppercase tracking-wider block mb-2">Xác nhận mật khẩu mới</label>
+                    <input type="password" placeholder="Nhập lại mật khẩu mới" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-luxury-gold transition-colors" />
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="pt-4 border-t border-white/5 flex justify-end">
+              <button onClick={handleSave} className="flex items-center gap-2 px-6 py-2.5 bg-luxury-gold hover:bg-luxury-gold-light text-black font-medium rounded-xl transition-all shadow-[0_0_15px_rgba(201,168,76,0.2)]">
+                <Save size={16} /> Lưu thay đổi
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -8,6 +8,8 @@ const PACKAGE_META = [
   { icon: <Gem size={20} />, gradient: 'from-purple-500/20 to-pink-500/20', accentColor: '#a78bfa', popular: false },
 ];
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-api.vercel.app';
+
 export default function TourPackages() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [apiPackages, setApiPackages] = useState([]);
@@ -15,7 +17,7 @@ export default function TourPackages() {
   const tp = t('tourPackages');
   
   React.useEffect(() => {
-    fetch('http://localhost:5000/api/tours')
+    fetch(`${BACKEND_URL}/api/tours`)
       .then(res => res.json())
       .then(data => {
         if (data && data.length > 0) {

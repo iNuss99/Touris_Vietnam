@@ -35,6 +35,8 @@ const DELAY_MAP = {
 
 // === DESTINATION CARD COMPONENT ===
 // truyen index vao de tinh toan hieu ung cuon trang xoay trai/phai xen ke
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-api.vercel.app';
+
 const DestinationCard = ({ data, onViewDetail, index }) => {
   const { t } = useLanguage();
   const dest = t('destinations');
@@ -337,7 +339,7 @@ export default function Destinations() {
   const dest = t('destinations');
   
   React.useEffect(() => {
-    fetch('http://localhost:5000/api/destinations')
+    fetch(`${BACKEND_URL}/api/destinations`)
       .then(res => res.json())
       .then(data => {
         if (data && data.length > 0) {
