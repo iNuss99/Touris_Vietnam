@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import Lenis from 'lenis';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
 import LoadingScreen from './components/LoadingScreen';
@@ -6,10 +7,13 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Destinations from './components/Destinations';
 import Culture from './components/Culture';
+import Testimonials from './components/Testimonials';
 import TourPackages from './components/TourPackages';
+import FAQs from './components/FAQs';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
-import ChatGreeting from './components/ChatGreeting';
+import GeminiChatWidget from './components/GeminiChatWidget';
+import ErrorBoundary from './components/ErrorBoundary';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 
@@ -64,12 +68,18 @@ function MainContent({ isLoading, isPageVisible, handleReveal, handleLoadingComp
           <Hero isPageVisible={isPageVisible} />
           <Destinations />
           <Culture />
+          <Testimonials />
           <TourPackages />
+          <FAQs />
           <ContactForm />
           <Footer />
         </div>
       </div>
-      {!isLoading && <ChatGreeting />}
+      {!isLoading && (
+        <ErrorBoundary>
+          <GeminiChatWidget />
+        </ErrorBoundary>
+      )}
     </>
   );
 }
@@ -89,55 +99,45 @@ function MainApp() {
     return () => clearInterval(iv);
   }, []);
 
-  // ── Scroll Progress Bar ───────────────────────────────────────────────────
+  // ── Lenis Smooth Scroll + Skew on Velocity ────────────────────────────────
   useEffect(() => {
-    const bar = document.querySelector('.scroll-progress');
-    if (!bar) return;
-    const onScroll = () => {
-      const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-      bar.style.transform = `scaleX(${Math.min(pct, 1)})`;
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  // ── Magnetic Cursor ───────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!window.matchMedia('(pointer: fine)').matches) return;
-    const dot = document.querySelector('.cursor-dot');
-    const ring = document.querySelector('.cursor-ring');
-    if (!dot || !ring) return;
-
-    let mx = 0, my = 0, rx = 0, ry = 0, rafId;
-
-    const onMove = (e) => {
-      mx = e.clientX; my = e.clientY;
-      dot.style.transform = `translate(${mx - 5}px, ${my - 5}px)`;
-    };
-    const lerp = (a, b, t) => a + (b - a) * t;
-    const animate = () => {
-      rx = lerp(rx, mx, 0.12); ry = lerp(ry, my, 0.12);
-      ring.style.transform = `translate(${rx - 18}px, ${ry - 18}px)`;
-      rafId = requestAnimationFrame(animate);
-    };
-
-    const addH = () => { dot.classList.add('cursor-hover'); ring.classList.add('cursor-hover'); };
-    const rmH = () => { dot.classList.remove('cursor-hover'); ring.classList.remove('cursor-hover'); };
-    document.querySelectorAll('a, button, [role="button"]').forEach(el => {
-      el.addEventListener('mouseenter', addH);
-      el.addEventListener('mouseleave', rmH);
+    const lenis = new Lenis({
+      duration: 1.4,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
     });
 
-    window.addEventListener('mousemove', onMove, { passive: true });
-    rafId = requestAnimationFrame(animate);
-    document.documentElement.style.cursor = 'none';
+    const bar = document.querySelector('.scroll-progress');
+    let lastScrollY = 0;
+    let velocity = 0;
+    let rafId;
+
+    const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+
+    lenis.on('scroll', ({ scroll, limit }) => {
+      // Progress bar
+      if (bar) bar.style.transform = `scaleX(${Math.min(scroll / limit, 1)})`;
+      // Velocity for skew
+      velocity = scroll - lastScrollY;
+      lastScrollY = scroll;
+    });
+
+    const tick = (time) => {
+      lenis.raf(time);
+      // Apply skew via CSS variable — composable with inline transforms
+      const skewDeg = clamp(velocity * 0.04, -3, 3);
+      document.documentElement.style.setProperty('--scroll-skew', `${skewDeg}deg`);
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
 
     return () => {
-      window.removeEventListener('mousemove', onMove);
       cancelAnimationFrame(rafId);
-      document.documentElement.style.cursor = '';
+      lenis.destroy();
     };
   }, []);
+
+
 
   // ── Scroll Reveal ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -171,8 +171,7 @@ function MainApp() {
       <div className="grain-overlay" aria-hidden="true" />
       <div className="tod-overlay" aria-hidden="true" />
       <div className="scroll-progress" aria-hidden="true" />
-      <div className="cursor-dot" aria-hidden="true" />
-      <div className="cursor-ring" aria-hidden="true" />
+
 
       <MainContent
         isLoading={isLoading}

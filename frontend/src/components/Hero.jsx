@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 
-// URL anh nen tĩnh Ha Long - fallback khi video chua load xong
-const FALLBACK_IMG = 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1920&q=85';
+// URL anh nen tinh Ha Long - fallback khi video chua load xong
+const FALLBACK_IMG = 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1024&q=60';
 
 export default function Hero({ isPageVisible }) {
   const [scrollY, setScrollY] = useState(0);
@@ -10,6 +10,26 @@ export default function Hero({ isPageVisible }) {
   const videoRef = useRef(null);
   const { t } = useLanguage();
   const hero = t('hero');
+  const magnetRef = useRef(null);
+
+  // Magnetic button — theo cursor trong vong 60px
+  const handleMagnetMove = useCallback((e) => {
+    const el = magnetRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 80) {
+      el.style.transform = `translate(${dx * 0.35}px, ${dy * 0.35}px) scale(1.05)`;
+    }
+  }, []);
+
+  const handleMagnetLeave = useCallback(() => {
+    if (magnetRef.current) magnetRef.current.style.transform = '';
+  }, []);
 
   // Theo doi scroll y de tao hieu ung Parallax
   useEffect(() => {
@@ -50,7 +70,6 @@ export default function Hero({ isPageVisible }) {
             transform: `translate3d(0, ${scrollY * 0.38}px, 0)`,
             willChange: 'transform',
             top: '-10%',
-            // An di khi video da san sang
             opacity: videoReady ? 0 : 1,
             transition: 'opacity 1.5s ease-in-out',
           }}
@@ -74,6 +93,7 @@ export default function Hero({ isPageVisible }) {
           }}
         >
           <source src="/Video_background/HaLongBay.mp4" type="video/mp4" />
+          <track kind="captions" srcLang="vi" label="Vietnamese" />
         </video>
 
         {/* === LOP 3: Gradient overlay — luon hien tren cung === */}
@@ -134,12 +154,15 @@ export default function Hero({ isPageVisible }) {
             {hero.description}
           </p>
 
-          {/* CTA Button — Liquid Effect */}
+          {/* CTA Button — Liquid + Magnetic Effect */}
           <div className="flex items-center justify-center">
             <a
+              ref={magnetRef}
               href="#kham-pha"
-              className={`btn-glow btn-liquid btn-ripple w-full sm:w-auto text-[12px] uppercase tracking-[0.25em] font-semibold text-luxury-dark bg-gradient-to-r from-luxury-gold-light via-luxury-gold to-luxury-gold-dim px-10 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl shadow-luxury-gold/20 reveal-blur delay-400 ${isPageVisible ? 'active' : ''}`}
-              style={{ paddingTop: '14px', paddingBottom: '14px' }}
+              onMouseMove={handleMagnetMove}
+              onMouseLeave={handleMagnetLeave}
+              className={`btn-glow btn-liquid btn-ripple w-full sm:w-auto text-[12px] uppercase tracking-[0.25em] font-semibold text-luxury-dark bg-gradient-to-r from-luxury-gold-light via-luxury-gold to-luxury-gold-dim px-10 rounded-full active:scale-95 shadow-2xl shadow-luxury-gold/20 reveal-blur delay-400 ${isPageVisible ? 'active' : ''}`}
+              style={{ paddingTop: '14px', paddingBottom: '14px', transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease' }}
             >
               <span className="liquid-inner">{hero.ctaButton}</span>
             </a>

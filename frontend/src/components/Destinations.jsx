@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 // import cac icon can thiet tu lucide-react, dong thoi them Check va loai bo code thua
 import { ArrowRight, Star, Clock, MapPin, X, Calendar, Compass, Sun, Check } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
+import SplitHeading from './SplitHeading';
 
 // import cac file hinh anh dia danh phien ban webp da duoc nen de tang toc do load trang
 import imgHaLong from '../assets/images/places/halong-bay.webp';
@@ -54,7 +55,7 @@ const DestinationCard = ({ data, onViewDetail, index }) => {
       <div className="flip-card-inner rounded-[20px] shadow-2xl">
         {/* MẶT TRƯỚC (FRONT) */}
         <div className="flip-card-front relative rounded-[20px] overflow-hidden group">
-          <img src={image} alt={data.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+          <img src={image} alt={data.title} loading="lazy" width="480" height="480" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 scroll-skew" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(4,8,15,0.97) 0%, rgba(4,8,15,0.5) 45%, rgba(4,8,15,0.1) 75%, transparent 100%)' }} />
           
           <div className="absolute top-4 right-4 z-10">
@@ -171,7 +172,7 @@ const TourDetailModal = ({ destination, onClose }) => {
 
         {/* Banner anh */}
         <div className="relative h-52 md:h-60 overflow-hidden">
-          <img src={image} alt={title} className="w-full h-full object-cover" />
+          <img src={image} alt={title} loading="lazy" width="877" height="1024" className="w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(15,22,42,1) 0%, rgba(15,22,42,0.4) 50%, transparent 100%)' }} />
           <div className="absolute bottom-5 left-6 right-6">
             <div className="flex flex-wrap items-center gap-3 mb-3">
@@ -366,9 +367,11 @@ export default function Destinations() {
             <div className="flex justify-center mb-5">
               <span className="section-label">{dest.sectionLabel}</span>
             </div>
-            <h2 className="font-serif text-white mb-4" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 600, lineHeight: 1.1 }}>
-              {dest.sectionTitle}
-            </h2>
+            <SplitHeading
+              text={dest.sectionTitle}
+              className="font-serif text-white mb-4"
+              style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 600, lineHeight: 1.1 }}
+            />
             <p className="text-white/40 font-light text-sm max-w-lg mx-auto leading-relaxed" style={{ fontWeight: 300 }}>
               {dest.sectionDesc}
             </p>

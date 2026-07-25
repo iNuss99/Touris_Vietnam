@@ -3,7 +3,7 @@ import path from 'path';
 import sharp from 'sharp';
 
 // thu muc chua anh can toi uu hoa
-const targetDir = './src/assets/images';
+const targetDir = './frontend/src/assets/images';
 
 // ham quet de quy cac thu muc va file de thuc hien convert
 async function processDirectory(directory) {

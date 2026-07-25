@@ -57,6 +57,8 @@ export default function Navbar() {
             <img
               src={logoImg}
               alt="Vietnam Tourism Logo"
+              width="72"
+              height="72"
               className="logo-img object-contain"
               style={{ height: '72px', width: 'auto' }}
               onError={(e) => { e.target.style.display = 'none'; }}
@@ -172,7 +174,7 @@ export default function Navbar() {
         style={{ background: 'rgba(4,8,15,0.97)', backdropFilter: 'blur(24px)' }}
       >
         <div className="flex justify-end p-6">
-          <button onClick={toggleMobileMenu} className="text-white/60 hover:text-luxury-gold transition-colors">
+          <button onClick={toggleMobileMenu} className="text-white/60 hover:text-luxury-gold transition-colors" aria-label="Close Mobile Menu">
             <X size={28} />
           </button>
         </div>
@@ -242,7 +244,7 @@ export default function Navbar() {
         </div>
         {/* Logo o day mobile drawer */}
         <div className="flex justify-center items-center gap-3 pb-10 opacity-30">
-          <img src={logoImg} alt="" style={{ height: '40px' }} />
+          <img src={logoImg} alt="" width="40" height="40" style={{ height: '40px' }} />
           <span className="font-serif text-base tracking-widest text-luxury-gold">VIETNAM TOURISM</span>
         </div>
       </div>

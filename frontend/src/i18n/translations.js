@@ -412,6 +412,84 @@ const translations = {
       errorMsg: 'An error occurred. Please try again later or contact our hotline.',
     },
 
+    // --- TESTIMONIALS ---
+    testimonials: {
+      sectionLabel: 'What clients say',
+      sectionTitle: 'Unforgettable Journeys',
+      sectionDesc: 'Over 50,000 travelers have trusted Touris Vietnam for their holidays. Here are some real experiences from our beloved customers.',
+      ratingText: '4.9/5 from 1,200+ reviews',
+      items: [
+        {
+          name: 'Mr. Tran Van Nam',
+          tour: 'Ha Long Bay Luxury Cruise',
+          rating: 5,
+          content: 'Incredible cruise experience! The staff took great care of my elderly parents. The food was fresh and delicious, and the room had an outstanding view. Will definitely return to Touris Vietnam.',
+        },
+        {
+          name: 'Ms. Le Mai Phuong',
+          tour: 'Hoi An Heritage Discovery',
+          rating: 4.8,
+          content: 'My first time in Hoi An, but the tour guide left a huge impression. Very enthusiastic and deeply knowledgeable about the culture. It felt like traveling with a local friend rather than an industrial tour.',
+        },
+        {
+          name: 'Hoa Family',
+          tour: 'Trang An Eco Adventure',
+          rating: 5,
+          content: 'Trang An is picturesque! The tour was highly professional, excellent transportation, and the sightseeing schedule was perfectly paced. Totally worth every penny.',
+        },
+        {
+          name: 'Mr. Hoang Minh',
+          tour: 'Phu Quoc Pearl Island',
+          rating: 4.9,
+          content: 'A perfect honeymoon! The Touris Vietnam team set up an extremely romantic room for us. The snorkeling and sunset schedules were spot-on. 10/10 recommendation.',
+        },
+        {
+          name: 'Mrs. Nguyen Thi Lan',
+          tour: 'Sapa Cloud Hunting',
+          rating: 4.9,
+          content: 'I was initially worried about my age for the Sapa trip, but the guides took care of everything. The hotel was central and convenient. Truly thankful to the team for a meaningful trip.',
+        },
+      ]
+    },
+
+    // --- FAQS ---
+    faqs: {
+      sectionLabel: 'Frequently Asked Questions',
+      sectionTitle: 'Answers You Need',
+      sectionDesc: 'Everything you need to know before booking. We are always transparent in all policies and services.',
+      contactCta: 'More questions? Chat with Khoa now',
+      items: [
+        {
+          q: 'What services are included in the tour?',
+          a: 'Each tour package has specific inclusions and exclusions. However, 100% of our tours include: Premium transportation, Hotel (3-5 stars depending on package), Professional tour guide throughout the trip, Entrance fees to scheduled attractions, and High-coverage travel insurance.'
+        },
+        {
+          q: 'What is your cancellation and refund policy?',
+          a: 'You can cancel free of charge up to 14 days before departure (100% refund). Cancellations between 7-14 days will be refunded 50%. Cancellations under 7 days are non-refundable. We encourage you to notify us as early as possible if any issues arise.'
+        },
+        {
+          q: 'How much deposit is required to hold a spot?',
+          a: 'To confirm your reservation and issue tickets, you only need to pay a 30-50% deposit of the total tour value (depending on the specific program). The remaining balance will be paid 3 days before departure or directly to the guide on the departure day.'
+        },
+        {
+          q: 'Can I change my travel dates after booking?',
+          a: 'Yes. We support ONE free date change (must be notified at least 10 days in advance). However, if your new date falls on a Holiday/Festival or peak season, a surcharge for the price difference may apply.'
+        },
+        {
+          q: 'Are the tours suitable for children and the elderly?',
+          a: 'Most of our tours are designed with a relaxed pace, perfectly suitable for families with elderly members and small children. Please inform our consultant in advance so we can arrange the most suitable transportation, meals, and accommodations.'
+        },
+        {
+          q: 'What payment methods do you accept?',
+          a: 'We accept a variety of payment methods: Bank Transfer (VND/USD), Credit Cards (Visa, Mastercard, JCB), E-wallets (Momo, ZaloPay), and cash payments at the Touris Vietnam office.'
+        },
+        {
+          q: 'How do I know if the tour is available on my chosen date?',
+          a: 'Seat availability is constantly updated. The fastest way is to chat directly with our staff via the chat box on the right corner or call our Hotline. We will check and respond immediately within 3 minutes.'
+        },
+      ]
+    },
+
     // --- FOOTER ---
     footer: {
       description: 'Accompanying you on the journey to discover the cultural essence and magnificent timeless landmarks of Vietnam.',
@@ -800,6 +878,84 @@ const translations = {
           ],
         },
       ],
+    },
+
+    // --- TESTIMONIALS ---
+    testimonials: {
+      sectionLabel: 'Khách hàng nói gì',
+      sectionTitle: 'Hành Trình Đáng Nhớ',
+      sectionDesc: 'Hơn 50,000 du khách đã tin tưởng lựa chọn Touris Vietnam cho kỳ nghỉ của mình. Dưới đây là những câu chuyện trải nghiệm thực tế.',
+      ratingText: '4.9/5 từ 1,200+ đánh giá',
+      items: [
+        {
+          name: 'Anh Trần Văn Nam',
+          tour: 'Ha Long Bay Luxury Cruise',
+          rating: 5,
+          content: 'Dịch vụ trên du thuyền quá tuyệt vời! Gia đình tôi có người lớn tuổi nhưng các bạn nhân viên chăm sóc rất chu đáo. Đồ ăn tươi ngon, phòng view đẹp xuất sắc. Chắc chắn sẽ quay lại ủng hộ Touris Vietnam.',
+        },
+        {
+          name: 'Chị Lê Mai Phương',
+          tour: 'Hoi An Heritage Discovery',
+          rating: 4.8,
+          content: 'Lần đầu trải nghiệm tour Hội An nhưng tôi cực kỳ ấn tượng với hướng dẫn viên. Rất nhiệt tình và hiểu biết sâu sắc về văn hóa. Cảm giác không phải đi tour công nghiệp mà như đi cùng một người bạn bản địa.',
+        },
+        {
+          name: 'Gia đình chị Hoa',
+          tour: 'Tràng An Eco Adventure',
+          rating: 5,
+          content: 'Cảnh quan Tràng An đẹp như tranh vẽ! Tổ chức tour cực kỳ chuyên nghiệp, xe đưa đón xịn xò, thời gian tham quan rất hợp lý không bị quá gấp gáp. Rất đáng đồng tiền bát gạo.',
+        },
+        {
+          name: 'Anh Hoàng Minh',
+          tour: 'Phu Quoc Pearl Island',
+          rating: 4.9,
+          content: 'Một chuyến trăng mật hoàn hảo! Team Touris Vietnam đã setup phòng honeymoon cực lãng mạn. Lịch trình lặn ngắm san hô và ngắm hoàng hôn đều được sắp xếp chuẩn xác. 10/10.',
+        },
+        {
+          name: 'Cô Nguyễn Thị Lan',
+          tour: 'Sapa Cloud Hunting',
+          rating: 4.9,
+          content: 'Cô lớn tuổi đi Sapa lúc đầu cũng e ngại nhưng các cháu HDV chăm sóc cô từng chút một. KS nằm ngay trung tâm tiện đi lại. Thật sự cảm ơn team rất nhiều vì một chuyến đi ý nghĩa.',
+        },
+      ]
+    },
+
+    // --- FAQS ---
+    faqs: {
+      sectionLabel: 'Giải đáp thắc mắc',
+      sectionTitle: 'Câu Hỏi Thường Gặp',
+      sectionDesc: 'Mọi thông tin bạn cần biết trước khi đặt tour. Chúng tôi luôn minh bạch trong mọi chính sách và dịch vụ.',
+      contactCta: 'Còn câu hỏi khác? Chat với Khoa ngay',
+      items: [
+        {
+          q: 'Tour bao gồm những dịch vụ nào?',
+          a: 'Mỗi gói tour sẽ có chi tiết bao gồm và không bao gồm riêng. Tuy nhiên, 100% tour của chúng tôi đều đã bao gồm: Xe di chuyển cao cấp, Khách sạn (từ 3-5 sao tùy gói), Hướng dẫn viên suốt tuyến, Vé tham quan các điểm trong lịch trình và Bảo hiểm du lịch với mức bồi thường cao.'
+        },
+        {
+          q: 'Chính sách hủy tour và hoàn tiền như thế nào?',
+          a: 'Bạn có thể hủy tour miễn phí trước 14 ngày khởi hành (hoàn tiền 100%). Hủy từ 7-14 ngày hoàn 50%. Hủy dưới 7 ngày sẽ không được hoàn tiền. Chúng tôi khuyến khích bạn thông báo sớm nhất có thể nếu có sự cố phát sinh.'
+        },
+        {
+          q: 'Cần đặt cọc bao nhiêu % để giữ chỗ?',
+          a: 'Để xác nhận giữ chỗ và xuất vé, bạn chỉ cần thanh toán đặt cọc 30-50% tổng giá trị tour (tùy theo từng chương trình). Số tiền còn lại sẽ được thanh toán trước ngày khởi hành 3 ngày hoặc thanh toán trực tiếp cho HDV vào ngày đi.'
+        },
+        {
+          q: 'Có thể thay đổi ngày đi sau khi đã đặt tour không?',
+          a: 'Có. Chúng tôi hỗ trợ đổi ngày MIỄN PHÍ 1 lần (cần báo trước ít nhất 10 ngày). Tuy nhiên, nếu ngày bạn đổi sang rơi vào dịp Lễ/Tết hoặc mùa cao điểm, có thể sẽ phát sinh phụ thu chênh lệch giá.'
+        },
+        {
+          q: 'Tour có phù hợp với trẻ em và người lớn tuổi không?',
+          a: 'Đa số các tour của chúng tôi được thiết kế theo tốc độ thư giãn, rất phù hợp cho gia đình có người già và trẻ nhỏ. Vui lòng báo trước với tư vấn viên để chúng tôi sắp xếp xe, suất ăn và phòng nghỉ phù hợp nhất.'
+        },
+        {
+          q: 'Thanh toán qua những hình thức nào?',
+          a: 'Chúng tôi chấp nhận đa dạng hình thức: Chuyển khoản ngân hàng (VNĐ/USD), Thẻ tín dụng (Visa, Mastercard, JCB), Ví điện tử (Momo, ZaloPay), và thanh toán tiền mặt tại văn phòng Touris Vietnam.'
+        },
+        {
+          q: 'Làm sao để biết tour ngày tôi chọn còn chỗ không?',
+          a: 'Tình trạng chỗ được cập nhật liên tục. Nhanh nhất là bạn chat trực tiếp với nhân viên qua khung chat góc phải hoặc gọi Hotline. Chúng tôi sẽ kiểm tra và phản hồi ngay lập tức trong vòng 3 phút.'
+        },
+      ]
     },
 
     // --- CONTACT FORM ---

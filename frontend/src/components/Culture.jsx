@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowUpRight, Award, Coffee, Shirt, Music, UtensilsCrossed } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
+import SplitHeading from './SplitHeading';
 
 // Import anh tu folder culture da duoc chuyen sang dinh dang webp de toi uu hoa
 import imgPho from '../assets/images/culture/pho.webp';
@@ -60,9 +61,11 @@ export default function Culture() {
           <div className="flex justify-center mb-5">
             <span className="section-label">{culture.sectionLabel}</span>
           </div>
-          <h2 className="font-serif text-white mb-4" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 600, lineHeight: 1.1 }}>
-            {culture.sectionTitle}
-          </h2>
+          <SplitHeading
+            text={culture.sectionTitle}
+            className="font-serif text-white mb-4"
+            style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 600, lineHeight: 1.1 }}
+          />
           <p className="text-white/40 font-light text-sm max-w-lg mx-auto leading-relaxed" style={{ fontWeight: 300 }}>
             {culture.sectionDesc}
           </p>
@@ -77,7 +80,7 @@ export default function Culture() {
             style={{ height: 'clamp(400px, 50vw, 580px)' }}>
             {/* Anh chinh */}
             {items.map((item, idx) => (
-              <img key={item.id} src={IMAGE_MAP[item.id]} alt={item.title}
+              <img key={item.id} src={IMAGE_MAP[item.id]} alt={item.title} loading="lazy" width="1024" height="809"
                 className="absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out"
                 style={{
                   opacity: activeItem === idx ? 1 : 0,
@@ -140,7 +143,7 @@ export default function Culture() {
                 >
                   {/* Thumbnail anh nho */}
                   <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 relative">
-                    <img src={IMAGE_MAP[item.id]} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover/tab:scale-110" />
+                    <img src={IMAGE_MAP[item.id]} alt={item.title} loading="lazy" width="64" height="64" className="w-full h-full object-cover transition-transform duration-500 group-hover/tab:scale-110" />
                     {isActive && (
                       <div className="absolute inset-0 rounded-xl" style={{ border: `2px solid ${itemAccent}60` }} />
                     )}

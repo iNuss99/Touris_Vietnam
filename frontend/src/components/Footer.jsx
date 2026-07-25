@@ -13,7 +13,7 @@ export default function Footer() {
 
   return (
     <footer
-      className="relative overflow-hidden pt-20"
+      className="relative overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #04080f 0%, #020408 100%)' }}
     >
       {/* Decorative Golden Top Line */}
@@ -24,7 +24,7 @@ export default function Footer() {
         style={{ width: '1000px', height: '350px', background: 'radial-gradient(ellipse at 50% 100%, rgba(201,168,76,0.03) 0%, transparent 65%)', filter: 'blur(50px)' }}
       />
 
-      <div className="max-w-screen-xl mx-auto px-6 md:px-12 relative z-10">
+      <div className="max-w-screen-xl mx-auto px-6 md:px-12 relative z-10 pt-20">
 
         {/* ===== MAIN FOOTER GRID ===== */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pb-16">
@@ -34,7 +34,7 @@ export default function Footer() {
             <div>
               {/* Logo Brand */}
               <div className="flex items-center gap-3.5 mb-6">
-                <img src={logoImg} alt="Vietnam Tourism" style={{ height: '56px', width: 'auto', filter: 'drop-shadow(0 2px 8px rgba(201,168,76,0.2))' }} />
+                <img src={logoImg} alt="Vietnam Tourism" loading="lazy" width="56" height="56" style={{ height: '56px', width: 'auto', filter: 'drop-shadow(0 2px 8px rgba(201,168,76,0.2))' }} />
                 <div className="flex flex-col leading-none">
                   <span className="font-serif text-lg font-bold tracking-[0.2em]"
                     style={{ background: 'linear-gradient(135deg, #f0d080, #c9a84c)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
@@ -63,15 +63,22 @@ export default function Footer() {
                   </span>
                   <span className="text-xs font-light">domjnhkhoa@gmail.com</span>
                 </a>
+                
+                <div className="flex gap-3 text-white/35 w-fit group pt-2">
+                  <div className="flex flex-col gap-1 text-[10px] font-light leading-relaxed">
+                    <p><span className="text-luxury-gold font-medium">Add:</span> 123 Nguyen Van Linh, Da Nang, Vietnam</p>
+                    <p><span className="text-luxury-gold font-medium">License:</span> 01-1234/2026/TCDL-GPLHQT</p>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Social Icons */}
             <div className="flex items-center gap-3">
               {[
-                { icon: <Facebook size={14} />, href: 'https://facebook.com', label: 'Facebook' },
-                { icon: <Instagram size={14} />, href: 'https://instagram.com', label: 'Instagram' },
-                { icon: <Youtube size={14} />, href: 'https://youtube.com', label: 'Youtube' },
+                { icon: <Facebook size={14} />, href: '#', label: 'Facebook' },
+                { icon: <Instagram size={14} />, href: '#', label: 'Instagram' },
+                { icon: <Youtube size={14} />, href: '#', label: 'Youtube' },
               ].map(({ icon, href, label }, i) => (
                 <a key={i} href={href} target="_blank" rel="noreferrer" aria-label={label}
                   className="w-9 h-9 flex items-center justify-center rounded-xl text-white/30 hover:text-luxury-gold hover:bg-luxury-gold/5 transition-all duration-300"
@@ -96,10 +103,10 @@ export default function Footer() {
                 <ul className="space-y-4">
                   {links.map((link, i) => (
                     <li key={i}>
-                      <a href={link.href} className="flex items-center gap-1.5 text-xs text-white/35 hover:text-luxury-gold-light transition-all duration-300 group w-fit"
+                      <a href={link.href} className="flex items-center gap-1.5 text-xs text-white/35 hover:text-luxury-gold-light transition-all duration-300 group w-fit whitespace-nowrap"
                         style={{ fontWeight: 300 }}>
                         <span className="transition-transform group-hover:translate-x-0.5">{link.label}</span>
-                        <ArrowRight size={10} className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-300 text-luxury-gold" />
+                        <ArrowRight size={10} className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-300 text-luxury-gold shrink-0" />
                       </a>
                     </li>
                   ))}

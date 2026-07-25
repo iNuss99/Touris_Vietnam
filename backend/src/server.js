@@ -4,11 +4,16 @@ const cors = require('cors');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { handleChat } = require('./services/chat_service');
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+  origin: '*', // Trong môi trường thực tế, nên giới hạn domain cụ thể
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 const pool = new Pool({
@@ -141,6 +146,22 @@ app.put('/api/leads/:id/status', async (req, res) => {
   } catch (err) {
     console.error('Error updating lead status:', err);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
+
+// API Chat with Gemini
+app.post('/api/chat', async (req, res) => {
+  const { history } = req.body;
+  if (!history || !Array.isArray(history)) {
+    return res.status(400).json({ success: false, error: 'Lịch sử chat không hợp lệ' });
+  }
+
+  try {
+    const reply = await handleChat(history);
+    res.json({ success: true, reply });
+  } catch (err) {
+    console.error('Chat API Error:', err);
+    res.status(500).json({ success: false, error: 'Lỗi khi xử lý tin nhắn' });
   }
 });
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Check, Sparkles, Zap, Crown, Gem, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
+import SplitHeading from './SplitHeading';
 
 const PACKAGE_META = [
   { icon: <Zap size={20} />, gradient: 'from-blue-500/20 to-cyan-500/20', accentColor: '#38bdf8', popular: false },
@@ -13,6 +14,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-
 export default function TourPackages() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [apiPackages, setApiPackages] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
   const tp = t('tourPackages');
   
@@ -24,7 +26,8 @@ export default function TourPackages() {
           setApiPackages(data);
         }
       })
-      .catch(err => console.error('Failed to fetch tours:', err));
+      .catch(err => console.error('Failed to fetch tours:', err))
+      .finally(() => setLoading(false));
   }, []);
 
   const packages = apiPackages.length > 0 ? apiPackages : (tp.packages || []);
@@ -50,9 +53,11 @@ export default function TourPackages() {
           <div className="flex justify-center mb-5">
             <span className="section-label">{tp.sectionLabel}</span>
           </div>
-          <h2 className="font-serif text-white mb-4" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 600 }}>
-            {tp.sectionTitle}
-          </h2>
+          <SplitHeading
+            text={tp.sectionTitle}
+            className="font-serif text-white mb-4"
+            style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 600 }}
+          />
           <p className="text-white/40 font-light text-sm max-w-lg mx-auto leading-relaxed" style={{ fontWeight: 300 }}>
             {tp.sectionDesc}
           </p>
@@ -61,7 +66,32 @@ export default function TourPackages() {
 
         {/* Bố cục Grid tĩnh thay vì Scroll ngang để tương thích mọi thiết bị */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-6 pb-12">
-          {packages.map((pkg, idx) => {
+          {loading ? (
+            [1, 2, 3].map((i) => (
+              <div key={i} className="relative h-full flex flex-col overflow-hidden" style={{ background: 'rgba(10,17,32,0.5)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.06)', minHeight: '500px' }}>
+                <div className="p-8 md:p-10 flex flex-col flex-1 animate-pulse">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-11 h-11 rounded-xl bg-white/10" />
+                    <div>
+                      <div className="w-16 h-3 bg-white/10 mb-2 rounded" />
+                      <div className="w-32 h-6 bg-white/10 rounded" />
+                    </div>
+                  </div>
+                  <div className="mb-7 pb-7 border-b border-white/5">
+                    <div className="w-24 h-8 bg-white/10 rounded mb-3" />
+                    <div className="w-12 h-3 bg-white/10 rounded mb-2" />
+                    <div className="w-16 h-3 bg-white/10 rounded" />
+                  </div>
+                  <div className="space-y-4 mb-8">
+                    <div className="w-full h-4 bg-white/10 rounded" />
+                    <div className="w-4/5 h-4 bg-white/10 rounded" />
+                    <div className="w-5/6 h-4 bg-white/10 rounded" />
+                  </div>
+                  <div className="w-full h-12 bg-white/10 rounded-xl mt-auto" />
+                </div>
+              </div>
+            ))
+          ) : packages.map((pkg, idx) => {
             const meta = PACKAGE_META[idx] || PACKAGE_META[0];
             const isHovered = hoveredIndex === idx;
             const isPopular = meta.popular;

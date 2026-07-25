@@ -96,7 +96,7 @@ const SuccessOverlay = ({ onReset }) => {
 export default function ContactForm() {
   const [formData, setFormData] = useState({
     fullName: '', zalo: '', email: '', destination: '',
-    date: '', guests: '1', serviceClass: 'Standard', message: ''
+    date: '', guests: '1', serviceClass: 'Standard', message: '', _honeypot: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState(null);
@@ -112,17 +112,31 @@ export default function ContactForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Honeypot check - if filled, it's a bot. Silently return success to fool the bot.
+    if (formData._honeypot) {
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLoading(false);
+        setStatus({ type: 'success' });
+        setFormData({ fullName: '', zalo: '', email: '', destination: '', date: '', guests: '1', serviceClass: 'Standard', message: '', _honeypot: '' });
+      }, 1000);
+      return;
+    }
+
     setIsLoading(true);
     setStatus(null);
 
     const payload = { ...formData, submittedAt: new Date().toLocaleString(lang === 'vi' ? 'vi-VN' : 'en-US') };
+    // Remove honeypot before sending
+    delete payload._honeypot;
 
     try {
       // Lưu thông tin thông qua Backend API (Backend sẽ lo việc lưu Neon DB và đồng bộ sang Google Sheet)
       const res = await fetch(`${BACKEND_URL}/api/leads`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -130,7 +144,7 @@ export default function ContactForm() {
       }
 
       setStatus({ type: 'success' });
-      setFormData({ fullName: '', zalo: '', email: '', destination: '', date: '', guests: '1', serviceClass: 'Standard', message: '' });
+      setFormData({ fullName: '', zalo: '', email: '', destination: '', date: '', guests: '1', serviceClass: 'Standard', message: '', _honeypot: '' });
     } catch (error) {
       console.error("Lỗi khi gửi form:", error);
       setStatus({ type: 'error', message: error.message });
@@ -288,6 +302,11 @@ export default function ContactForm() {
                     placeholder={c.placeholderMsg}
                     className="w-full bg-luxury-dark/40 border border-white/10 focus:border-luxury-gold focus:ring-1 focus:ring-luxury-gold rounded-xl py-3.5 pl-11 pr-4 text-sm text-white placeholder-gray-600 outline-none transition-all duration-300 resize-none" />
                 </div>
+              </div>
+
+              {/* Honeypot field (hidden from users, visible to bots) */}
+              <div style={{ display: 'none' }} aria-hidden="true">
+                <input type="text" name="_honeypot" tabIndex="-1" autoComplete="off" value={formData._honeypot} onChange={handleChange} />
               </div>
 
               {/* Submit */}

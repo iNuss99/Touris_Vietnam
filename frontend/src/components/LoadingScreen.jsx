@@ -5,10 +5,21 @@ import { useLanguage } from '../i18n/LanguageContext';
 
 export default function LoadingScreen({ onReveal, onComplete }) {
   const [phase, setPhase] = useState('loading'); // loading -> reveal -> done
+  const [counter, setCounter] = useState(0);
   const { t } = useLanguage();
   const loading = t('loading');
 
   useEffect(() => {
+    // Counter: 0 → 100 over 1.9s
+    let val = 0;
+    const step = () => {
+      val += Math.random() * 4 + 1;
+      if (val >= 100) { setCounter(100); return; }
+      setCounter(Math.floor(val));
+      setTimeout(step, 19);
+    };
+    step();
+
     // Phase 1: Loading animation plays for 2s
     const t1 = setTimeout(() => {
       setPhase('reveal');
@@ -23,6 +34,10 @@ export default function LoadingScreen({ onReveal, onComplete }) {
   }, [onReveal, onComplete]);
 
   if (phase === 'done') return null;
+
+  // SVG stroke circle: circumference = 2π × 44 ≈ 276.5
+  const CIRC = 276.5;
+  const strokeDashoffset = CIRC - (counter / 100) * CIRC;
 
   return (
     <div
@@ -88,13 +103,40 @@ export default function LoadingScreen({ onReveal, onComplete }) {
             style={{ background: 'radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 60%)', filter: 'blur(60px)' }} />
         </div>
 
-        {/* Logo */}
-        <img
-          src={logoImg}
-          alt="Vietnam Tourism"
-          className="loader-logo"
-          style={{ height: '80px', width: 'auto', filter: 'drop-shadow(0 4px 20px rgba(201,168,76,0.4))' }}
-        />
+        {/* SVG stroke ring + Logo */}
+        <div className="relative flex items-center justify-center" style={{ width: 100, height: 100 }}>
+          <svg
+            width="100" height="100"
+            viewBox="0 0 100 100"
+            style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}
+          >
+            {/* Track */}
+            <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(201,168,76,0.1)" strokeWidth="1" />
+            {/* Progress arc */}
+            <circle
+              cx="50" cy="50" r="44" fill="none"
+              stroke="url(#goldGrad)" strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeDasharray={CIRC}
+              strokeDashoffset={strokeDashoffset}
+              style={{ transition: 'stroke-dashoffset 0.1s linear' }}
+            />
+            <defs>
+              <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#8a6e2a" />
+                <stop offset="50%" stopColor="#f0d080" />
+                <stop offset="100%" stopColor="#c9a84c" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <img
+            src={logoImg}
+            alt="Vietnam Tourism"
+            className="loader-logo"
+            width="80" height="80"
+            style={{ height: '68px', width: 'auto', filter: 'drop-shadow(0 4px 20px rgba(201,168,76,0.4))', position: 'relative', zIndex: 1 }}
+          />
+        </div>
 
         {/* Brand name */}
         <div className="mt-5 flex flex-col items-center leading-none">
@@ -107,16 +149,22 @@ export default function LoadingScreen({ onReveal, onComplete }) {
           </span>
         </div>
 
-        {/* Loading bar */}
-        <div className="mt-10 w-48 h-[2px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
-          <div className="h-full rounded-full loader-bar"
-            style={{ background: 'linear-gradient(90deg, transparent, #c9a84c, #f0d080, #c9a84c, transparent)' }}
-          />
+        {/* Counter + Loading bar */}
+        <div className="mt-10 w-48">
+          <div className="flex justify-between mb-2">
+            <span className="text-[9px] uppercase tracking-[0.4em] text-white/20 loader-text" style={{ animationDelay: '0.3s' }}>
+              {loading.text}
+            </span>
+            <span className="text-[9px] font-mono text-luxury-gold/60 loader-text" style={{ animationDelay: '0.3s' }}>
+              {counter}%
+            </span>
+          </div>
+          <div className="w-full h-[1px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+            <div className="h-full rounded-full loader-bar"
+              style={{ background: 'linear-gradient(90deg, transparent, #c9a84c, #f0d080, #c9a84c, transparent)' }}
+            />
+          </div>
         </div>
-
-        <p className="mt-4 text-[9px] uppercase tracking-[0.4em] text-white/20 loader-text" style={{ animationDelay: '0.3s' }}>
-          {loading.text}
-        </p>
       </div>
 
       <style>{`
