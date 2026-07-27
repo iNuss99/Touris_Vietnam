@@ -32,7 +32,11 @@ export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
   // State cho Sidebar Tabs
-  const [activeTab, setActiveTab] = useState('leads'); // 'leads', 'reports', 'settings'
+  const [activeTab, setActiveTab] = useState(() => {
+    if (user?.role === 'editor') return 'content';
+    if (user?.role === 'viewer') return 'reports';
+    return 'leads';
+  });
   
   // State cho Admin Profile
   const [adminProfile, setAdminProfile] = useState(() => {
