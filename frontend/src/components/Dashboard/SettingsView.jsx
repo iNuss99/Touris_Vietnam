@@ -9,7 +9,7 @@ export default function SettingsView({ adminProfile, setAdminProfile, handleLogo
   };
 
   const handleSaveProfile = () => {
-    localStorage.setItem('adminProfile', JSON.stringify(adminProfile));
+    // The Dashboard component automatically saves to localStorage via useEffect
     alert('Đã lưu thông tin hồ sơ (Local Storage)');
   };
 

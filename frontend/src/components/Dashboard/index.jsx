@@ -40,7 +40,7 @@ export default function Dashboard() {
   
   // State cho Admin Profile
   const [adminProfile, setAdminProfile] = useState(() => {
-    const saved = localStorage.getItem('touris_admin_profile');
+    const saved = localStorage.getItem(`touris_profile_${user?.id}`);
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -49,19 +49,21 @@ export default function Dashboard() {
       }
     }
     return {
-      name: 'Administrator',
-      email: 'admin@touris.vn',
+      name: user?.name || 'Administrator',
+      email: user?.email || 'admin@touris.vn',
       avatar: null
     };
   });
 
   useEffect(() => {
     try {
-      localStorage.setItem('touris_admin_profile', JSON.stringify(adminProfile));
+      if (user?.id) {
+        localStorage.setItem(`touris_profile_${user.id}`, JSON.stringify(adminProfile));
+      }
     } catch (e) {
-      console.warn('Lỗi khi lưu vào localStorage (có thể do dung lượng ảnh quá lớn):', e);
+      console.warn('Lỗi khi lưu vào localStorage:', e);
     }
-  }, [adminProfile]);
+  }, [adminProfile, user?.id]);
 
   const fetchLeads = async () => {
     setIsLoading(true);
