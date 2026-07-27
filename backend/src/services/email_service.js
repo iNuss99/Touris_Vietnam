@@ -21,7 +21,7 @@ async function sendWelcomeEmail({ to, fullName, role, tempPassword }) {
     viewer:      'Xem báo cáo',
   };
 
-  const loginUrl = process.env.FRONTEND_URL || 'https://touris-vietnam.vercel.app/login';
+  const loginUrl = process.env.FRONTEND_URL || 'https://tour-vietnam.vercel.app/login';
 
   const html = `
 <!DOCTYPE html>
