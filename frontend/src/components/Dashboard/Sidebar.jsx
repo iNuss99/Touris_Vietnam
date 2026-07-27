@@ -54,7 +54,9 @@ export default function Sidebar({
             {adminProfile.avatar ? (
               <img src={adminProfile.avatar} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-sm font-bold text-slate-600">AD</span>
+              <span className="text-sm font-bold text-slate-600">
+                {adminProfile.name ? adminProfile.name.charAt(0).toUpperCase() : 'U'}
+              </span>
             )}
           </div>
           {isSidebarOpen && (
