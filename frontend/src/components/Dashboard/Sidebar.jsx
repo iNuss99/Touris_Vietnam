@@ -66,7 +66,7 @@ export default function Sidebar({
         </div>
         <button 
           onClick={() => {
-            localStorage.removeItem('touris_token');
+            sessionStorage.removeItem('touris_token');
             navigate('/login');
           }}
           className={`mt-4 w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-400/80 hover:bg-red-500/10 hover:text-red-400 transition-all ${!isSidebarOpen && 'justify-center px-0'}`}

@@ -16,8 +16,8 @@ export function AuthProvider({ children }) {
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('touris_token');
-    const mcp = localStorage.getItem('touris_must_change_password');
+    const token = sessionStorage.getItem('touris_token');
+    const mcp = sessionStorage.getItem('touris_must_change_password');
     if (token) {
       const decoded = parseJwt(token);
       if (decoded && decoded.exp * 1000 > Date.now()) {
@@ -25,32 +25,33 @@ export function AuthProvider({ children }) {
         setMustChangePassword(mcp === 'true');
       } else {
         // Token expired
-        localStorage.removeItem('touris_token');
-        localStorage.removeItem('touris_must_change_password');
+        sessionStorage.removeItem('touris_token');
+        sessionStorage.removeItem('touris_must_change_password');
       }
     }
     setIsInitializing(false);
   }, []);
 
   const login = (token, role, name, must_change_password) => {
-    localStorage.setItem('touris_token', token);
-    localStorage.setItem('touris_must_change_password', must_change_password ? 'true' : 'false');
+    sessionStorage.setItem('touris_token', token);
+    sessionStorage.setItem('touris_must_change_password', must_change_password ? 'true' : 'false');
     const decoded = parseJwt(token);
     setUser({ id: decoded?.id, email: decoded?.email, name, role });
     setMustChangePassword(!!must_change_password);
   };
 
   const logout = () => {
-    localStorage.removeItem('touris_token');
-    localStorage.removeItem('touris_must_change_password');
+    sessionStorage.removeItem('touris_token');
+    sessionStorage.removeItem('touris_must_change_password');
     setUser(null);
     setMustChangePassword(false);
   };
 
   const passwordChanged = () => {
-    localStorage.setItem('touris_must_change_password', 'false');
+    sessionStorage.setItem('touris_must_change_password', 'false');
     setMustChangePassword(false);
   };
+
 
   const hasPermission = (requiredRoles) => {
     if (!user) return false;

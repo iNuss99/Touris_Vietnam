@@ -42,7 +42,7 @@ export default function ContentView() {
   const handleDelete = async (id) => {
     if (!window.confirm('Bạn có chắc chắn muốn xóa mục này?')) return;
     try {
-      const token = localStorage.getItem('touris_token');
+      const token = sessionStorage.getItem('touris_token');
       const res = await fetch(`${BACKEND_URL}/api/${activeTab}/${id}`, {
         method: 'DELETE',
         headers: {
@@ -59,7 +59,7 @@ export default function ContentView() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('touris_token');
+      const token = sessionStorage.getItem('touris_token');
       const method = currentItem.id ? 'PUT' : 'POST';
       const url = currentItem.id 
         ? `${BACKEND_URL}/api/${activeTab}/${currentItem.id}`

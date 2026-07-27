@@ -66,7 +66,7 @@ export default function Dashboard() {
   const fetchLeads = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('touris_token');
+      const token = sessionStorage.getItem('touris_token');
       const res = await fetch(`${BACKEND_URL}/api/leads`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -101,7 +101,7 @@ export default function Dashboard() {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      const token = localStorage.getItem('touris_token');
+      const token = sessionStorage.getItem('touris_token');
       const res = await fetch(`${BACKEND_URL}/api/leads/${id}/status`, {
         method: 'PUT',
         headers: { 
@@ -247,7 +247,8 @@ export default function Dashboard() {
   }, [leads]);
 
   const handleLogout = () => {
-    localStorage.removeItem('touris_token');
+    sessionStorage.removeItem('touris_token');
+    sessionStorage.removeItem('touris_must_change_password');
     navigate('/login');
   };
 

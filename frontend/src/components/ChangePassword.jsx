@@ -36,7 +36,7 @@ export default function ChangePassword() {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('touris_token');
+      const token = sessionStorage.getItem('touris_token');
       const res = await fetch(`${BACKEND_URL}/api/change-password`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

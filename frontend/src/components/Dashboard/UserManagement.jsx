@@ -25,7 +25,7 @@ export default function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem('touris_token');
+      const token = sessionStorage.getItem('touris_token');
       const res = await fetch(`${BACKEND_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -48,7 +48,7 @@ export default function UserManagement() {
     setFormError('');
     setSubmitting(true);
     try {
-      const token = localStorage.getItem('touris_token');
+      const token = sessionStorage.getItem('touris_token');
       const res = await fetch(`${BACKEND_URL}/api/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -70,7 +70,7 @@ export default function UserManagement() {
 
   const handleRoleChange = async (userId, newRole) => {
     try {
-      const token = localStorage.getItem('touris_token');
+      const token = sessionStorage.getItem('touris_token');
       const res = await fetch(`${BACKEND_URL}/api/users/${userId}/role`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -86,7 +86,7 @@ export default function UserManagement() {
   const handleStatusToggle = async (userId, currentStatus) => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     try {
-      const token = localStorage.getItem('touris_token');
+      const token = sessionStorage.getItem('touris_token');
       const res = await fetch(`${BACKEND_URL}/api/users/${userId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -102,7 +102,7 @@ export default function UserManagement() {
   const handleDelete = async (userId) => {
     if (!confirm('Bạn có chắc chắn muốn xóa tài khoản này? Hành động này không thể hoàn tác.')) return;
     try {
-      const token = localStorage.getItem('touris_token');
+      const token = sessionStorage.getItem('touris_token');
       const res = await fetch(`${BACKEND_URL}/api/users/${userId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
