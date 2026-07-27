@@ -249,12 +249,16 @@ app.post('/api/users', authMiddleware, requireRole('super_admin'), async (req, r
     
     const newUser = result.rows[0];
     
-    sendWelcomeEmail({
-      to: email,
-      fullName: full_name,
-      role: role,
-      tempPassword: tempPassword
-    }).catch(err => console.error('Lỗi gửi email chào mừng:', err));
+    try {
+      await sendWelcomeEmail({
+        to: email,
+        fullName: full_name,
+        role: role,
+        tempPassword: tempPassword
+      });
+    } catch (emailErr) {
+      console.error('Lỗi gửi email chào mừng:', emailErr);
+    }
 
     res.status(201).json({ success: true, user: newUser });
   } catch (err) {
