@@ -44,8 +44,8 @@ const DestinationCard = ({ data, onViewDetail, index }) => {
 
   // xac dinh class reveal xoay trai hoac xoay phai dua tren index
   const revealClass = index % 2 === 0 ? 'reveal-rotate-left' : 'reveal-rotate-right';
-  const image = IMAGE_MAP[data.id];
-  const delay = DELAY_MAP[data.id] || '0ms';
+  const image = data.image_url || IMAGE_MAP[data.code] || IMAGE_MAP[data.id];
+  const delay = DELAY_MAP[data.code] || DELAY_MAP[data.id] || '0ms';
 
   return (
     <div
@@ -118,7 +118,7 @@ const TourDetailModal = ({ destination, onClose }) => {
   if (!destination) return null;
   
   const { tour, title, rating, duration, location, category, about, bestTime, cuisine, localHighlights } = destination;
-  const image = IMAGE_MAP[destination.id];
+  const image = destination.image_url || IMAGE_MAP[destination.code] || IMAGE_MAP[destination.id];
 
   return (
     <div
@@ -344,7 +344,20 @@ export default function Destinations() {
       .then(res => res.json())
       .then(data => {
         if (data && data.length > 0) {
-          setApiItems(data);
+          const mappedData = data.map(d => ({
+            ...d,
+            localHighlights: d.local_highlights || d.localHighlights || [],
+            bestTime: d.best_time || d.bestTime,
+            tour: d.tour || {
+              tourName: d.tour_name,
+              price: d.tour_price,
+              includes: d.tour_includes || [],
+              highlights: d.tour_highlights || [],
+              itinerary: d.itinerary || [],
+              pricePer: 'VNĐ / người',
+            }
+          }));
+          setApiItems(mappedData);
         }
       })
       .catch(err => console.error('Failed to fetch destinations:', err));

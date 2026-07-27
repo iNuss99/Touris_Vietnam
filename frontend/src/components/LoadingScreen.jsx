@@ -71,7 +71,6 @@ export default function LoadingScreen({ onReveal, onComplete }) {
         className="absolute top-0 left-0 w-1/2 h-full"
         style={{
           background: '#04080f',
-          borderRight: '1px solid rgba(201, 168, 76, 0.25)',
           transform: phase === 'reveal' ? 'translateX(-100%)' : 'translateX(0)',
           transition: 'transform 1.1s cubic-bezier(0.76, 0, 0.24, 1) 120ms',
           zIndex: 12,
@@ -81,7 +80,6 @@ export default function LoadingScreen({ onReveal, onComplete }) {
         className="absolute top-0 right-0 w-1/2 h-full"
         style={{
           background: '#04080f',
-          borderLeft: '1px solid rgba(201, 168, 76, 0.25)',
           transform: phase === 'reveal' ? 'translateX(100%)' : 'translateX(0)',
           transition: 'transform 1.1s cubic-bezier(0.76, 0, 0.24, 1) 120ms',
           zIndex: 12,
@@ -97,11 +95,7 @@ export default function LoadingScreen({ onReveal, onComplete }) {
           transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        {/* Ambient glow */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px]"
-            style={{ background: 'radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 60%)', filter: 'blur(60px)' }} />
-        </div>
+        {/* Ambient glow removed */}
 
         {/* SVG stroke ring + Logo */}
         <div className="relative flex items-center justify-center" style={{ width: 100, height: 100 }}>
@@ -134,7 +128,7 @@ export default function LoadingScreen({ onReveal, onComplete }) {
             alt="Vietnam Tourism"
             className="loader-logo"
             width="80" height="80"
-            style={{ height: '68px', width: 'auto', filter: 'drop-shadow(0 4px 20px rgba(201,168,76,0.4))', position: 'relative', zIndex: 1 }}
+            style={{ height: '68px', width: 'auto', position: 'relative', zIndex: 1 }}
           />
         </div>
 

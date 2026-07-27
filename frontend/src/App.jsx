@@ -16,10 +16,15 @@ import GeminiChatWidget from './components/GeminiChatWidget';
 import ErrorBoundary from './components/ErrorBoundary';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
+import ChangePassword from './components/ChangePassword';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 function ProtectedRoute({ children }) {
-  const token = localStorage.getItem('touris_token');
-  if (!token) {
+  const { user, isInitializing } = useAuth();
+  
+  if (isInitializing) return null;
+  
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
   return children;
@@ -185,18 +190,25 @@ function MainApp() {
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<MainApp />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/crm" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-        </Routes>
-      </BrowserRouter>
-    </LanguageProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<MainApp />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/change-password" element={
+              <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            } />
+            <Route path="/crm" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </BrowserRouter>
+      </LanguageProvider>
+    </AuthProvider>
   );
 }

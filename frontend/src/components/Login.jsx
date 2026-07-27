@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-api.vercel.app';
 
@@ -10,6 +11,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,8 +27,12 @@ export default function Login() {
       const data = await res.json();
 
       if (data.success) {
-        localStorage.setItem('touris_token', data.token);
-        navigate('/crm');
+        login(data.token, data.role, data.name, data.must_change_password);
+        if (data.must_change_password) {
+          navigate('/change-password');
+        } else {
+          navigate('/crm');
+        }
       } else {
         setError(data.error || 'Đăng nhập thất bại');
       }
