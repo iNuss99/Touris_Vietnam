@@ -1,11 +1,29 @@
-import React from 'react';
-import { Save, LogOut } from 'lucide-react';
+import React, { useRef } from 'react';
+import { Save, LogOut, Upload, Camera, Trash2 } from 'lucide-react';
 import UserManagement from './UserManagement';
 
 export default function SettingsView({ adminProfile, setAdminProfile, handleLogout }) {
+  const fileInputRef = useRef(null);
+
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
     setAdminProfile(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Kích thước ảnh quá lớn! Vui lòng chọn ảnh nhỏ hơn 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setAdminProfile(prev => ({ ...prev, avatar: event.target.result }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSaveProfile = () => {
@@ -15,6 +33,15 @@ export default function SettingsView({ adminProfile, setAdminProfile, handleLogo
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-12">
+      {/* Hidden file input for device image upload */}
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        accept="image/*" 
+        onChange={handleFileUpload} 
+        className="hidden" 
+      />
+
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-4xl font-sans text-slate-800 tracking-tight mb-2">Cài đặt hệ thống</h2>
@@ -25,12 +52,20 @@ export default function SettingsView({ adminProfile, setAdminProfile, handleLogo
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-1 space-y-6">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-sm">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-500 to-sky-500 mx-auto mb-4 flex items-center justify-center text-3xl font-sans font-bold text-white shadow-lg overflow-hidden">
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-500 to-sky-500 mx-auto mb-4 flex items-center justify-center text-3xl font-sans font-bold text-white shadow-lg overflow-hidden relative group cursor-pointer border-2 border-slate-100 hover:border-teal-400 transition-all"
+              title="Bấm để tải ảnh từ máy"
+            >
               {adminProfile.avatar ? (
                 <img src={adminProfile.avatar} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 adminProfile.name ? adminProfile.name.charAt(0).toUpperCase() : 'A'
               )}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs gap-1 font-normal">
+                <Camera size={20} />
+                <span>Tải ảnh</span>
+              </div>
             </div>
             <h3 className="text-lg font-sans text-slate-800 mb-1">{adminProfile.name || 'Admin'}</h3>
             <p className="text-slate-500 text-sm">{adminProfile.email || 'admin@touris.vn'}</p>
@@ -87,15 +122,39 @@ export default function SettingsView({ adminProfile, setAdminProfile, handleLogo
               </div>
 
               <div>
-                <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-2">Avatar URL (Link ảnh)</label>
-                <input 
-                  type="text" 
-                  name="avatar"
-                  value={adminProfile.avatar || ''}
-                  onChange={handleProfileChange}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm"
-                  placeholder="https://example.com/avatar.jpg"
-                />
+                <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-2">Ảnh đại diện (Avatar)</label>
+                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-slate-100 border border-slate-300 text-slate-700 hover:bg-slate-200 px-4 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors shrink-0 shadow-sm"
+                  >
+                    <Upload size={16} className="text-teal-600" />
+                    Chọn ảnh từ máy
+                  </button>
+
+                  <div className="relative flex-1">
+                    <input 
+                      type="text" 
+                      name="avatar"
+                      value={adminProfile.avatar || ''}
+                      onChange={handleProfileChange}
+                      className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm pr-10"
+                      placeholder="Hoặc dán URL/link ảnh vào đây"
+                    />
+                    {adminProfile.avatar && (
+                      <button
+                        type="button"
+                        onClick={() => setAdminProfile(prev => ({ ...prev, avatar: '' }))}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 p-1"
+                        title="Xóa ảnh"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1.5">Hỗ trợ định dạng JPG, PNG, GIF, WEBP (Tối đa 5MB)</p>
               </div>
 
               <div>

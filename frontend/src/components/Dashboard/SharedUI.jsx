@@ -2,6 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Users, PieChart as PieChartIcon, Settings, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
 
+export const normalizeStatus = (status) => {
+  if (!status) return 'NEW';
+  const s = String(status).toUpperCase().trim();
+  if (s === 'CONVERTED' || s === 'THÀNH CÔNG' || s === 'SUCCESS' || s === 'CHỐT') return 'CONVERTED';
+  if (s === 'IN_PROGRESS' || s === 'ĐANG ĐÀM PHÁN' || s === 'ĐANG XỬ LÝ' || s === 'IN PROGRESS') return 'IN_PROGRESS';
+  if (s === 'LOST' || s === 'HỦY BỎ' || s === 'HỦY' || s === 'CANCELLED') return 'LOST';
+  return 'NEW';
+};
+
 export const STATUS_COLORS = {
   'NEW': { bg: '#eff6ff', text: '#2563eb', border: '#bfdbfe' }, // Blue
   'IN_PROGRESS': { bg: '#fffbeb', text: '#d97706', border: '#fde68a' }, // Amber
@@ -49,8 +58,9 @@ export function KpiCard({ title, value, icon, accent }) {
 }
 
 export function StatusBadge({ status }) {
-  const config = STATUS_COLORS[status || 'NEW'];
-  const label = STATUS_LABELS[status || 'NEW'];
+  const norm = normalizeStatus(status);
+  const config = STATUS_COLORS[norm] || STATUS_COLORS.NEW;
+  const label = STATUS_LABELS[norm] || 'Mới';
   
   return (
     <span 

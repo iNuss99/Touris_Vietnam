@@ -59,11 +59,20 @@ export default function ChatWidget() {
 
   // Proactive greeting tooltip
   useEffect(() => {
+    if (sessionStorage.getItem('chatTooltipDismissed') === 'true') return;
+
     const timer = setTimeout(() => {
       if (!isOpen) setShowTooltip(true);
-    }, 5000);
+    }, 5000); // Hiển thị sau 5s
+
     return () => clearTimeout(timer);
   }, [isOpen]);
+
+  const dismissTooltip = (e) => {
+    if (e) e.stopPropagation();
+    setShowTooltip(false);
+    sessionStorage.setItem('chatTooltipDismissed', 'true');
+  };
 
   // 60s idle auto-open
   useEffect(() => {
@@ -176,15 +185,28 @@ export default function ChatWidget() {
       }}>
         {showTooltip && (
           <div className="msg-enter" style={{
+            position: 'relative',
             background: 'rgba(6, 11, 22, 0.95)', padding: '12px 16px', borderRadius: '16px', borderBottomRightRadius: '4px',
             border: '1px solid rgba(201,168,76,0.3)', color: '#fff', fontSize: '13px', boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
             backdropFilter: 'blur(10px)', maxWidth: '220px', cursor: 'pointer'
-          }} onClick={() => { setIsOpen(true); setShowTooltip(false); }}>
+          }} onClick={() => { setIsOpen(true); dismissTooltip(); }}>
+            <div 
+              onClick={dismissTooltip}
+              style={{
+                position: 'absolute', top: '-6px', right: '-6px', background: '#c9a84c', color: '#04080f',
+                width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '10px', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.3)', zIndex: 10
+              }}
+              title="Đóng"
+            >
+              ✕
+            </div>
             Chào Anh/Chị, em có thể giúp gì cho chuyến đi sắp tới ạ? 👋
           </div>
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
           <button
+            className="chatbot-toggle-btn"
             onClick={() => { setIsOpen(true); setShowTooltip(false); }}
             style={{
               width: '64px', height: '64px', borderRadius: '50%',
@@ -208,14 +230,18 @@ export default function ChatWidget() {
             title="Chat Zalo"
             style={{
               width: '64px', height: '64px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #0068ff 0%, #0050c7 100%)', textDecoration: 'none',
+              textDecoration: 'none', overflow: 'hidden',
               boxShadow: '0 4px 16px rgba(0,104,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
             }}
             onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
             onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
           >
-            <MessageCircle size={28} style={{ fill: 'currentColor', color: 'white' }} />
+            <img 
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNh1D4-GGRpZtlkTWomY8pPjTSyeBeXV02_BQ6ji3S1qJj-LHds16AYcqn&s=10" 
+              alt="Zalo" 
+              style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', transform: 'scale(1.25)' }}
+            />
           </a>
         </div>
       </div>

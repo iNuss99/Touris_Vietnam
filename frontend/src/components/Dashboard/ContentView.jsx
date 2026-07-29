@@ -1,7 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Edit2, Trash2, Plus, Map, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Edit2, Trash2, Plus, Map, Image as ImageIcon, Loader2, Star, CheckCircle } from 'lucide-react';
+
+import imgHaLong from '../../assets/images/places/halong-bay.webp';
+import imgHoiAn from '../../assets/images/places/hoi-an.webp';
+import imgTrangAn from '../../assets/images/places/trang-an.webp';
+import imgPhuQuoc from '../../assets/images/places/phu-quoc.webp';
+import imgSaPa from '../../assets/images/places/sapa.webp';
+import imgDaNang from '../../assets/images/places/da-nang.webp';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
+const DESTINATION_PRESET_IMAGES = [
+  { label: 'Hạ Long', url: 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80', local: imgHaLong },
+  { label: 'Hội An', url: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&w=800&q=80', local: imgHoiAn },
+  { label: 'Tràng An', url: 'https://images.unsplash.com/photo-1596401057633-531022261759?auto=format&fit=crop&w=800&q=80', local: imgTrangAn },
+  { label: 'Phú Quốc', url: 'https://images.unsplash.com/photo-1540206395-68808572332f?auto=format&fit=crop&w=800&q=80', local: imgPhuQuoc },
+  { label: 'Sa Pa', url: 'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&w=800&q=80', local: imgSaPa },
+  { label: 'Đà Nẵng', url: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=800&q=80', local: imgDaNang }
+];
 
 export default function ContentView() {
   const [activeTab, setActiveTab] = useState('tours');
@@ -29,13 +45,31 @@ export default function ContentView() {
     }
   };
 
+  const getDisplayImage = (item) => {
+    if (!item) return imgHaLong;
+    if (item.image_url && item.image_url.trim() !== '') {
+      return item.image_url;
+    }
+    const key = (item.title || item.name || item.location || item.code || '').toLowerCase();
+    if (key.includes('hạ long') || key.includes('halong')) return imgHaLong;
+    if (key.includes('hội an') || key.includes('hoian')) return imgHoiAn;
+    if (key.includes('tràng an') || key.includes('trangan')) return imgTrangAn;
+    if (key.includes('phú quốc') || key.includes('phuquoc')) return imgPhuQuoc;
+    if (key.includes('sa pa') || key.includes('sapa')) return imgSaPa;
+    if (key.includes('đà nẵng') || key.includes('danang')) return imgDaNang;
+    
+    return imgHaLong;
+  };
+
   const handleEdit = (item) => {
     setCurrentItem(item);
     setIsEditing(true);
   };
 
   const handleAddNew = () => {
-    setCurrentItem({});
+    setCurrentItem({
+      image_url: ''
+    });
     setIsEditing(true);
   };
 
@@ -65,13 +99,19 @@ export default function ContentView() {
         ? `${BACKEND_URL}/api/${activeTab}/${currentItem.id}`
         : `${BACKEND_URL}/api/${activeTab}`;
         
+      // Ensure image_url has fallback if empty
+      const payload = {
+        ...currentItem,
+        image_url: currentItem.image_url || getDisplayImage(currentItem)
+      };
+
       const res = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(currentItem)
+        body: JSON.stringify(payload)
       });
       
       if (!res.ok) throw new Error('Failed to save');
@@ -84,65 +124,113 @@ export default function ContentView() {
 
   const renderForm = () => {
     const isTour = activeTab === 'tours';
+    const previewImg = currentItem.image_url || getDisplayImage(currentItem);
+
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8 animate-in fade-in slide-in-from-top-4">
-        <h3 className="text-lg font-sans font-bold text-slate-800 mb-6">
-          {currentItem.id ? `Sửa ${isTour ? 'Tour' : 'Điểm đến'}` : `Thêm ${isTour ? 'Tour' : 'Điểm đến'} mới`}
-        </h3>
+      <div className="bg-white rounded-2xl shadow-md border border-slate-200 p-6 mb-8 animate-in fade-in slide-in-from-top-4">
+        <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+          <h3 className="text-lg font-sans font-bold text-slate-800 flex items-center gap-2">
+            <Edit2 size={18} className="text-teal-600" />
+            {currentItem.id ? `Chỉnh sửa ${isTour ? 'Tour' : 'Điểm đến'}` : `Thêm ${isTour ? 'Tour' : 'Điểm đến'} mới`}
+          </h3>
+          <span className="text-xs text-slate-400">* Trường thông tin bắt buộc</span>
+        </div>
+
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700">Tên / Tiêu đề *</label>
-            <input required type="text" value={currentItem.title || ''} onChange={e => setCurrentItem({...currentItem, title: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
+            <input required type="text" value={currentItem.title || currentItem.name || ''} onChange={e => setCurrentItem(isTour ? {...currentItem, name: e.target.value, title: e.target.value} : {...currentItem, title: e.target.value})} className="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700">Địa điểm *</label>
-            <input required type="text" value={currentItem.location || ''} onChange={e => setCurrentItem({...currentItem, location: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
+            <input required type="text" value={currentItem.location || currentItem.subtitle || ''} onChange={e => setCurrentItem(isTour ? {...currentItem, subtitle: e.target.value, location: e.target.value} : {...currentItem, location: e.target.value})} className="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Thời gian (VD: 3N2Đ) *</label>
-            <input required type="text" value={currentItem.duration || ''} onChange={e => setCurrentItem({...currentItem, duration: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
+            <label className="text-sm font-medium text-slate-700">Thời gian (VD: 3N2Đ, 2-3 Ngày) *</label>
+            <input required type="text" value={currentItem.duration || ''} onChange={e => setCurrentItem({...currentItem, duration: e.target.value})} className="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">{isTour ? 'Giá' : 'Giá từ'} *</label>
-            <input required type="text" value={currentItem.price || currentItem.tour_price || ''} onChange={e => setCurrentItem(isTour ? {...currentItem, price: e.target.value} : {...currentItem, tour_price: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
+            <label className="text-sm font-medium text-slate-700">{isTour ? 'Giá Tour' : 'Giá từ'} *</label>
+            <input required type="text" value={currentItem.price || currentItem.tour_price || ''} onChange={e => setCurrentItem(isTour ? {...currentItem, price: e.target.value} : {...currentItem, tour_price: e.target.value})} className="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Đánh giá (1-5)</label>
-            <input type="number" step="0.1" max="5" min="1" value={currentItem.rating || ''} onChange={e => setCurrentItem({...currentItem, rating: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
+            <label className="text-sm font-medium text-slate-700">Đánh giá (1.0 - 5.0)</label>
+            <input type="number" step="0.1" max="5" min="1" value={currentItem.rating || '4.9'} onChange={e => setCurrentItem({...currentItem, rating: e.target.value})} className="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">URL Hình ảnh</label>
-            <input type="text" value={currentItem.image_url || ''} onChange={e => setCurrentItem({...currentItem, image_url: e.target.value})} placeholder="https://..." className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
+
+          {/* IMAGE URL WITH PREVIEW & PRESETS */}
+          <div className="space-y-2 col-span-1 md:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+            <label className="text-sm font-semibold text-slate-800 flex items-center justify-between">
+              <span>Hình ảnh đại diện Tour / Điểm đến</span>
+              <span className="text-xs text-teal-600 font-normal">Tự động đồng bộ với Landing Page</span>
+            </label>
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              <div className="w-28 h-20 rounded-xl bg-slate-200 border border-slate-300 overflow-hidden shrink-0 flex items-center justify-center relative shadow-sm">
+                <img 
+                  src={previewImg} 
+                  alt="Preview" 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => { e.target.src = imgHaLong; }}
+                />
+              </div>
+
+              <div className="flex-1 w-full space-y-2">
+                <input 
+                  type="text" 
+                  value={currentItem.image_url || ''} 
+                  onChange={e => setCurrentItem({...currentItem, image_url: e.target.value})} 
+                  placeholder="Dán link ảnh (https://...) hoặc chọnPreset bên dưới" 
+                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all text-xs bg-white" 
+                />
+                
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[11px] text-slate-500 font-medium mr-1">Gán ảnh Landing Page:</span>
+                  {DESTINATION_PRESET_IMAGES.map(p => (
+                    <button
+                      key={p.label}
+                      type="button"
+                      onClick={() => setCurrentItem({...currentItem, image_url: p.url})}
+                      className="px-2.5 py-1 text-[11px] font-medium bg-white hover:bg-teal-50 text-slate-700 hover:text-teal-700 rounded-lg border border-slate-200 transition-colors shadow-2xs"
+                    >
+                      📷 {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
+
           {isTour && (
             <>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">Số khách tối đa</label>
-                <input type="text" value={currentItem.max_guests || ''} onChange={e => setCurrentItem({...currentItem, max_guests: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
+                <input type="text" value={currentItem.max_guests || '20 người'} onChange={e => setCurrentItem({...currentItem, max_guests: e.target.value})} className="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Ngày khởi hành (YYYY-MM-DD)</label>
-                <input type="date" value={currentItem.start_date ? currentItem.start_date.split('T')[0] : ''} onChange={e => setCurrentItem({...currentItem, start_date: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
+                <label className="text-sm font-medium text-slate-700">Thời gian đơn vị</label>
+                <input type="text" value={currentItem.unit || 'người'} onChange={e => setCurrentItem({...currentItem, unit: e.target.value})} className="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
               </div>
             </>
           )}
+
           {!isTour && (
-             <div className="space-y-2">
-               <label className="text-sm font-medium text-slate-700">Danh mục (Category)</label>
-               <input type="text" value={currentItem.category || ''} onChange={e => setCurrentItem({...currentItem, category: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
+             <div className="space-y-2 col-span-1 md:col-span-2">
+               <label className="text-sm font-medium text-slate-700">Danh mục (Category / Badge)</label>
+               <input type="text" value={currentItem.category || currentItem.badge || 'UNESCO HERITAGE'} onChange={e => setCurrentItem({...currentItem, category: e.target.value, badge: e.target.value})} className="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
              </div>
           )}
+
           <div className="col-span-1 md:col-span-2 space-y-2">
             <label className="text-sm font-medium text-slate-700">Mô tả ngắn</label>
-            <textarea rows="3" value={currentItem.description || ''} onChange={e => setCurrentItem({...currentItem, description: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
+            <textarea rows="3" value={currentItem.description || currentItem.about || ''} onChange={e => setCurrentItem({...currentItem, description: e.target.value, about: e.target.value})} className="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all" />
           </div>
           
-          <div className="col-span-1 md:col-span-2 flex justify-end gap-3 pt-4">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors font-medium">
+          <div className="col-span-1 md:col-span-2 flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <button type="button" onClick={() => setIsEditing(false)} className="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors font-medium text-sm">
               Hủy
             </button>
-            <button type="submit" className="px-5 py-2.5 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors shadow-sm font-medium">
-              Lưu thay đổi
+            <button type="submit" className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl transition-colors shadow-md font-medium text-sm">
+              Lưu Thay Đổi
             </button>
           </div>
         </form>
@@ -155,14 +243,15 @@ export default function ContentView() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-3xl font-sans font-bold text-slate-800">Quản lý Tour & Sản phẩm</h2>
-          <p className="text-slate-500 mt-1">Cập nhật thông tin Tour, Khuyến mãi & Điểm đến</p>
+          <p className="text-slate-500 mt-1">Cập nhật danh mục Tour, Khuyến mãi & Điểm đến yêu thích (Đồng bộ với Landing Page)</p>
         </div>
-        <button onClick={handleAddNew} className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors shadow-sm font-medium">
+        <button onClick={handleAddNew} className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl transition-all shadow-md font-medium">
           <Plus size={18} />
           Thêm {activeTab === 'tours' ? 'Tour' : 'Điểm đến'}
         </button>
       </div>
 
+      {/* Tabs Switcher */}
       <div className="flex border-b border-slate-200">
         <button 
           onClick={() => { setActiveTab('tours'); setIsEditing(false); }}
@@ -183,7 +272,7 @@ export default function ContentView() {
       {loading && !isEditing ? (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400">
           <Loader2 size={32} className="animate-spin text-teal-500 mb-4" />
-          <p>Đang tải dữ liệu...</p>
+          <p>Đang tải dữ liệu sản phẩm...</p>
         </div>
       ) : (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
@@ -191,56 +280,70 @@ export default function ContentView() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200">
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Hình ảnh</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tiêu đề / Địa điểm</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Thời gian</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Giá</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Thao tác</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Hình ảnh</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tiêu đề / Địa điểm</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Thời gian</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Giá</th>
+                  <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {items.length === 0 ? (
                   <tr>
                     <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
-                      Chưa có nội dung nào.
+                      Chưa có nội dung nào trong danh mục này.
                     </td>
                   </tr>
                 ) : (
-                  items.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-6 py-4">
-                        <div className="w-16 h-12 rounded-lg bg-slate-200 overflow-hidden shadow-sm flex items-center justify-center">
-                          {item.image_url ? (
-                            <img src={item.image_url} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <ImageIcon size={20} className="text-slate-400" />
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-800">{item.title || item.name}</div>
-                        <div className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
-                          <Map size={12} /> {item.location || item.subtitle}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-slate-600 font-medium">
-                        {item.duration}
-                      </td>
-                      <td className="px-6 py-4 font-bold text-teal-600">
-                        {item.price || item.tour_price}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => handleEdit(item)} className="p-2 text-sky-600 hover:bg-sky-50 rounded-lg transition-colors" title="Chỉnh sửa">
-                            <Edit2 size={16} />
-                          </button>
-                          <button onClick={() => handleDelete(item.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Xóa">
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                  items.map((item) => {
+                    const displayImg = getDisplayImage(item);
+                    return (
+                      <tr key={item.id} className="hover:bg-slate-50/70 transition-colors group">
+                        <td className="px-6 py-4">
+                          <div className="w-16 h-12 rounded-xl bg-slate-200 overflow-hidden shadow-sm border border-slate-200 flex items-center justify-center relative group-hover:shadow transition-all">
+                            <img 
+                              src={displayImg} 
+                              alt={item.title || item.name || ''} 
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                              onError={(e) => {
+                                e.target.src = imgHaLong;
+                              }}
+                            />
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            {item.title || item.name}
+                            {item.badge && (
+                              <span className="px-2 py-0.5 text-[10px] font-semibold bg-teal-50 text-teal-700 rounded border border-teal-200">
+                                {item.badge}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                            <Map size={12} className="text-teal-600" /> {item.location || item.subtitle || 'Việt Nam'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-xs text-slate-600 font-medium">
+                          {item.duration || '2-3 Ngày'}
+                        </td>
+                        <td className="px-6 py-4 text-xs font-bold text-teal-600">
+                          {item.price || item.tour_price}
+                          {item.unit && <span className="text-[11px] font-normal text-slate-400"> / {item.unit}</span>}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => handleEdit(item)} className="p-2 text-sky-600 hover:bg-sky-50 rounded-xl transition-colors border border-transparent hover:border-sky-200" title="Chỉnh sửa">
+                              <Edit2 size={16} />
+                            </button>
+                            <button onClick={() => handleDelete(item.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors border border-transparent hover:border-red-200" title="Xóa">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

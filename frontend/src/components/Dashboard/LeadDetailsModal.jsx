@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { X, Users, Briefcase, Calendar, MessageSquare } from 'lucide-react';
-import { StatusBadge, STATUS_COLORS, STATUS_LABELS } from './SharedUI';
+import { StatusBadge } from './SharedUI';
 
-export default function LeadDetailsModal({ lead, onClose, onStatusChange }) {
+export default function LeadDetailsModal({ lead, onClose }) {
   useEffect(() => {
     const handleEsc = (e) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', handleEsc);
@@ -24,38 +24,19 @@ export default function LeadDetailsModal({ lead, onClose, onStatusChange }) {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
           <div>
-            <h3 className="text-xl font-sans font-bold text-slate-800">Chi tiết yêu cầu</h3>
+            <div className="flex items-center gap-3">
+              <h3 className="text-xl font-sans font-bold text-slate-800">Chi tiết yêu cầu</h3>
+              <StatusBadge status={lead.status} />
+            </div>
             <p className="text-xs text-slate-500 mt-1 uppercase tracking-widest">ID: VNT-{lead.id.toString().padStart(4, '0')} • {new Date(lead.submitted_at).toLocaleString('vi-VN')}</p>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors">
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors cursor-pointer">
             <X size={18} />
           </button>
         </div>
 
         {/* Body */}
         <div className="p-6 overflow-y-auto space-y-6">
-          
-          {/* Action Row */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-slate-500">Trạng thái hiện tại:</span>
-              <StatusBadge status={lead.status} />
-            </div>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <span className="text-sm text-slate-500 hidden sm:block">Đổi trạng thái:</span>
-              <select
-                value={lead.status || 'NEW'}
-                onChange={(e) => onStatusChange(lead.id, e.target.value)}
-                className="w-full sm:w-auto bg-white border border-slate-200 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 rounded-lg px-3 py-2 text-sm font-medium outline-none cursor-pointer transition-all shadow-sm"
-                style={{ color: STATUS_COLORS[lead.status || 'NEW'].text }}
-              >
-                {Object.entries(STATUS_LABELS).map(([val, label]) => (
-                  <option key={val} value={val}>{label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Cột 1: Thông tin khách */}
             <div className="space-y-5">

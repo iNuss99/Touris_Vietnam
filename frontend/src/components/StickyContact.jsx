@@ -34,13 +34,11 @@ export default function StickyContact() {
         target="_blank"
         rel="noopener noreferrer"
         className="group relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg shadow-blue-500/20 transition-transform duration-300 hover:scale-110 active:scale-95"
-        style={{
-          background: 'linear-gradient(135deg, #0068ff 0%, #0050c7 100%)',
-        }}
-        aria-label="Chat Zalo"
-      >
-        <MessageCircle size={22} className="text-white" style={{ fill: 'currentColor' }} />
-        <span className="absolute text-white font-bold text-[8px] mt-1 tracking-wider" style={{ top: '26px' }}>Zalo</span>
+        <img 
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNh1D4-GGRpZtlkTWomY8pPjTSyeBeXV02_BQ6ji3S1qJj-LHds16AYcqn&s=10" 
+          alt="Zalo" 
+          className="w-full h-full rounded-full object-cover"
+        />
         
         {/* Tooltip */}
         <span className="absolute left-full ml-4 px-3 py-1.5 bg-luxury-dark/95 text-[#0068ff] text-xs font-semibold uppercase tracking-wider rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap border border-[#0068ff]/30 shadow-xl backdrop-blur-md">

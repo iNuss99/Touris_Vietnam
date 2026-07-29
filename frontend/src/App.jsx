@@ -57,8 +57,9 @@ function MainContent({ isLoading, isPageVisible, handleReveal, handleLoadingComp
     <>
       {isLoading && <LoadingScreen onReveal={handleReveal} onComplete={handleLoadingComplete} />}
       <div className="cursor-glow" />
+      <Navbar isPageVisible={isPageVisible} />
       <div
-        className={`min-h-screen antialiased transition-all duration-[1.2s] ease-[cubic-bezier(0.16,1,0.3,1)] ${isPageVisible ? 'opacity-100 translate-y-0 scale-100 blur-0' : 'opacity-0 translate-y-4 scale-[0.98] blur-[2px]'
+        className={`min-h-screen antialiased transition-all duration-[1.2s] ease-[cubic-bezier(0.16,1,0.3,1)] ${isPageVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-[0.98]'
           }`}
         style={{ background: '#04080f', color: '#e8e4d8' }}
       >
@@ -71,7 +72,6 @@ function MainContent({ isLoading, isPageVisible, handleReveal, handleLoadingComp
             transitionProperty: 'opacity, filter, transform',
           }}
         >
-          <Navbar />
           <Hero isPageVisible={isPageVisible} />
           <Destinations />
           <Culture />
@@ -106,44 +106,25 @@ function MainApp() {
     return () => clearInterval(iv);
   }, []);
 
-  // ── Lenis Smooth Scroll + Skew on Velocity ────────────────────────────────
+  // ── Lenis Smooth Scroll ───────────────────────────────────────────────────
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.4,
+      duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
+      smoothTouch: false, // Tắt trên mobile để dùng native scroll mượt hơn
     });
 
     const bar = document.querySelector('.scroll-progress');
-    let lastScrollY = 0;
-    let velocity = 0;
-    let lastSkew = null;
     let rafId;
 
-    const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
-
-    lenis.on('scroll', ({ scroll, limit, velocity: lenisVelocity }) => {
+    lenis.on('scroll', ({ scroll, limit }) => {
       // Progress bar
       if (bar && limit > 0) bar.style.transform = `scaleX(${Math.min(scroll / limit, 1)})`;
-      // Velocity for skew
-      velocity = lenisVelocity !== undefined ? lenisVelocity : (scroll - lastScrollY);
-      lastScrollY = scroll;
     });
 
     const tick = (time) => {
       lenis.raf(time);
-      
-      // Apply skew via CSS variable — composable with inline transforms
-      const skewDeg = clamp(velocity * 0.04, -3, 3);
-      if (skewDeg !== lastSkew) {
-        document.documentElement.style.setProperty('--scroll-skew', `${skewDeg}deg`);
-        lastSkew = skewDeg;
-      }
-      
-      // Decay velocity when scrolling stops
-      velocity *= 0.9;
-      if (Math.abs(velocity) < 0.1) velocity = 0;
-
       rafId = requestAnimationFrame(tick);
     };
     rafId = requestAnimationFrame(tick);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, PieChart as PieChartIcon, Settings, ChevronLeft, ChevronRight, LogOut, UserCog, Newspaper } from 'lucide-react';
+import { ArrowLeft, Users, PieChart as PieChartIcon, Settings, ChevronLeft, ChevronRight, LogOut, UserCog, Newspaper, TrendingUp } from 'lucide-react';
 import { NavItem } from './SharedUI';
 import { useAuth } from '../../context/AuthContext';
 
@@ -30,6 +30,10 @@ export default function Sidebar({
       </div>
 
       <nav className="flex-1 space-y-2 w-full">
+        {user?.role === 'super_admin' && (
+          <NavItem icon={<TrendingUp size={18} />} label="Bảng điều khiển CEO" active={activeTab === 'ceo'} isOpen={isSidebarOpen} onClick={() => setActiveTab('ceo')} />
+        )}
+        
         <NavItem icon={<Users size={18} />} label="Quản lý Leads" active={activeTab === 'leads'} isOpen={isSidebarOpen} onClick={() => setActiveTab('leads')} />
         <NavItem icon={<PieChartIcon size={18} />} label="Báo cáo" active={activeTab === 'reports'} isOpen={isSidebarOpen} onClick={() => setActiveTab('reports')} />
         

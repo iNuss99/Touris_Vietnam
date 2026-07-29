@@ -4,7 +4,7 @@ import { Menu, X } from 'lucide-react';
 import logoImg from '../assets/images/logo.webp';
 import { useLanguage } from '../i18n/LanguageContext';
 
-export default function Navbar() {
+export default function Navbar({ isPageVisible = true }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
@@ -47,7 +47,7 @@ export default function Navbar() {
           isScrolled
             ? 'bg-luxury-dark/92 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.6)] border-b border-luxury-gold/8 py-3'
             : 'py-5'
-        }`}
+        } ${isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}
         style={{ paddingLeft: '2rem', paddingRight: '2rem' }}
       >
         <div className="max-w-screen-xl mx-auto flex items-center justify-between">

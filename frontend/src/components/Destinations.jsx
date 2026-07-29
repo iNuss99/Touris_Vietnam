@@ -42,10 +42,23 @@ const DestinationCard = ({ data, onViewDetail, index }) => {
   const { t } = useLanguage();
   const dest = t('destinations');
 
-  // xac dinh class reveal xoay trai hoac xoay phai dua tren index
-  const revealClass = index % 2 === 0 ? 'reveal-rotate-left' : 'reveal-rotate-right';
-  const image = data.image_url || IMAGE_MAP[data.code] || IMAGE_MAP[data.id];
+  const getCardImage = (d) => {
+    if (IMAGE_MAP[d.code]) return IMAGE_MAP[d.code];
+    if (IMAGE_MAP[d.id]) return IMAGE_MAP[d.id];
+    const key = (d.title || d.code || '').toLowerCase();
+    if (key.includes('hạ long') || key.includes('halong')) return imgHaLong;
+    if (key.includes('hội an') || key.includes('hoian')) return imgHoiAn;
+    if (key.includes('tràng an') || key.includes('trangan')) return imgTrangAn;
+    if (key.includes('phú quốc') || key.includes('phuquoc')) return imgPhuQuoc;
+    if (key.includes('sa pa') || key.includes('sapa')) return imgSaPa;
+    if (key.includes('đà nẵng') || key.includes('danang')) return imgDaNang;
+    if (d.image_url && d.image_url.trim() !== '' && !d.image_url.includes('unsplash.com')) return d.image_url;
+    return imgHaLong;
+  };
+
+  const image = getCardImage(data);
   const delay = DELAY_MAP[data.code] || DELAY_MAP[data.id] || '0ms';
+  const revealClass = (index ?? 0) % 2 === 0 ? 'reveal-rotate-left' : 'reveal-rotate-right';
 
   return (
     <div

@@ -10,15 +10,23 @@ export default function LoadingScreen({ onReveal, onComplete }) {
   const loading = t('loading');
 
   useEffect(() => {
-    // Counter: 0 → 100 over 1.9s
-    let val = 0;
-    const step = () => {
-      val += Math.random() * 4 + 1;
-      if (val >= 100) { setCounter(100); return; }
-      setCounter(Math.floor(val));
-      setTimeout(step, 19);
+    // Counter: 0 → 100 over 1.9s using requestAnimationFrame for 60fps smoothness
+    let start = null;
+    const duration = 1900;
+    let rafId;
+
+    const step = (timestamp) => {
+      if (!start) start = timestamp;
+      const progress = timestamp - start;
+      const percentage = Math.min((progress / duration) * 100, 100);
+      
+      setCounter(Math.floor(percentage));
+      
+      if (progress < duration) {
+        rafId = requestAnimationFrame(step);
+      }
     };
-    step();
+    rafId = requestAnimationFrame(step);
 
     // Phase 1: Loading animation plays for 2s
     const t1 = setTimeout(() => {
@@ -30,7 +38,7 @@ export default function LoadingScreen({ onReveal, onComplete }) {
       setPhase('done');
       onComplete();
     }, 3300);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    return () => { cancelAnimationFrame(rafId); clearTimeout(t1); clearTimeout(t2); };
   }, [onReveal, onComplete]);
 
   if (phase === 'done') return null;

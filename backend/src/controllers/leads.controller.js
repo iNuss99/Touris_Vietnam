@@ -50,10 +50,17 @@ const updateLeadStatus = async (req, res) => {
     return res.status(400).json({ success: false, error: 'Status is required' });
   }
 
+  // Normalize status value to standard uppercase key
+  let normStatus = String(status).toUpperCase().trim();
+  if (normStatus === 'THÀNH CÔNG' || normStatus === 'CHỐT' || normStatus === 'SUCCESS') normStatus = 'CONVERTED';
+  else if (normStatus === 'ĐANG XỬ LÝ' || normStatus === 'ĐANG ĐÀM PHÁN') normStatus = 'IN_PROGRESS';
+  else if (normStatus === 'MỚI') normStatus = 'NEW';
+  else if (normStatus === 'HỦY BỎ' || normStatus === 'HỦY') normStatus = 'LOST';
+
   try {
     const result = await pool.query(
       'UPDATE leads SET status = $1 WHERE id = $2 RETURNING *',
-      [status, id]
+      [normStatus, id]
     );
     
     if (result.rows.length === 0) {

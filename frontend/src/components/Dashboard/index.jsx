@@ -7,7 +7,8 @@ import SettingsView from './SettingsView';
 import LeadDetailsModal from './LeadDetailsModal';
 import UserManagement from './UserManagement';
 import ContentView from './ContentView';
-import { STATUS_LABELS } from './SharedUI';
+import CeoDashboardView from './CeoDashboardView';
+import { STATUS_LABELS, normalizeStatus } from './SharedUI';
 import { useAuth } from '../../context/AuthContext';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-api.vercel.app';
@@ -33,6 +34,7 @@ export default function Dashboard() {
   
   // State cho Sidebar Tabs
   const [activeTab, setActiveTab] = useState(() => {
+    if (user?.role === 'super_admin') return 'ceo';
     if (user?.role === 'editor') return 'content';
     if (user?.role === 'viewer') return 'reports';
     return 'leads';
@@ -89,17 +91,19 @@ export default function Dashboard() {
     }
   };
 
+  // Trigger fetchLeads whenever user or activeTab changes (for leads, reports, ceo)
   useEffect(() => {
-    if (user?.role === 'super_admin' || user?.role === 'sales') {
-      fetchLeads();
+    if (user?.role === 'super_admin' || user?.role === 'sales' || user?.role === 'viewer' || user?.role === 'admin') {
+      if (['leads', 'reports', 'ceo'].includes(activeTab)) {
+        fetchLeads();
+      }
     } else {
       setIsLoading(false);
-      // If editor, default to content tab
       if (user?.role === 'editor') {
         setActiveTab('content');
       }
     }
-  }, [user]);
+  }, [user, activeTab]);
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -114,18 +118,24 @@ export default function Dashboard() {
       });
       if (!res.ok) throw new Error('Failed to update status');
       
+      // Update local state immediately & refetch to ensure 100% sync
       setLeads(prev => prev.map(lead => lead.id === id ? { ...lead, status: newStatus } : lead));
       if (selectedLead && selectedLead.id === id) {
-        setSelectedLead({ ...selectedLead, status: newStatus });
+        setSelectedLead(prev => prev ? { ...prev, status: newStatus } : null);
       }
+      
+      // Refetch from backend database to sync all tabs
+      await fetchLeads();
     } catch (err) {
+      console.error('Lỗi cập nhật trạng thái:', err);
       alert('Lỗi cập nhật trạng thái: ' + err.message);
     }
   };
 
-  // Lấy danh sách điểm đến duy nhất cho Filter
+  // Lấy danh sách điểm đến chuẩn 6 Tour chính cho Filter
   const uniqueDestinations = useMemo(() => {
-    const dests = new Set(leads.map(l => l.destination).filter(Boolean));
+    const OFFICIAL_6_TOURS = ['Vịnh Hạ Long', 'Hội An', 'Tràng An', 'Phú Quốc', 'Sa Pa', 'Đà Nẵng'];
+    const dests = new Set([...OFFICIAL_6_TOURS, ...leads.map(l => l.destination).filter(Boolean)]);
     return Array.from(dests);
   }, [leads]);
 
@@ -135,7 +145,7 @@ export default function Dashboard() {
       const matchesSearch = (lead.full_name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
                             (lead.phone?.includes(searchQuery)) ||
                             (lead.email?.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchesStatus = statusFilter === 'ALL' || lead.status === statusFilter;
+      const matchesStatus = statusFilter === 'ALL' || normalizeStatus(lead.status) === normalizeStatus(statusFilter);
       const matchesDest = destFilter === 'ALL' || lead.destination === destFilter;
       
       return matchesSearch && matchesStatus && matchesDest;
@@ -201,9 +211,9 @@ export default function Dashboard() {
 
   // Metrics
   const totalLeads = leads.length;
-  const newLeads = leads.filter(l => l.status === 'NEW').length;
-  const inProgress = leads.filter(l => l.status === 'IN_PROGRESS').length;
-  const converted = leads.filter(l => l.status === 'CONVERTED').length;
+  const newLeads = leads.filter(l => normalizeStatus(l.status) === 'NEW').length;
+  const inProgress = leads.filter(l => normalizeStatus(l.status) === 'IN_PROGRESS').length;
+  const converted = leads.filter(l => normalizeStatus(l.status) === 'CONVERTED').length;
 
   // Chart Data: Leads by Destination
   const destData = useMemo(() => {
@@ -221,7 +231,6 @@ export default function Dashboard() {
     const counts = {};
     const today = new Date();
     
-    // Khởi tạo 14 ngày gần nhất
     for (let i = 13; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
@@ -229,7 +238,6 @@ export default function Dashboard() {
       counts[dateStr] = 0;
     }
 
-    // Đếm số lượng leads
     leads.forEach(l => {
       const dateStr = new Date(l.submitted_at).toLocaleDateString('vi-VN');
       if (counts[dateStr] !== undefined) {
@@ -237,7 +245,6 @@ export default function Dashboard() {
       }
     });
 
-    // Tạo mảng kết quả đảm bảo thứ tự thời gian
     const result = [];
     for (let i = 13; i >= 0; i--) {
       const d = new Date(today);
@@ -301,7 +308,12 @@ export default function Dashboard() {
               setSelectedLead={setSelectedLead}
               sortConfig={sortConfig}
               setSortConfig={setSortConfig}
+              onStatusChange={handleStatusChange}
             />
+          )}
+
+          {activeTab === 'ceo' && user?.role === 'super_admin' && (
+            <CeoDashboardView />
           )}
 
           {activeTab === 'reports' && (
@@ -312,6 +324,7 @@ export default function Dashboard() {
               inProgress={inProgress}
               leads={leads}
               leadsByDate={leadsByDate}
+              fetchLeads={fetchLeads}
             />
           )}
 
