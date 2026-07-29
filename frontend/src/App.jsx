@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import Lenis from 'lenis';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
@@ -14,10 +14,12 @@ import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import GeminiChatWidget from './components/GeminiChatWidget';
 import ErrorBoundary from './components/ErrorBoundary';
-import Dashboard from './components/Dashboard';
-import Login from './components/Login';
-import ChangePassword from './components/ChangePassword';
 import { AuthProvider, useAuth } from './context/AuthContext';
+
+const Dashboard = React.lazy(() => import('./components/Dashboard'));
+const Login = React.lazy(() => import('./components/Login'));
+const ChangePassword = React.lazy(() => import('./components/ChangePassword'));
+const NotFound = React.lazy(() => import('./components/NotFound'));
 
 function ProtectedRoute({ children }) {
   const { user, isInitializing } = useAuth();
@@ -115,23 +117,33 @@ function MainApp() {
     const bar = document.querySelector('.scroll-progress');
     let lastScrollY = 0;
     let velocity = 0;
+    let lastSkew = null;
     let rafId;
 
     const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
 
-    lenis.on('scroll', ({ scroll, limit }) => {
+    lenis.on('scroll', ({ scroll, limit, velocity: lenisVelocity }) => {
       // Progress bar
-      if (bar) bar.style.transform = `scaleX(${Math.min(scroll / limit, 1)})`;
+      if (bar && limit > 0) bar.style.transform = `scaleX(${Math.min(scroll / limit, 1)})`;
       // Velocity for skew
-      velocity = scroll - lastScrollY;
+      velocity = lenisVelocity !== undefined ? lenisVelocity : (scroll - lastScrollY);
       lastScrollY = scroll;
     });
 
     const tick = (time) => {
       lenis.raf(time);
+      
       // Apply skew via CSS variable — composable with inline transforms
       const skewDeg = clamp(velocity * 0.04, -3, 3);
-      document.documentElement.style.setProperty('--scroll-skew', `${skewDeg}deg`);
+      if (skewDeg !== lastSkew) {
+        document.documentElement.style.setProperty('--scroll-skew', `${skewDeg}deg`);
+        lastSkew = skewDeg;
+      }
+      
+      // Decay velocity when scrolling stops
+      velocity *= 0.9;
+      if (Math.abs(velocity) < 0.1) velocity = 0;
+
       rafId = requestAnimationFrame(tick);
     };
     rafId = requestAnimationFrame(tick);
@@ -193,20 +205,23 @@ export default function App() {
     <AuthProvider>
       <LanguageProvider>
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<MainApp />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/change-password" element={
-              <ProtectedRoute>
-                <ChangePassword />
-              </ProtectedRoute>
-            } />
-            <Route path="/crm" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-          </Routes>
+          <Suspense fallback={<LoadingScreen />}>
+            <Routes>
+              <Route path="/" element={<MainApp />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/change-password" element={
+                <ProtectedRoute>
+                  <ChangePassword />
+                </ProtectedRoute>
+              } />
+              <Route path="/crm" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
       </LanguageProvider>
     </AuthProvider>

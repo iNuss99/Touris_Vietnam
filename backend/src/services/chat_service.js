@@ -1,11 +1,7 @@
 const { OpenAI } = require('openai');
 const fs = require('fs');
 const path = require('path');
-const { Pool } = require('pg');
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_ap7OnRLFjZ8q@ep-dark-firefly-azj7ve04-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
-});
+const pool = require('../config/db');
 
 const openai = new OpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
