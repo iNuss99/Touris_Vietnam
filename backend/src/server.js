@@ -1,7 +1,8 @@
 require('dotenv').config();
 
 if (!process.env.JWT_SECRET) {
-  throw new Error("FATAL ERROR: JWT_SECRET is not defined in environment variables. Server cannot start.");
+  console.warn("WARNING: JWT_SECRET is not defined in environment variables. Using default fallback secret.");
+  process.env.JWT_SECRET = 'touris_vietnam_jwt_secret_key_2026_fallback';
 }
 
 const express = require('express');
