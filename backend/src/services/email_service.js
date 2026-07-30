@@ -1,12 +1,16 @@
-const nodemailer = require('nodemailer');
+function getTransporter() {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  
+  if (!user || !pass) {
+    throw new Error('Chưa cấu hình GMAIL_USER hoặc GMAIL_APP_PASSWORD trong Vercel Environment Variables');
+  }
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user, pass },
+  });
+}
 
 /**
  * Gửi email chào mừng kèm mật khẩu tạm thời
@@ -120,6 +124,7 @@ async function sendWelcomeEmail({ to, fullName, role, tempPassword }) {
 </html>`;
 
   try {
+    const transporter = getTransporter();
     await transporter.sendMail({
       from: `"Touris Vietnam CRM" <${process.env.GMAIL_USER}>`,
       to,
@@ -219,6 +224,7 @@ async function sendPasswordResetEmail({ to, fullName, tempPassword }) {
 </html>`;
 
   try {
+    const transporter = getTransporter();
     await transporter.sendMail({
       from: `"Touris Vietnam CRM" <${process.env.GMAIL_USER}>`,
       to,
