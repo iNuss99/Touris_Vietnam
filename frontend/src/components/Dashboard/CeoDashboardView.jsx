@@ -57,7 +57,7 @@ export default function CeoDashboardView() {
       }
     } catch (err) {
       console.error('Error fetching CEO stats:', err);
-      setError(`Không thể kết nối máy chủ backend (${API_URL}). Vui lòng đảm bảo dịch vụ backend (port 5000) đang khởi chạy.`);
+      setError(`Không thể kết nối máy chủ backend (${API_URL}). Vui lòng thử lại sau hoặc liên hệ quản trị viên.`);
     } finally {
       setLoading(false);
     }
