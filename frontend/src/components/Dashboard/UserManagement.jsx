@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Edit2, Trash2, Mail, Shield, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { UserPlus, Edit2, Trash2, Mail, Shield, CheckCircle, XCircle, Loader2, KeyRound, Copy, Check } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-api.vercel.app';
@@ -15,6 +15,14 @@ export default function UserManagement() {
   const [formData, setFormData] = useState({ email: '', full_name: '', role: 'sales' });
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+
+  // Reset Password State
+  const [resetResult, setResetResult] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  // Custom Confirmation Modal & Toast Notifications State
+  const [confirmModal, setConfirmModal] = useState({ show: false, type: null, user: null, loading: false });
+  const [notification, setNotification] = useState(null);
 
   const roleLabels = {
     super_admin: { label: 'Super Admin', color: 'bg-purple-100 text-purple-700' },
@@ -60,7 +68,7 @@ export default function UserManagement() {
       setUsers([...users, data.user]);
       setShowModal(false);
       setFormData({ email: '', full_name: '', role: 'sales' });
-      alert('Đã tạo tài khoản thành công! Mật khẩu đã được gửi qua email.');
+      setNotification({ type: 'success', message: 'Đã tạo tài khoản thành công! Mật khẩu đã được gửi qua email.' });
     } catch (err) {
       setFormError(err.message);
     } finally {
@@ -78,8 +86,9 @@ export default function UserManagement() {
       });
       if (!res.ok) throw new Error('Lỗi cập nhật quyền');
       setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      setNotification({ type: 'success', message: 'Cập nhật vai trò thành công.' });
     } catch (err) {
-      alert(err.message);
+      setNotification({ type: 'error', message: err.message });
     }
   };
 
@@ -94,26 +103,72 @@ export default function UserManagement() {
       });
       if (!res.ok) throw new Error('Lỗi cập nhật trạng thái');
       setUsers(users.map(u => u.id === userId ? { ...u, status: newStatus } : u));
+      setNotification({ 
+        type: 'success', 
+        message: newStatus === 'active' ? 'Đã kích hoạt tài khoản.' : 'Đã khóa tài khoản.' 
+      });
     } catch (err) {
-      alert(err.message);
+      setNotification({ type: 'error', message: err.message });
     }
   };
 
-  const handleDelete = async (userId) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa tài khoản này? Hành động này không thể hoàn tác.')) return;
+  // Open Custom Confirmation Dialogs
+  const triggerConfirmReset = (targetUser) => {
+    setConfirmModal({ show: true, type: 'reset', user: targetUser, loading: false });
+  };
+
+  const triggerConfirmDelete = (targetUser) => {
+    setConfirmModal({ show: true, type: 'delete', user: targetUser, loading: false });
+  };
+
+  // Execute Action from Custom Confirmation Dialog
+  const handleExecuteConfirmAction = async () => {
+    if (!confirmModal.user || !confirmModal.type) return;
+    const targetUser = confirmModal.user;
+
+    setConfirmModal(prev => ({ ...prev, loading: true }));
+
     try {
       const token = sessionStorage.getItem('touris_token');
-      const res = await fetch(`${BACKEND_URL}/api/users/${userId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!res.ok) {
+      if (confirmModal.type === 'reset') {
+        const res = await fetch(`${BACKEND_URL}/api/users/${targetUser.id}/reset-password`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` }
+        });
         const data = await res.json();
-        throw new Error(data.error || 'Lỗi khi xóa');
+        if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra khi cấp lại mật khẩu');
+
+        setConfirmModal({ show: false, type: null, user: null, loading: false });
+        setResetResult({
+          email: targetUser.email,
+          fullName: targetUser.name || targetUser.full_name,
+          tempPassword: data.tempPassword
+        });
+        setCopied(false);
+      } else if (confirmModal.type === 'delete') {
+        const res = await fetch(`${BACKEND_URL}/api/users/${targetUser.id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Lỗi khi xóa tài khoản');
+        }
+        setUsers(users.filter(u => u.id !== targetUser.id));
+        setConfirmModal({ show: false, type: null, user: null, loading: false });
+        setNotification({ type: 'success', message: `Đã xóa tài khoản ${targetUser.email} thành công.` });
       }
-      setUsers(users.filter(u => u.id !== userId));
     } catch (err) {
-      alert(err.message);
+      setConfirmModal(prev => ({ ...prev, loading: false }));
+      setNotification({ type: 'error', message: err.message });
+    }
+  };
+
+  const handleCopyPassword = () => {
+    if (resetResult?.tempPassword) {
+      navigator.clipboard.writeText(resetResult.tempPassword);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -195,13 +250,22 @@ export default function UserManagement() {
                   </td>
                   <td className="py-4 text-right">
                     {u.id !== user.id && (
-                      <button 
-                        onClick={() => handleDelete(u.id)}
-                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Xóa tài khoản"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        <button 
+                          onClick={() => triggerConfirmReset(u)}
+                          className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                          title="Cấp lại mật khẩu"
+                        >
+                          <KeyRound size={16} />
+                        </button>
+                        <button 
+                          onClick={() => triggerConfirmDelete(u)}
+                          className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                          title="Xóa tài khoản"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -286,6 +350,122 @@ export default function UserManagement() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Result Modal */}
+      {resetResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-4 mx-auto border border-amber-100">
+              <KeyRound size={24} />
+            </div>
+            
+            <h3 className="text-lg font-bold text-slate-800 text-center mb-1">Đã cấp lại mật khẩu thành công</h3>
+            <p className="text-sm text-slate-500 text-center mb-6">
+              Mật khẩu mới đã được cập nhật cho tài khoản <strong className="text-slate-700">{resetResult.email}</strong> và gửi tự động qua email.
+            </p>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                Mật khẩu tạm thời mới
+              </label>
+              <div className="flex items-center justify-between bg-white border border-slate-300 rounded-lg p-3">
+                <span className="font-mono text-lg font-bold text-teal-700 tracking-wider">
+                  {resetResult.tempPassword}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyPassword}
+                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 text-slate-700 rounded-md transition-colors cursor-pointer"
+                >
+                  {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                  {copied ? 'Đã chép!' : 'Sao chép'}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => setResetResult(null)}
+                className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium text-sm transition-colors cursor-pointer"
+              >
+                Đã xong
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirmation Modal */}
+      {confirmModal.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200 border border-slate-100">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 mx-auto border ${
+              confirmModal.type === 'reset' 
+                ? 'bg-amber-50 text-amber-600 border-amber-100' 
+                : 'bg-red-50 text-red-600 border-red-100'
+            }`}>
+              {confirmModal.type === 'reset' ? <KeyRound size={28} /> : <Trash2 size={28} />}
+            </div>
+            
+            <h3 className="text-lg font-bold text-slate-800 text-center mb-2">
+              {confirmModal.type === 'reset' ? 'Xác nhận cấp lại mật khẩu' : 'Xác nhận xóa tài khoản'}
+            </h3>
+            
+            <p className="text-sm text-slate-600 text-center mb-6 leading-relaxed">
+              {confirmModal.type === 'reset' ? (
+                <>Bạn có chắc chắn muốn cấp lại mật khẩu cho tài khoản <strong className="text-slate-800 font-semibold">{confirmModal.user?.email}</strong>? Mật khẩu tạm mới sẽ được khởi tạo và gửi qua email.</>
+              ) : (
+                <>Hành động này <strong className="text-red-600 font-semibold">không thể hoàn tác</strong>. Bạn có chắc muốn xóa vĩnh viễn tài khoản <strong className="text-slate-800 font-semibold">{confirmModal.user?.email}</strong>?</>
+              )}
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={confirmModal.loading}
+                onClick={() => setConfirmModal({ show: false, type: null, user: null, loading: false })}
+                className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                disabled={confirmModal.loading}
+                onClick={handleExecuteConfirmAction}
+                className={`px-5 py-2.5 text-sm font-semibold text-white rounded-xl transition-all shadow-sm flex items-center gap-2 cursor-pointer ${
+                  confirmModal.type === 'reset'
+                    ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20'
+                    : 'bg-red-600 hover:bg-red-700 shadow-red-600/20'
+                }`}
+              >
+                {confirmModal.loading && <Loader2 size={16} className="animate-spin" />}
+                {confirmModal.type === 'reset' ? 'Cấp lại ngay' : 'Xóa tài khoản'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {notification && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-300">
+          <div className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl border text-sm font-medium ${
+            notification.type === 'success' 
+              ? 'bg-slate-900 text-emerald-400 border-slate-800' 
+              : 'bg-slate-900 text-red-400 border-slate-800'
+          }`}>
+            {notification.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
+            <span className="text-slate-100">{notification.message}</span>
+            <button 
+              onClick={() => setNotification(null)}
+              className="ml-2 text-slate-400 hover:text-slate-200 cursor-pointer"
+            >
+              ✕
+            </button>
           </div>
         </div>
       )}

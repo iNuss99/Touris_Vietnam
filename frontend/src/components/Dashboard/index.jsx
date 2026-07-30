@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import TopHeader from './TopHeader';
 import LeadsView from './LeadsView';
 import ReportsView from './ReportsView';
 import SettingsView from './SettingsView';
@@ -278,8 +279,13 @@ export default function Dashboard() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 h-screen overflow-y-auto relative z-0">
-        <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto">
+      <main className="flex-1 h-screen overflow-y-auto relative z-0 flex flex-col">
+        <TopHeader 
+          adminProfile={adminProfile} 
+          setActiveTab={setActiveTab} 
+          activeTab={activeTab} 
+        />
+        <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto flex-1 w-full">
           {activeTab === 'leads' && (
             <LeadsView
               leads={leads}

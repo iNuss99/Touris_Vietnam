@@ -1,6 +1,6 @@
 const pool = require('../config/db');
 const bcrypt = require('bcryptjs');
-const { sendWelcomeEmail } = require('../services/email_service');
+const { sendWelcomeEmail, sendPasswordResetEmail } = require('../services/email_service');
 
 const getUsers = async (req, res) => {
   try {
@@ -104,11 +104,52 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const resetUserPassword = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const userResult = await pool.query('SELECT id, email, full_name FROM admins WHERE id=$1', [id]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Người dùng không tồn tại' });
+    }
+
+    const targetUser = userResult.rows[0];
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    await pool.query(
+      'UPDATE admins SET password_hash=$1, must_change_password=true WHERE id=$2',
+      [hashedPassword, id]
+    );
+
+    try {
+      await sendPasswordResetEmail({
+        to: targetUser.email,
+        fullName: targetUser.full_name,
+        tempPassword
+      });
+    } catch (emailErr) {
+      console.error('Lỗi gửi email cấp lại mật khẩu:', emailErr);
+    }
+
+    res.json({
+      success: true,
+      message: 'Cấp lại mật khẩu thành công',
+      tempPassword,
+      email: targetUser.email,
+      full_name: targetUser.full_name
+    });
+  } catch (err) {
+    console.error('Lỗi cấp lại mật khẩu:', err);
+    res.status(500).json({ success: false, error: 'Server Error' });
+  }
+};
+
 module.exports = {
   getUsers,
   createUser,
   updateUser,
   updateUserRole,
   updateUserStatus,
-  deleteUser
+  deleteUser,
+  resetUserPassword
 };

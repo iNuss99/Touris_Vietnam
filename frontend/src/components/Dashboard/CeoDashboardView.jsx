@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 const COLORS = ['#0d9488', '#3b82f6', '#f59e0b', '#ef4444'];
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.VITE_BACKEND_URL ? `${import.meta.env.VITE_BACKEND_URL}/api` : 'http://localhost:5000/api');
 
 const StatCard = ({ title, value, subtext, icon: Icon, trend }) => (
   <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col relative overflow-hidden hover:shadow-md transition-shadow">
@@ -37,18 +37,26 @@ export default function CeoDashboardView() {
   const [showAllDeals, setShowAllDeals] = useState(false);
 
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [statsData, setStatsData] = useState(null);
 
   const fetchCeoData = async (period = timeFilter) => {
     try {
       setLoading(true);
+      setError(null);
       const res = await fetch(`${API_URL}/ceo/stats?period=${period}`);
+      if (!res.ok) {
+        throw new Error(`Server returned HTTP ${res.status}`);
+      }
       const data = await res.json();
       if (data.success) {
         setStatsData(data);
+      } else {
+        throw new Error(data.error || 'Failed to load CEO stats');
       }
     } catch (err) {
       console.error('Error fetching CEO stats:', err);
+      setError(`Không thể kết nối máy chủ backend (${API_URL}). Vui lòng đảm bảo dịch vụ backend (port 5000) đang khởi chạy.`);
     } finally {
       setLoading(false);
     }
@@ -146,6 +154,20 @@ export default function CeoDashboardView() {
           </div>
         </div>
       </div>
+
+      {/* Error Alert Banner */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3 text-sm">
+          <AlertCircle size={18} className="text-red-500 shrink-0" />
+          <div className="flex-1 font-medium">{error}</div>
+          <button 
+            onClick={() => fetchCeoData(timeFilter)}
+            className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+          >
+            Thử lại
+          </button>
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
