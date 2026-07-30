@@ -28,18 +28,29 @@ const createUser = async (req, res) => {
     
     const newUser = result.rows[0];
     
+    let emailSent = false;
+    let emailError = null;
     try {
-      await sendWelcomeEmail({
+      const mailRes = await sendWelcomeEmail({
         to: email,
         fullName: full_name,
         role: role,
         tempPassword: tempPassword
       });
+      emailSent = !!mailRes?.success;
+      if (mailRes && !mailRes.success) emailError = mailRes.error;
     } catch (emailErr) {
       console.error('Lỗi gửi email chào mừng:', emailErr);
+      emailError = emailErr.message;
     }
 
-    res.status(201).json({ success: true, user: newUser });
+    res.status(201).json({ 
+      success: true, 
+      user: newUser, 
+      tempPassword, 
+      emailSent, 
+      emailError 
+    });
   } catch (err) {
     console.error('Lỗi tạo user:', err);
     if (err.code === '23505') { // Unique violation
@@ -121,14 +132,19 @@ const resetUserPassword = async (req, res) => {
       [hashedPassword, id]
     );
 
+    let emailSent = false;
+    let emailError = null;
     try {
-      await sendPasswordResetEmail({
+      const mailRes = await sendPasswordResetEmail({
         to: targetUser.email,
         fullName: targetUser.full_name,
         tempPassword
       });
+      emailSent = !!mailRes?.success;
+      if (mailRes && !mailRes.success) emailError = mailRes.error;
     } catch (emailErr) {
       console.error('Lỗi gửi email cấp lại mật khẩu:', emailErr);
+      emailError = emailErr.message;
     }
 
     res.json({
@@ -136,7 +152,9 @@ const resetUserPassword = async (req, res) => {
       message: 'Cấp lại mật khẩu thành công',
       tempPassword,
       email: targetUser.email,
-      full_name: targetUser.full_name
+      full_name: targetUser.full_name,
+      emailSent,
+      emailError
     });
   } catch (err) {
     console.error('Lỗi cấp lại mật khẩu:', err);

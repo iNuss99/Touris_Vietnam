@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
 const AuthContext = createContext(null);
 
@@ -11,9 +11,20 @@ function parseJwt(token) {
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [realUser, setRealUser] = useState(null);
+  const [viewAsRole, setViewAsRoleState] = useState(() => sessionStorage.getItem('touris_view_as_role') || null);
   const [mustChangePassword, setMustChangePassword] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
+
+  const setViewAsRole = (role) => {
+    if (!role || role === 'super_admin') {
+      sessionStorage.removeItem('touris_view_as_role');
+      setViewAsRoleState(null);
+    } else {
+      sessionStorage.setItem('touris_view_as_role', role);
+      setViewAsRoleState(role);
+    }
+  };
 
   useEffect(() => {
     const token = sessionStorage.getItem('touris_token');
@@ -21,12 +32,13 @@ export function AuthProvider({ children }) {
     if (token) {
       const decoded = parseJwt(token);
       if (decoded && decoded.exp * 1000 > Date.now()) {
-        setUser({ id: decoded.id, email: decoded.email, name: decoded.name, role: decoded.role });
+        setRealUser({ id: decoded.id, email: decoded.email, name: decoded.name, role: decoded.role });
         setMustChangePassword(mcp === 'true');
       } else {
         // Token expired
         sessionStorage.removeItem('touris_token');
         sessionStorage.removeItem('touris_must_change_password');
+        sessionStorage.removeItem('touris_view_as_role');
       }
     }
     setIsInitializing(false);
@@ -36,14 +48,16 @@ export function AuthProvider({ children }) {
     sessionStorage.setItem('touris_token', token);
     sessionStorage.setItem('touris_must_change_password', must_change_password ? 'true' : 'false');
     const decoded = parseJwt(token);
-    setUser({ id: decoded?.id, email: decoded?.email, name, role });
+    setRealUser({ id: decoded?.id, email: decoded?.email, name, role });
     setMustChangePassword(!!must_change_password);
   };
 
   const logout = () => {
     sessionStorage.removeItem('touris_token');
     sessionStorage.removeItem('touris_must_change_password');
-    setUser(null);
+    sessionStorage.removeItem('touris_view_as_role');
+    setRealUser(null);
+    setViewAsRoleState(null);
     setMustChangePassword(false);
   };
 
@@ -52,6 +66,15 @@ export function AuthProvider({ children }) {
     setMustChangePassword(false);
   };
 
+  const isSuperAdmin = realUser?.role === 'super_admin';
+
+  const user = useMemo(() => {
+    if (!realUser) return null;
+    if (isSuperAdmin && viewAsRole) {
+      return { ...realUser, role: viewAsRole, isSimulatedRole: true };
+    }
+    return realUser;
+  }, [realUser, isSuperAdmin, viewAsRole]);
 
   const hasPermission = (requiredRoles) => {
     if (!user) return false;
@@ -59,7 +82,19 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, mustChangePassword, isInitializing, login, logout, passwordChanged, hasPermission }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      realUser, 
+      viewAsRole, 
+      setViewAsRole, 
+      isSuperAdmin, 
+      mustChangePassword, 
+      isInitializing, 
+      login, 
+      logout, 
+      passwordChanged, 
+      hasPermission 
+    }}>
       {children}
     </AuthContext.Provider>
   );

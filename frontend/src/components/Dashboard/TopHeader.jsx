@@ -1,18 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, ChevronDown, User, Settings, LogOut, ShieldCheck, Sparkles, UserCog } from 'lucide-react';
+import { Bell, ChevronDown, User, Settings, LogOut, ShieldCheck, Sparkles, UserCog, Eye } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export default function TopHeader({ adminProfile, setActiveTab, activeTab }) {
-  const { user, logout } = useAuth();
+  const { user, logout, isSuperAdmin, viewAsRole, setViewAsRole } = useAuth();
   const navigate = useNavigate();
   
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(3);
 
   const notifRef = useRef(null);
   const userMenuRef = useRef(null);
+  const roleMenuRef = useRef(null);
 
   const mockNotifications = [
     {
@@ -47,11 +49,18 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab }) {
     }
   ];
 
-  const roleLabels = {
+  const roleDisplayNames = {
     super_admin: 'Super Admin',
     sales: 'Kinh doanh',
     editor: 'Biên tập viên',
     viewer: 'Người xem'
+  };
+
+  const roleFullLabels = {
+    super_admin: 'Super Admin (Mặc định)',
+    sales: 'Kinh doanh (Sales)',
+    editor: 'Biên tập viên (Editor)',
+    viewer: 'Người xem (Viewer)'
   };
 
   // Close dropdowns on click outside
@@ -62,6 +71,9 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab }) {
       }
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setShowUserMenu(false);
+      }
+      if (roleMenuRef.current && !roleMenuRef.current.contains(event.target)) {
+        setShowRoleMenu(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -92,14 +104,89 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab }) {
       </div>
 
       {/* Right Top Header Actions: Notification & Avatar */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         
+        {/* Role Impersonation Switcher (Only for Super Admin) */}
+        {isSuperAdmin && (
+          <div className="relative" ref={roleMenuRef}>
+            <button
+              onClick={() => {
+                setShowRoleMenu(!showRoleMenu);
+                setShowNotifications(false);
+                setShowUserMenu(false);
+              }}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer shadow-xs ${
+                viewAsRole && viewAsRole !== 'super_admin'
+                  ? 'bg-amber-500 text-white border-amber-600 shadow-amber-200 hover:bg-amber-600'
+                  : 'bg-slate-100/80 text-slate-700 border-slate-200/80 hover:bg-slate-200/80 hover:text-teal-700'
+              }`}
+              title="Kiểm tra góc nhìn của các role khác"
+            >
+              <Eye size={16} className={viewAsRole && viewAsRole !== 'super_admin' ? 'animate-pulse text-white' : 'text-slate-500'} />
+              <span className="hidden sm:inline">
+                {`Góc nhìn: ${roleDisplayNames[viewAsRole || user?.role] || 'Super Admin'}`}
+              </span>
+              <ChevronDown size={14} className={viewAsRole && viewAsRole !== 'super_admin' ? 'text-white' : 'text-slate-400'} />
+            </button>
+
+            {showRoleMenu && (
+              <div className="absolute right-0 mt-3 w-60 bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 p-2 animate-in zoom-in-95 duration-200">
+                <div className="px-3 py-2 border-b border-slate-100 mb-1">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Góc nhìn Role (Giả lập)</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Thử nghiệm giao diện các quyền khác</p>
+                </div>
+                
+                <div className="space-y-1 py-1">
+                  {Object.entries(roleFullLabels).map(([roleKey, roleLabel]) => {
+                    const isSelected = (viewAsRole === roleKey) || (!viewAsRole && roleKey === 'super_admin');
+                    return (
+                      <button
+                        key={roleKey}
+                        onClick={() => {
+                          setViewAsRole(roleKey === 'super_admin' ? null : roleKey);
+                          setShowRoleMenu(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 text-xs rounded-xl font-medium transition-colors cursor-pointer ${
+                          isSelected
+                            ? 'bg-teal-50 text-teal-700 font-bold'
+                            : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-teal-500' : 'bg-slate-300'}`}></span>
+                          <span>{roleLabel}</span>
+                        </div>
+                        {isSelected && <span className="text-[10px] bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded font-semibold">Đang bật</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {viewAsRole && viewAsRole !== 'super_admin' && (
+                  <div className="pt-2 mt-1 border-t border-slate-100">
+                    <button
+                      onClick={() => {
+                        setViewAsRole(null);
+                        setShowRoleMenu(false);
+                      }}
+                      className="w-full text-center py-1.5 text-xs text-amber-600 font-semibold hover:bg-amber-50 rounded-xl transition-colors cursor-pointer"
+                    >
+                      ↺ Khôi phục về Super Admin
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Notification Icon */}
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => {
               setShowNotifications(!showNotifications);
               setShowUserMenu(false);
+              setShowRoleMenu(false);
             }}
             className="w-10 h-10 rounded-xl bg-slate-100/80 hover:bg-slate-200/60 border border-slate-200/60 flex items-center justify-center text-slate-600 hover:text-teal-600 transition-all relative cursor-pointer"
             title="Thông báo"
@@ -185,7 +272,7 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab }) {
                 {adminProfile?.name || user?.name || 'Admin'}
               </p>
               <p className="text-[10px] font-semibold text-teal-600 uppercase tracking-wider mt-0.5">
-                {roleLabels[user?.role] || user?.role || 'Super Admin'}
+                {roleDisplayNames[user?.role] || user?.role || 'Super Admin'}
               </p>
             </div>
 

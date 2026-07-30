@@ -1,9 +1,7 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // TLS
+  service: 'gmail',
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
@@ -129,36 +127,10 @@ async function sendWelcomeEmail({ to, fullName, role, tempPassword }) {
       html,
     });
     console.log(`[SMTP] Email đã được gửi thành công đến ${to}`);
+    return { success: true };
   } catch (err) {
     console.error('\n❌ Lỗi Gmail SMTP:', err.message);
-    console.log('🔄 Đang tự động chuyển sang dùng Ethereal Email (Môi trường giả lập) để gửi test...');
-    
-    try {
-      const testAccount = await nodemailer.createTestAccount();
-      const testTransporter = nodemailer.createTransport({
-        host: "smtp.ethereal.email",
-        port: 587,
-        secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass,
-        },
-      });
-
-      const info = await testTransporter.sendMail({
-        from: '"Touris Vietnam CRM (DEV)" <no-reply@touris.vn>',
-        to,
-        subject: `[TEST] 🔑 Thông tin đăng nhập Touris CRM — ${fullName}`,
-        html,
-      });
-
-      console.log('✅ Email Test đã gửi thành công!');
-      console.log('=> 🌟 XEM EMAIL TẠI ĐÂY:', nodemailer.getTestMessageUrl(info));
-      console.log('-----------------------------------------------------\n');
-    } catch (testErr) {
-      console.error('Lỗi Ethereal:', testErr);
-      throw err;
-    }
+    return { success: false, error: err.message };
   }
 }
 
@@ -254,30 +226,10 @@ async function sendPasswordResetEmail({ to, fullName, tempPassword }) {
       html,
     });
     console.log(`[SMTP] Email cấp lại mật khẩu đã gửi đến ${to}`);
+    return { success: true };
   } catch (err) {
     console.error('\n❌ Lỗi Gmail SMTP khi reset pass:', err.message);
-    try {
-      const testAccount = await nodemailer.createTestAccount();
-      const testTransporter = nodemailer.createTransport({
-        host: "smtp.ethereal.email",
-        port: 587,
-        secure: false,
-        auth: { user: testAccount.user, pass: testAccount.pass },
-      });
-
-      const info = await testTransporter.sendMail({
-        from: '"Touris Vietnam CRM (DEV)" <no-reply@touris.vn>',
-        to,
-        subject: `[TEST] 🔑 Cấp lại mật khẩu — ${fullName}`,
-        html,
-      });
-
-      console.log('✅ Email Test đã gửi thành công!');
-      console.log('=> 🌟 XEM EMAIL TẠI ĐÂY:', nodemailer.getTestMessageUrl(info));
-    } catch (testErr) {
-      console.error('Lỗi Ethereal:', testErr);
-      throw err;
-    }
+    return { success: false, error: err.message };
   }
 }
 

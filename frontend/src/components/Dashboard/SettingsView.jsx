@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
-import { Save, LogOut, Upload, Camera, Trash2 } from 'lucide-react';
-import UserManagement from './UserManagement';
+import { Save, LogOut, Upload, Camera, Trash2, User, Key } from 'lucide-react';
 
 export default function SettingsView({ adminProfile, setAdminProfile, handleLogout }) {
   const fileInputRef = useRef(null);
@@ -32,7 +31,7 @@ export default function SettingsView({ adminProfile, setAdminProfile, handleLogo
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-12">
+    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in pb-12">
       {/* Hidden file input for device image upload */}
       <input 
         type="file" 
@@ -49,12 +48,15 @@ export default function SettingsView({ adminProfile, setAdminProfile, handleLogo
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-1 space-y-6">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-sm">
+      {/* Unified Single Card Container */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm space-y-8">
+        
+        {/* Top Header Row inside Card: Profile Summary & Logout */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          <div className="flex items-center gap-4">
             <div 
               onClick={() => fileInputRef.current?.click()}
-              className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-500 to-sky-500 mx-auto mb-4 flex items-center justify-center text-3xl font-sans font-bold text-white shadow-lg overflow-hidden relative group cursor-pointer border-2 border-slate-100 hover:border-teal-400 transition-all"
+              className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-500 to-sky-500 flex items-center justify-center text-2xl font-sans font-bold text-white shadow-md overflow-hidden relative group cursor-pointer border-2 border-slate-100 hover:border-teal-400 transition-all shrink-0"
               title="Bấm để tải ảnh từ máy"
             >
               {adminProfile.avatar ? (
@@ -62,185 +64,175 @@ export default function SettingsView({ adminProfile, setAdminProfile, handleLogo
               ) : (
                 adminProfile.name ? adminProfile.name.charAt(0).toUpperCase() : 'A'
               )}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs gap-1 font-normal">
-                <Camera size={20} />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] gap-0.5 font-normal">
+                <Camera size={16} />
                 <span>Tải ảnh</span>
               </div>
             </div>
-            <h3 className="text-lg font-sans text-slate-800 mb-1">{adminProfile.name || 'Admin'}</h3>
-            <p className="text-slate-500 text-sm">{adminProfile.email || 'admin@touris.vn'}</p>
+            <div>
+              <h3 className="text-lg font-sans font-bold text-slate-800">{adminProfile.name || 'Admin'}</h3>
+              <p className="text-slate-500 text-xs">{adminProfile.email || 'admin@touris.vn'}</p>
+            </div>
           </div>
           
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 transition-colors font-medium text-sm"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 transition-colors font-medium text-xs shadow-xs cursor-pointer"
           >
-            <LogOut size={18} />
-            Đăng xuất
+            <LogOut size={16} />
+            <span>Đăng xuất</span>
           </button>
         </div>
 
-        <div className="md:col-span-2 space-y-6">
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-            <h3 className="text-xl font-sans text-slate-800 mb-6 border-b border-slate-200 pb-4">Thông tin hồ sơ</h3>
-            <div className="space-y-5">
-              <div className="grid grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-2">Họ và tên</label>
-                  <input 
-                    type="text" 
-                    name="name"
-                    value={adminProfile.name}
-                    onChange={handleProfileChange}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm"
-                    placeholder="Nhập họ tên"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-2">Số điện thoại</label>
-                  <input 
-                    type="text" 
-                    name="phone"
-                    value={adminProfile.phone || ''}
-                    onChange={handleProfileChange}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm"
-                    placeholder="Nhập SĐT"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-2">Email liên hệ</label>
-                <input 
-                  type="email" 
-                  name="email"
-                  value={adminProfile.email}
-                  onChange={handleProfileChange}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm"
-                  placeholder="admin@touris.vn"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-2">Ảnh đại diện (Avatar)</label>
-                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="bg-slate-100 border border-slate-300 text-slate-700 hover:bg-slate-200 px-4 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors shrink-0 shadow-sm"
-                  >
-                    <Upload size={16} className="text-teal-600" />
-                    Chọn ảnh từ máy
-                  </button>
-
-                  <div className="relative flex-1">
-                    <input 
-                      type="text" 
-                      name="avatar"
-                      value={adminProfile.avatar || ''}
-                      onChange={handleProfileChange}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm pr-10"
-                      placeholder="Hoặc dán URL/link ảnh vào đây"
-                    />
-                    {adminProfile.avatar && (
-                      <button
-                        type="button"
-                        onClick={() => setAdminProfile(prev => ({ ...prev, avatar: '' }))}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 p-1"
-                        title="Xóa ảnh"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <p className="text-[11px] text-slate-400 mt-1.5">Hỗ trợ định dạng JPG, PNG, GIF, WEBP (Tối đa 5MB)</p>
-              </div>
-
-              <div>
-                <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-2">Ngôn ngữ</label>
-                <select 
-                  name="language"
-                  value={adminProfile.language || 'vi'}
-                  onChange={handleProfileChange}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm appearance-none shadow-sm cursor-pointer"
-                >
-                  <option value="vi">Tiếng Việt</option>
-                  <option value="en">English</option>
-                </select>
-              </div>
-
-              <div className="pt-4 flex justify-end">
-                <button 
-                  onClick={handleSaveProfile}
-                  className="bg-teal-600 text-white px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 hover:bg-teal-700 transition-colors text-sm shadow-sm"
-                >
-                  <Save size={18} />
-                  Lưu thay đổi
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-            <h3 className="text-xl font-sans text-slate-800 mb-6 border-b border-slate-200 pb-4">Đổi mật khẩu</h3>
-            <div className="space-y-5">
-              <div>
-                <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-2">Mật khẩu hiện tại</label>
-                <input 
-                  type="password" 
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm"
-                  placeholder="••••••••"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-2">Mật khẩu mới</label>
-                  <input 
-                    type="password" 
-                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm"
-                    placeholder="••••••••"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-2">Xác nhận mật khẩu</label>
-                  <input 
-                    type="password" 
-                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-              <div className="pt-4 flex justify-end">
-                <button className="bg-slate-100 text-slate-700 border border-slate-200 px-6 py-2.5 rounded-xl font-medium hover:bg-slate-200 transition-colors text-sm shadow-sm">
-                  Cập nhật mật khẩu
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-            <h3 className="text-xl font-sans text-slate-800 mb-6 border-b border-slate-200 pb-4">Thông báo</h3>
-            <div className="space-y-4">
-              {[
-                { id: 'notif-1', label: 'Email khi có khách hàng mới (Lead mới)' },
-                { id: 'notif-2', label: 'Cảnh báo Lead chưa xử lý quá 24h' },
-                { id: 'notif-3', label: 'Báo cáo tổng kết hàng tuần' }
-              ].map((item, idx) => (
-                <label key={idx} className="flex items-center gap-3 cursor-pointer group">
-                  <div className="relative">
-                    <input type="checkbox" className="sr-only peer" defaultChecked={idx === 0} />
-                    <div className="w-10 h-6 bg-slate-200 rounded-full transition-colors peer-checked:bg-teal-500"></div>
-                    <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform translate-x-0 peer-checked:translate-x-4"></div>
-                  </div>
-                  <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">{item.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+        {/* Horizontal 2-Column Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
-          <UserManagement />
+          {/* Column 1: Thông tin hồ sơ */}
+          <div className="space-y-5">
+            <h3 className="text-lg font-sans font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
+              <User size={18} className="text-teal-600" />
+              <span>Thông tin hồ sơ</span>
+            </h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-1.5">Họ và tên</label>
+                <input 
+                  type="text" 
+                  name="name"
+                  value={adminProfile.name}
+                  onChange={handleProfileChange}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm"
+                  placeholder="Nhập họ tên"
+                />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-1.5">Số điện thoại</label>
+                <input 
+                  type="text" 
+                  name="phone"
+                  value={adminProfile.phone || ''}
+                  onChange={handleProfileChange}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm"
+                  placeholder="Nhập SĐT"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-1.5">Email liên hệ</label>
+              <input 
+                type="email" 
+                name="email"
+                value={adminProfile.email}
+                onChange={handleProfileChange}
+                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm"
+                placeholder="admin@touris.vn"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-1.5">Ảnh đại diện (Avatar)</label>
+              <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="bg-slate-100 border border-slate-300 text-slate-700 hover:bg-slate-200 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors shrink-0 shadow-sm cursor-pointer"
+                >
+                  <Upload size={15} className="text-teal-600" />
+                  Chọn ảnh
+                </button>
+
+                <div className="relative flex-1">
+                  <input 
+                    type="text" 
+                    name="avatar"
+                    value={adminProfile.avatar || ''}
+                    onChange={handleProfileChange}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-xs shadow-sm pr-8"
+                    placeholder="Dán URL ảnh"
+                  />
+                  {adminProfile.avatar && (
+                    <button
+                      type="button"
+                      onClick={() => setAdminProfile(prev => ({ ...prev, avatar: '' }))}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 p-1 cursor-pointer"
+                      title="Xóa ảnh"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-1.5">Ngôn ngữ</label>
+              <select 
+                name="language"
+                value={adminProfile.language || 'vi'}
+                onChange={handleProfileChange}
+                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm appearance-none shadow-sm cursor-pointer"
+              >
+                <option value="vi">Tiếng Việt</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button 
+                onClick={handleSaveProfile}
+                className="bg-teal-600 text-white px-5 py-2 rounded-xl font-medium flex items-center gap-2 hover:bg-teal-700 transition-colors text-xs shadow-sm cursor-pointer"
+              >
+                <Save size={16} />
+                Lưu thay đổi
+              </button>
+            </div>
+          </div>
+
+          {/* Column 2: Đổi mật khẩu */}
+          <div className="space-y-5 lg:border-l lg:border-slate-100 lg:pl-8">
+            <h3 className="text-lg font-sans font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
+              <Key size={18} className="text-teal-600" />
+              <span>Đổi mật khẩu</span>
+            </h3>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-1.5">Mật khẩu hiện tại</label>
+              <input 
+                type="password" 
+                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-1.5">Mật khẩu mới</label>
+              <input 
+                type="password" 
+                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-slate-500 font-medium mb-1.5">Xác nhận mật khẩu</label>
+              <input 
+                type="password" 
+                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-slate-800 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 transition-all text-sm shadow-sm"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button className="bg-slate-100 text-slate-700 border border-slate-200 px-5 py-2 rounded-xl font-medium hover:bg-slate-200 transition-colors text-xs shadow-sm cursor-pointer">
+                Cập nhật mật khẩu
+              </button>
+            </div>
+          </div>
+
         </div>
+
       </div>
     </div>
   );

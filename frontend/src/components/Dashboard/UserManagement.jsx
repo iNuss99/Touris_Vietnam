@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Edit2, Trash2, Mail, Shield, CheckCircle, XCircle, Loader2, KeyRound, Copy, Check } from 'lucide-react';
+import { UserPlus, Edit2, Trash2, Mail, Shield, CheckCircle, XCircle, Loader2, KeyRound, Copy, Check, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-api.vercel.app';
@@ -68,7 +68,15 @@ export default function UserManagement() {
       setUsers([...users, data.user]);
       setShowModal(false);
       setFormData({ email: '', full_name: '', role: 'sales' });
-      setNotification({ type: 'success', message: 'Đã tạo tài khoản thành công! Mật khẩu đã được gửi qua email.' });
+      setResetResult({
+        email: data.user.email,
+        fullName: data.user.name || data.user.full_name,
+        tempPassword: data.tempPassword,
+        emailSent: data.emailSent,
+        emailError: data.emailError,
+        isNewUser: true
+      });
+      setCopied(false);
     } catch (err) {
       setFormError(err.message);
     } finally {
@@ -142,7 +150,10 @@ export default function UserManagement() {
         setResetResult({
           email: targetUser.email,
           fullName: targetUser.name || targetUser.full_name,
-          tempPassword: data.tempPassword
+          tempPassword: data.tempPassword,
+          emailSent: data.emailSent,
+          emailError: data.emailError,
+          isNewUser: false
         });
         setCopied(false);
       } else if (confirmModal.type === 'delete') {
@@ -178,12 +189,12 @@ export default function UserManagement() {
     <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
       <div className="flex justify-between items-center mb-6 border-b border-slate-200 pb-4">
         <div>
-          <h3 className="text-xl font-sans text-slate-800">Quản lý nhân sự</h3>
-          <p className="text-sm text-slate-500 mt-1">Thêm và phân quyền tài khoản truy cập CRM</p>
+          <h3 className="text-lg font-sans font-bold text-slate-800">Danh sách tài khoản</h3>
+          <p className="text-xs text-slate-500 mt-0.5">Tất cả tài khoản nhân sự được cấp quyền truy cập</p>
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+          className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors cursor-pointer shadow-sm"
         >
           <UserPlus size={16} />
           Thêm nhân sự
@@ -354,31 +365,50 @@ export default function UserManagement() {
         </div>
       )}
 
-      {/* Reset Password Result Modal */}
+      {/* Reset / New Password Result Modal */}
       {resetResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-4 mx-auto border border-amber-100">
+            <div className="w-12 h-12 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center mb-4 mx-auto border border-teal-100">
               <KeyRound size={24} />
             </div>
             
-            <h3 className="text-lg font-bold text-slate-800 text-center mb-1">Đã cấp lại mật khẩu thành công</h3>
-            <p className="text-sm text-slate-500 text-center mb-6">
-              Mật khẩu mới đã được cập nhật cho tài khoản <strong className="text-slate-700">{resetResult.email}</strong> và gửi tự động qua email.
+            <h3 className="text-lg font-bold text-slate-800 text-center mb-1">
+              {resetResult.isNewUser ? 'Khởi tạo tài khoản thành công' : 'Đã cấp lại mật khẩu thành công'}
+            </h3>
+            <p className="text-xs text-slate-500 text-center mb-4">
+              Tài khoản: <strong className="text-slate-800">{resetResult.email}</strong>
             </p>
+
+            {resetResult.emailSent ? (
+              <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs flex items-center gap-2 mb-4">
+                <CheckCircle size={16} className="text-emerald-600 shrink-0" />
+                <span>Đã gửi mật khẩu tự động tới email <strong>{resetResult.email}</strong></span>
+              </div>
+            ) : (
+              <div className="p-3 bg-amber-50 text-amber-900 border border-amber-200 rounded-xl text-xs flex flex-col gap-1.5 mb-4">
+                <div className="flex items-center gap-1.5 font-bold text-amber-800">
+                  <AlertTriangle size={16} className="shrink-0 text-amber-600" />
+                  <span>Chưa gửi được email tự động</span>
+                </div>
+                <p className="text-[11px] text-amber-700 leading-relaxed">
+                  Lỗi SMTP gửi mail ({resetResult.emailError || 'Chưa nhận diện'}). Vui lòng bấm <strong className="text-slate-900">Sao chép</strong> mật khẩu dưới đây để gửi trực tiếp cho nhân sự qua Zalo / SMS.
+                </p>
+              </div>
+            )}
 
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6">
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                Mật khẩu tạm thời mới
+                Mật khẩu tạm thời
               </label>
-              <div className="flex items-center justify-between bg-white border border-slate-300 rounded-lg p-3">
-                <span className="font-mono text-lg font-bold text-teal-700 tracking-wider">
+              <div className="flex items-center justify-between bg-white border border-slate-300 rounded-lg p-3 shadow-xs">
+                <span className="font-mono text-lg font-bold text-teal-700 tracking-wider select-all">
                   {resetResult.tempPassword}
                 </span>
                 <button
                   type="button"
                   onClick={handleCopyPassword}
-                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 text-slate-700 rounded-md transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-md transition-colors cursor-pointer border border-teal-200"
                 >
                   {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
                   {copied ? 'Đã chép!' : 'Sao chép'}
@@ -390,7 +420,7 @@ export default function UserManagement() {
               <button
                 type="button"
                 onClick={() => setResetResult(null)}
-                className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium text-sm transition-colors cursor-pointer"
+                className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium text-sm transition-colors cursor-pointer shadow-sm"
               >
                 Đã xong
               </button>

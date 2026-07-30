@@ -17,7 +17,7 @@ const ITEMS_PER_PAGE = 8;
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { logout, user } = useAuth();
+  const { logout, user, isSuperAdmin, viewAsRole, setViewAsRole } = useAuth();
   const [leads, setLeads] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -285,6 +285,36 @@ export default function Dashboard() {
           setActiveTab={setActiveTab} 
           activeTab={activeTab} 
         />
+
+        {/* Role Impersonation Warning Banner */}
+        {isSuperAdmin && viewAsRole && viewAsRole !== 'super_admin' && (
+          <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white px-6 py-2.5 flex items-center justify-between shadow-md text-xs font-semibold shrink-0 animate-in slide-in-from-top-2 duration-200 z-20">
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+              </span>
+              <span>
+                ⚠️ Đang trải nghiệm giao diện với <strong>Góc nhìn: {
+                  {
+                    sales: 'Kinh doanh (Sales)',
+                    editor: 'Biên tập viên (Editor)',
+                    viewer: 'Người xem (Viewer)'
+                  }[viewAsRole] || viewAsRole
+                }</strong> (Tài khoản gốc: Super Admin)
+              </span>
+            </div>
+            <button
+              onClick={() => setViewAsRole(null)}
+              className="bg-white/20 hover:bg-white/30 active:bg-white/40 text-white px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 border border-white/20"
+              title="Khôi phục lại giao diện Super Admin"
+            >
+              <span>Thoát chế độ xem</span>
+              <span className="text-sm font-normal">✕</span>
+            </button>
+          </div>
+        )}
+
         <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto flex-1 w-full">
           {activeTab === 'leads' && (
             <LeadsView
