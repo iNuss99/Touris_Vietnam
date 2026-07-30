@@ -80,7 +80,7 @@ export default function Hero({ isPageVisible }) {
           ref={videoRef}
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
           onCanPlayThrough={handleCanPlay}
           onTimeUpdate={handleTimeUpdate}
           className="absolute inset-0 w-full h-[120%] object-cover pointer-events-none"

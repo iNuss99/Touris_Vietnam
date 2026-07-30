@@ -10,9 +10,9 @@ export default function LoadingScreen({ onReveal, onComplete }) {
   const loading = t('loading');
 
   useEffect(() => {
-    // Counter: 0 → 100 over 1.9s using requestAnimationFrame for 60fps smoothness
+    // Counter: 0 → 100 over 450ms using requestAnimationFrame for 60fps smoothness
     let start = null;
-    const duration = 1900;
+    const duration = 450;
     let rafId;
 
     const step = (timestamp) => {
@@ -28,16 +28,16 @@ export default function LoadingScreen({ onReveal, onComplete }) {
     };
     rafId = requestAnimationFrame(step);
 
-    // Phase 1: Loading animation plays for 2s
+    // Phase 1: Reveal curtain after 500ms
     const t1 = setTimeout(() => {
       setPhase('reveal');
       if (onReveal) onReveal();
-    }, 2000);
-    // Phase 2: Reveal transition for 1.3s then signal complete
+    }, 500);
+    // Phase 2: Complete curtain transition after 900ms
     const t2 = setTimeout(() => {
       setPhase('done');
-      onComplete();
-    }, 3300);
+      if (onComplete) onComplete();
+    }, 900);
     return () => { cancelAnimationFrame(rafId); clearTimeout(t1); clearTimeout(t2); };
   }, [onReveal, onComplete]);
 
@@ -177,7 +177,7 @@ export default function LoadingScreen({ onReveal, onComplete }) {
           animation: fadeSlideUp 0.8s cubic-bezier(0.16,1,0.3,1) both;
         }
         .loader-bar {
-          animation: loadProgress 2s cubic-bezier(0.4,0,0.2,1) forwards;
+          animation: loadProgress 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
         }
         @keyframes fadeSlideUp {
           from { opacity: 0; transform: translateY(20px); }

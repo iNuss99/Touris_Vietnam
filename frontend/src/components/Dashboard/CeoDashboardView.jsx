@@ -31,6 +31,73 @@ const StatCard = ({ title, value, subtext, icon: Icon, trend }) => (
   </div>
 );
 
+const CeoFinancialCharts = React.memo(function CeoFinancialCharts({ timeFilter, chartData, expenseData, totalRevenue, formatMoneyUnit }) {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Main Financial Chart */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Doanh Thu & Dòng Tiền Theo Kỳ (Triệu VNĐ)</h3>
+            <p className="text-xs text-slate-400 mt-0.5">Cập nhật tự động từ CSDL Neon DB - Bộ lọc: <span className="font-semibold text-teal-600 uppercase">{timeFilter}</span></p>
+          </div>
+        </div>
+        <div className="h-[320px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={chartData || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+              <Tooltip 
+                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
+                cursor={{ fill: '#f8fafc' }}
+              />
+              <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+              <Bar dataKey="revenue" name="Doanh Thu Dự Kiến" fill="#0d9488" radius={[4, 4, 0, 0]} maxBarSize={40} />
+              <Line type="monotone" dataKey="cashflow" name="Dòng Tiền Thực Thu" stroke="#f59e0b" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Expenses Pie Chart */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2">Cơ Cấu Chi Phí & Lợi Nhuận</h3>
+        <p className="text-xs text-slate-400 mb-4">Ước tính tỷ trọng theo quy mô doanh thu</p>
+        <div className="flex-1 min-h-[260px] relative">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={expenseData || []}
+                cx="50%"
+                cy="50%"
+                innerRadius={65}
+                outerRadius={95}
+                paddingAngle={2}
+                dataKey="value"
+                stroke="none"
+              >
+                {(expenseData || []).map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip 
+                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                itemStyle={{ color: '#1e293b', fontWeight: 500 }}
+                formatter={(val) => [`${val} Triệu VNĐ`, 'Giá trị']}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Tổng Quy Mô</span>
+            <span className="text-xl font-bold text-slate-800 mt-0.5">{formatMoneyUnit(totalRevenue || 0)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 export default function CeoDashboardView() {
   const [timeFilter, setTimeFilter] = useState('year'); // 'month', 'quarter', 'year'
   const [sortOrder, setSortOrder] = useState('desc'); // 'desc' (Cao -> Thấp), 'asc' (Thấp -> Cao)
@@ -202,69 +269,14 @@ export default function CeoDashboardView() {
         />
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Financial Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Doanh Thu & Dòng Tiền Theo Kỳ (Triệu VNĐ)</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Cập nhật tự động từ CSDL Neon DB - Bộ lọc: <span className="font-semibold text-teal-600 uppercase">{timeFilter}</span></p>
-            </div>
-          </div>
-          <div className="h-[320px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={statsData?.chartData || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <Tooltip 
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}
-                  cursor={{ fill: '#f8fafc' }}
-                />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
-                <Bar dataKey="revenue" name="Doanh Thu Dự Kiến" fill="#0d9488" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                <Line type="monotone" dataKey="cashflow" name="Dòng Tiền Thực Thu" stroke="#f59e0b" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Expenses Pie Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2">Cơ Cấu Chi Phí & Lợi Nhuận</h3>
-          <p className="text-xs text-slate-400 mb-4">Ước tính tỷ trọng theo quy mô doanh thu</p>
-          <div className="flex-1 min-h-[260px] relative">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={statsData?.expenseData || []}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={65}
-                  outerRadius={95}
-                  paddingAngle={2}
-                  dataKey="value"
-                  stroke="none"
-                >
-                  {(statsData?.expenseData || []).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  itemStyle={{ color: '#1e293b', fontWeight: 500 }}
-                  formatter={(val) => [`${val} Triệu VNĐ`, 'Giá trị']}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Tổng Quy Mô</span>
-              <span className="text-xl font-bold text-slate-800 mt-0.5">{formatMoneyUnit(statsData?.stats?.totalRevenue || 0)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Memoized Charts Section */}
+      <CeoFinancialCharts 
+        timeFilter={timeFilter}
+        chartData={statsData?.chartData}
+        expenseData={statsData?.expenseData}
+        totalRevenue={statsData?.stats?.totalRevenue}
+        formatMoneyUnit={formatMoneyUnit}
+      />
 
       {/* Enhanced High Value Deals Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all">

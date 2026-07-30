@@ -11,10 +11,22 @@ function parseJwt(token) {
 }
 
 export function AuthProvider({ children }) {
-  const [realUser, setRealUser] = useState(null);
+  const [realUser, setRealUser] = useState(() => {
+    const token = sessionStorage.getItem('touris_token');
+    if (token) {
+      const decoded = parseJwt(token);
+      if (decoded && decoded.exp * 1000 > Date.now()) {
+        return { id: decoded.id, email: decoded.email, name: decoded.name, role: decoded.role };
+      }
+      sessionStorage.removeItem('touris_token');
+      sessionStorage.removeItem('touris_must_change_password');
+      sessionStorage.removeItem('touris_view_as_role');
+    }
+    return null;
+  });
   const [viewAsRole, setViewAsRoleState] = useState(() => sessionStorage.getItem('touris_view_as_role') || null);
-  const [mustChangePassword, setMustChangePassword] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [mustChangePassword, setMustChangePassword] = useState(() => sessionStorage.getItem('touris_must_change_password') === 'true');
+  const [isInitializing, setIsInitializing] = useState(false);
 
   const setViewAsRole = (role) => {
     if (!role || role === 'super_admin') {
@@ -25,24 +37,6 @@ export function AuthProvider({ children }) {
       setViewAsRoleState(role);
     }
   };
-
-  useEffect(() => {
-    const token = sessionStorage.getItem('touris_token');
-    const mcp = sessionStorage.getItem('touris_must_change_password');
-    if (token) {
-      const decoded = parseJwt(token);
-      if (decoded && decoded.exp * 1000 > Date.now()) {
-        setRealUser({ id: decoded.id, email: decoded.email, name: decoded.name, role: decoded.role });
-        setMustChangePassword(mcp === 'true');
-      } else {
-        // Token expired
-        sessionStorage.removeItem('touris_token');
-        sessionStorage.removeItem('touris_must_change_password');
-        sessionStorage.removeItem('touris_view_as_role');
-      }
-    }
-    setIsInitializing(false);
-  }, []);
 
   const login = (token, role, name, must_change_password) => {
     sessionStorage.setItem('touris_token', token);

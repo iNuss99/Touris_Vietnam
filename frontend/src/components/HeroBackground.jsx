@@ -40,7 +40,7 @@ export default function HeroBackground({ scrollY }) {
         const moveX = currentX * depth * 50; 
         const moveY = currentY * depth * 50;
         
-        let transformStr = `translate3d(${moveX}px, ${moveY + scrollY * scrollFactor}px, 0)`;
+        let transformStr = `translate3d(${moveX}px, ${moveY + window.scrollY * scrollFactor}px, 0)`;
         
         // Tilt 3D
         if (rotate) {
@@ -62,7 +62,7 @@ export default function HeroBackground({ scrollY }) {
       window.removeEventListener('mousemove', onMouseMove);
       cancelAnimationFrame(frameId);
     };
-  }, [scrollY]); // Cập nhật khi scrollY thay đổi để parallax mượt
+  }, []); // [] dependency array giup animation loop chay 60fps mượt mà không bị destroy/re-create khi scroll
 
   return (
     <div 

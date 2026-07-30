@@ -3,6 +3,63 @@ import { Download, RefreshCw, XCircle, Users, CheckCircle, Clock, Search, Filter
 import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip } from 'recharts';
 import { KpiCard, StatusBadge, CustomTooltip, STATUS_LABELS, STATUS_COLORS, normalizeStatus } from './SharedUI';
 
+const LeadsCharts = React.memo(function LeadsCharts({ destData, newLeads, inProgress, converted, lostCount }) {
+  const PIE_COLORS = ['#c9a84c', '#34d0be', '#3b82f6', '#8b5cf6', '#f59e0b', '#64748b'];
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+      {/* Chart 1: Destinations */}
+      <div className="lg:col-span-1 bg-white border border-slate-200 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-300 hover:shadow-md transition-all shadow-sm">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-widest mb-6">Top Điểm Đến</h3>
+        <div className="h-[220px] w-full">
+          {destData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={destData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="none">
+                  {destData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
+                </Pie>
+                <RechartsTooltip content={<CustomTooltip />} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex items-center justify-center text-slate-400 text-xs">Chưa có dữ liệu</div>
+          )}
+        </div>
+      </div>
+
+      {/* Chart 2: Lead Status breakdown */}
+      <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-300 hover:shadow-md transition-all shadow-sm">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-widest mb-6">Phân Bố Trạng Thái Customer Funnel</h3>
+        <div className="h-[220px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={[
+              { name: 'Mới', value: newLeads, fill: '#3b82f6' },
+              { name: 'Đang xử lý', value: inProgress, fill: '#f59e0b' },
+              { name: 'Thành công', value: converted, fill: '#0d9488' },
+              { name: 'Hủy bỏ', value: lostCount, fill: '#ef4444' }
+            ]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+              <XAxis dataKey="name" stroke="#cbd5e1" tick={{fill: '#64748b', fontSize: 12}} axisLine={false} tickLine={false} />
+              <YAxis stroke="#cbd5e1" tick={{fill: '#64748b', fontSize: 12}} allowDecimals={false} axisLine={false} tickLine={false} />
+              <RechartsTooltip cursor={{fill: '#f8fafc'}} content={<CustomTooltip />} />
+              <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={40}>
+                {[
+                  <Cell key="0" fill="#3b82f6" />,
+                  <Cell key="1" fill="#f59e0b" />,
+                  <Cell key="2" fill="#0d9488" />,
+                  <Cell key="3" fill="#ef4444" />
+                ]}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 export default function LeadsView({
   leads,
   totalLeads,
@@ -32,8 +89,6 @@ export default function LeadsView({
   setSortConfig,
   onStatusChange
 }) {
-  const PIE_COLORS = ['#c9a84c', '#34d0be', '#3b82f6', '#8b5cf6', '#f59e0b', '#64748b'];
-
   const handleSort = (key) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -49,6 +104,8 @@ export default function LeadsView({
       : <ArrowDown size={14} className="text-teal-500 ml-1 inline" />;
   };
 
+  const lostCount = React.useMemo(() => leads.filter(l => normalizeStatus(l.status) === 'LOST').length, [leads]);
+
   return (
     <>
       {/* Header Actions */}
@@ -61,7 +118,7 @@ export default function LeadsView({
           <button onClick={exportToCSV} className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all text-sm font-medium text-slate-600 hover:text-slate-900 shadow-sm cursor-pointer">
             <Download size={16} /> Xuất CSV
           </button>
-          <button onClick={fetchLeads} className="flex items-center gap-2 px-5 py-2.5 bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-700 rounded-xl transition-all text-sm font-medium shadow-sm cursor-pointer">
+          <button onClick={() => fetchLeads(true)} className="flex items-center gap-2 px-5 py-2.5 bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-700 rounded-xl transition-all text-sm font-medium shadow-sm cursor-pointer">
             <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
             Làm mới
           </button>
@@ -82,57 +139,14 @@ export default function LeadsView({
         <KpiCard title="Thành công" value={converted} icon={<CheckCircle size={20} />} accent="#0d9488" />
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-        {/* Chart 1: Destinations */}
-        <div className="lg:col-span-1 bg-white border border-slate-200 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-300 hover:shadow-md transition-all shadow-sm">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <h3 className="text-sm font-medium text-slate-500 uppercase tracking-widest mb-6">Top Điểm Đến</h3>
-          <div className="h-[220px] w-full">
-            {destData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={destData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="none">
-                    {destData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
-                  </Pie>
-                  <RechartsTooltip content={<CustomTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-slate-400 text-xs">Chưa có dữ liệu</div>
-            )}
-          </div>
-        </div>
-
-        {/* Chart 2: Lead Status breakdown */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 relative overflow-hidden group hover:border-slate-300 hover:shadow-md transition-all shadow-sm">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <h3 className="text-sm font-medium text-slate-500 uppercase tracking-widest mb-6">Phân Bố Trạng Thái Customer Funnel</h3>
-          <div className="h-[220px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={[
-                { name: 'Mới', value: newLeads, fill: '#3b82f6' },
-                { name: 'Đang xử lý', value: inProgress, fill: '#f59e0b' },
-                { name: 'Thành công', value: converted, fill: '#0d9488' },
-                { name: 'Hủy bỏ', value: leads.filter(l => normalizeStatus(l.status) === 'LOST').length, fill: '#ef4444' }
-              ]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="name" stroke="#cbd5e1" tick={{fill: '#64748b', fontSize: 12}} axisLine={false} tickLine={false} />
-                <YAxis stroke="#cbd5e1" tick={{fill: '#64748b', fontSize: 12}} allowDecimals={false} axisLine={false} tickLine={false} />
-                <RechartsTooltip cursor={{fill: '#f8fafc'}} content={<CustomTooltip />} />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={40}>
-                  {[
-                    <Cell key="0" fill="#3b82f6" />,
-                    <Cell key="1" fill="#f59e0b" />,
-                    <Cell key="2" fill="#0d9488" />,
-                    <Cell key="3" fill="#ef4444" />
-                  ]}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
+      {/* Memoized Charts Row */}
+      <LeadsCharts 
+        destData={destData} 
+        newLeads={newLeads} 
+        inProgress={inProgress} 
+        converted={converted} 
+        lostCount={lostCount} 
+      />
 
       {/* Filter & Search Bar */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mb-12">

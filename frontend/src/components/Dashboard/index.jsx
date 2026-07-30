@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, useDeferredValue } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopHeader from './TopHeader';
@@ -14,6 +14,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-api.vercel.app';
 const ITEMS_PER_PAGE = 8;
+const CACHE_TTL_MS = 2 * 60 * 1000; // Cache leads trong 2 phut
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -21,9 +22,11 @@ export default function Dashboard() {
   const [leads, setLeads] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const lastFetchedRef = useRef(0);
   
   // States cho Filter, Search & Pagination
   const [searchQuery, setSearchQuery] = useState('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [destFilter, setDestFilter] = useState('ALL');
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,7 +71,14 @@ export default function Dashboard() {
     }
   }, [adminProfile, user?.id]);
 
-  const fetchLeads = async () => {
+  const fetchLeads = useCallback(async (isManualRefresh = false) => {
+    const now = Date.now();
+    // Su dung cache neu da co du lieu va chua het TTL (tru khi nguoi dung nhan Lam moi)
+    if (!isManualRefresh && leads.length > 0 && (now - lastFetchedRef.current < CACHE_TTL_MS)) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const token = sessionStorage.getItem('touris_token');
@@ -85,18 +95,20 @@ export default function Dashboard() {
       if (!res.ok) throw new Error('Failed to fetch leads');
       const data = await res.json();
       setLeads(data);
+      lastFetchedRef.current = now;
+      setError(null);
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [leads.length, logout, navigate]);
 
-  // Trigger fetchLeads whenever user or activeTab changes (for leads, reports, ceo)
+  // Trigger fetchLeads khi activeTab thay doi
   useEffect(() => {
     if (user?.role === 'super_admin' || user?.role === 'sales' || user?.role === 'viewer' || user?.role === 'admin') {
       if (['leads', 'reports', 'ceo'].includes(activeTab)) {
-        fetchLeads();
+        fetchLeads(false);
       }
     } else {
       setIsLoading(false);
@@ -104,9 +116,17 @@ export default function Dashboard() {
         setActiveTab('content');
       }
     }
-  }, [user, activeTab]);
+  }, [user, activeTab, fetchLeads]);
 
+  // Optimistic status update — Khong load ngat trang UI khi cap nhat trang thai
   const handleStatusChange = async (id, newStatus) => {
+    const previousLeads = [...leads];
+    // Cap nhat local state tuc thi
+    setLeads(prev => prev.map(lead => lead.id === id ? { ...lead, status: newStatus } : lead));
+    if (selectedLead && selectedLead.id === id) {
+      setSelectedLead(prev => prev ? { ...prev, status: newStatus } : null);
+    }
+
     try {
       const token = sessionStorage.getItem('touris_token');
       const res = await fetch(`${BACKEND_URL}/api/leads/${id}/status`, {
@@ -118,17 +138,10 @@ export default function Dashboard() {
         body: JSON.stringify({ status: newStatus })
       });
       if (!res.ok) throw new Error('Failed to update status');
-      
-      // Update local state immediately & refetch to ensure 100% sync
-      setLeads(prev => prev.map(lead => lead.id === id ? { ...lead, status: newStatus } : lead));
-      if (selectedLead && selectedLead.id === id) {
-        setSelectedLead(prev => prev ? { ...prev, status: newStatus } : null);
-      }
-      
-      // Refetch from backend database to sync all tabs
-      await fetchLeads();
     } catch (err) {
       console.error('Lỗi cập nhật trạng thái:', err);
+      // Revert lai state neu backend bi loi
+      setLeads(previousLeads);
       alert('Lỗi cập nhật trạng thái: ' + err.message);
     }
   };
@@ -140,12 +153,14 @@ export default function Dashboard() {
     return Array.from(dests);
   }, [leads]);
 
-  // Xử lý Lọc & Tìm kiếm & Sắp xếp
+  // Xử lý Lọc & Tìm kiếm & Sắp xếp voi deferredSearchQuery de 0ms lag phím
   const filteredLeads = useMemo(() => {
+    const query = (deferredSearchQuery || '').toLowerCase();
     let result = leads.filter(lead => {
-      const matchesSearch = (lead.full_name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                            (lead.phone?.includes(searchQuery)) ||
-                            (lead.email?.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesSearch = !query || 
+                            (lead.full_name?.toLowerCase().includes(query)) ||
+                            (lead.phone?.includes(query)) ||
+                            (lead.email?.toLowerCase().includes(query));
       const matchesStatus = statusFilter === 'ALL' || normalizeStatus(lead.status) === normalizeStatus(statusFilter);
       const matchesDest = destFilter === 'ALL' || lead.destination === destFilter;
       
@@ -266,8 +281,8 @@ export default function Dashboard() {
     <div className="min-h-screen font-sans flex relative overflow-hidden bg-slate-50 text-slate-800">
       
       {/* Background Decor */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-teal-500/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-sky-500/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-3xl opacity-30 pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-sky-500/10 rounded-full blur-3xl opacity-30 pointer-events-none" />
 
       {/* Sidebar */}
       <Sidebar 
@@ -284,6 +299,9 @@ export default function Dashboard() {
           adminProfile={adminProfile} 
           setActiveTab={setActiveTab} 
           activeTab={activeTab} 
+          leads={leads}
+          setSelectedLead={setSelectedLead}
+          setSearchQuery={setSearchQuery}
         />
 
         {/* Role Impersonation Warning Banner */}

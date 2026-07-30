@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Bell, ChevronDown, User, Settings, LogOut, ShieldCheck, Sparkles, UserCog, Eye } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Bell, ChevronDown, User, Settings, LogOut, ShieldCheck, Sparkles, UserCog, Eye, Search, Command, ArrowRight, LayoutDashboard, Users, PieChart as PieChartIcon, Newspaper, X, Phone, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-export default function TopHeader({ adminProfile, setActiveTab, activeTab }) {
+export default function TopHeader({ adminProfile, setActiveTab, activeTab, leads = [], setSelectedLead, setSearchQuery }) {
   const { user, logout, isSuperAdmin, viewAsRole, setViewAsRole } = useAuth();
   const navigate = useNavigate();
   
@@ -12,9 +12,59 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab }) {
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(3);
 
+  // Global Search State
+  const [globalQuery, setGlobalQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchInputRef = useRef(null);
+  const searchContainerRef = useRef(null);
+
   const notifRef = useRef(null);
   const userMenuRef = useRef(null);
   const roleMenuRef = useRef(null);
+
+  // Keyboard shortcut Ctrl+K / Cmd+K listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+        setTimeout(() => searchInputRef.current?.focus(), 50);
+      } else if (e.key === 'Escape') {
+        setIsSearchOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Danh mục Modules hệ thống cho Global Search
+  const systemModules = useMemo(() => [
+    { id: 'ceo', label: 'Bảng điều khiển CEO', desc: 'Thống kê tài chính & dòng tiền thực thu', icon: LayoutDashboard, roleReq: ['super_admin'] },
+    { id: 'leads', label: 'Quản lý Leads', desc: 'Danh sách 62+ yêu cầu tour & chấm điểm Hot', icon: Users },
+    { id: 'reports', label: 'Báo cáo Thống kê', desc: 'Phân tích tăng trưởng & tỷ lệ chốt', icon: PieChartIcon },
+    { id: 'users', label: 'Quản lý Nhân sự', desc: 'Phân quyền tài khoản CRM', icon: UserCog, roleReq: ['super_admin'] },
+    { id: 'content', label: 'Quản lý Nội dung', desc: 'Biên tập tour & điểm đến', icon: Newspaper, roleReq: ['super_admin', 'editor'] },
+    { id: 'settings', label: 'Cài đặt Tài khoản', desc: 'Thông tin cá nhân & mật khẩu', icon: Settings }
+  ], []);
+
+  // Lọc kết quả tìm kiếm xuyên module
+  const searchResults = useMemo(() => {
+    const q = globalQuery.trim().toLowerCase();
+    if (!q) return { modules: systemModules, leads: [] };
+
+    const matchedModules = systemModules.filter(m => 
+      m.label.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q)
+    );
+
+    const matchedLeads = (leads || []).filter(l => 
+      (l.full_name && l.full_name.toLowerCase().includes(q)) ||
+      (l.phone && l.phone.includes(q)) ||
+      (l.email && l.email.toLowerCase().includes(q)) ||
+      (l.destination && l.destination.toLowerCase().includes(q))
+    ).slice(0, 5);
+
+    return { modules: matchedModules, leads: matchedLeads };
+  }, [globalQuery, systemModules, leads]);
 
   const mockNotifications = [
     {
@@ -75,6 +125,9 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab }) {
       if (roleMenuRef.current && !roleMenuRef.current.contains(event.target)) {
         setShowRoleMenu(false);
       }
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        setIsSearchOpen(false);
+      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -88,9 +141,9 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab }) {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-slate-200/80 px-6 py-3.5 flex items-center justify-between shadow-xs">
+    <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-slate-200/80 px-6 py-3 flex items-center justify-between shadow-xs gap-4">
       {/* Left Title / Tab Indicator */}
-      <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
+      <div className="flex items-center gap-2 text-sm text-slate-500 font-medium shrink-0">
         <span className="text-slate-400">Dashboard</span>
         <span className="text-slate-300">/</span>
         <span className="text-slate-800 font-semibold uppercase tracking-wider text-xs">
@@ -101,6 +154,135 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab }) {
           {activeTab === 'content' && 'Quản lý Nội dung'}
           {activeTab === 'settings' && 'Cài đặt Tài khoản'}
         </span>
+      </div>
+
+      {/* Center: Global Cross-Module Search Bar */}
+      <div className="relative flex-1 max-w-lg mx-4 hidden sm:block" ref={searchContainerRef}>
+        <div 
+          onClick={() => {
+            setIsSearchOpen(true);
+            searchInputRef.current?.focus();
+          }}
+          className={`flex items-center gap-2.5 px-3.5 py-2 rounded-xl border text-xs transition-all cursor-text ${
+            isSearchOpen 
+              ? 'bg-white border-teal-500 ring-2 ring-teal-500/20 shadow-md' 
+              : 'bg-slate-100/70 border-slate-200/80 hover:bg-slate-100 hover:border-slate-300 text-slate-400'
+          }`}
+        >
+          <Search size={16} className={isSearchOpen ? 'text-teal-600' : 'text-slate-400'} />
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={globalQuery}
+            onChange={(e) => {
+              setGlobalQuery(e.target.value);
+              setIsSearchOpen(true);
+            }}
+            onFocus={() => setIsSearchOpen(true)}
+            placeholder="Tìm nhanh xuyên module (Leads, Khách hàng, Báo cáo)..."
+            className="w-full bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 text-xs font-medium"
+          />
+          {globalQuery ? (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setGlobalQuery('');
+              }} 
+              className="text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+            >
+              <X size={14} />
+            </button>
+          ) : (
+            <div className="hidden lg:flex items-center gap-1 bg-white border border-slate-200 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-slate-400 shadow-2xs">
+              <Command size={10} />
+              <span>K</span>
+            </div>
+          )}
+        </div>
+
+        {/* Command Palette Dropdown Search Results */}
+        {isSearchOpen && (
+          <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150 p-2 max-h-[420px] overflow-y-auto">
+            {/* Header Hint */}
+            <div className="px-3 py-1.5 border-b border-slate-100 flex justify-between items-center text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
+              <span>Tìm kiếm tức thì xuyên hệ thống</span>
+              <span>Dùng Ctrl + K để mở nhanh</span>
+            </div>
+
+            {/* Section 1: Modules / Navigation */}
+            {searchResults.modules.length > 0 && (
+              <div className="py-2">
+                <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Chức năng & Module</p>
+                <div className="space-y-0.5">
+                  {searchResults.modules.map((mod) => {
+                    const IconComp = mod.icon;
+                    return (
+                      <button
+                        key={mod.id}
+                        onClick={() => {
+                          setActiveTab(mod.id);
+                          setIsSearchOpen(false);
+                          setGlobalQuery('');
+                        }}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
+                          activeTab === mod.id ? 'bg-teal-50 text-teal-800 font-semibold' : 'hover:bg-slate-50 text-slate-700'
+                        }`}
+                      >
+                        <div className="p-1.5 rounded-lg bg-slate-100 text-teal-600 shrink-0">
+                          <IconComp size={16} />
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                          <p className="text-xs font-semibold text-slate-800 leading-tight">{mod.label}</p>
+                          <p className="text-[11px] text-slate-400 truncate">{mod.desc}</p>
+                        </div>
+                        <ArrowRight size={14} className="text-slate-300 shrink-0" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Section 2: Matched Leads */}
+            {searchResults.leads.length > 0 && (
+              <div className="py-2 border-t border-slate-100">
+                <p className="px-3 text-[10px] font-bold text-teal-600 uppercase tracking-wider mb-1">Kết quả Khách hàng / Leads ({searchResults.leads.length})</p>
+                <div className="space-y-0.5">
+                  {searchResults.leads.map((lead) => (
+                    <button
+                      key={lead.id}
+                      onClick={() => {
+                        setActiveTab('leads');
+                        if (setSearchQuery) setSearchQuery(lead.full_name || '');
+                        if (setSelectedLead) setSelectedLead(lead);
+                        setIsSearchOpen(false);
+                        setGlobalQuery('');
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left hover:bg-teal-50/70 transition-colors cursor-pointer"
+                    >
+                      <div>
+                        <p className="text-xs font-bold text-slate-800">{lead.full_name}</p>
+                        <p className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
+                          {lead.phone && <span className="flex items-center gap-1"><Phone size={11} /> {lead.phone}</span>}
+                          {lead.destination && <span className="text-teal-700 font-medium">📍 {lead.destination}</span>}
+                        </p>
+                      </div>
+                      <span className="text-[10px] bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded-full">
+                        Xem chi tiết ➔
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {searchResults.modules.length === 0 && searchResults.leads.length === 0 && (
+              <div className="py-8 text-center text-slate-400 text-xs font-medium">
+                Không tìm thấy kết quả nào phù hợp với "{globalQuery}"
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Right Top Header Actions: Notification & Avatar */}
