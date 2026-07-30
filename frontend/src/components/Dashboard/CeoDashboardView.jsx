@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 
 const COLORS = ['#0d9488', '#3b82f6', '#f59e0b', '#ef4444'];
-const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.VITE_BACKEND_URL ? `${import.meta.env.VITE_BACKEND_URL}/api` : 'http://localhost:5000/api');
+const BACKEND_BASE = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-api.vercel.app';
+const API_URL = import.meta.env.VITE_API_URL || `${BACKEND_BASE}/api`;
 
 const StatCard = ({ title, value, subtext, icon: Icon, trend }) => (
   <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col relative overflow-hidden hover:shadow-md transition-shadow">

@@ -125,7 +125,8 @@ export default function ChatWidget() {
     setIsLoading(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const backendBase = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-api.vercel.app';
+      const apiUrl = import.meta.env.VITE_API_URL || backendBase;
       const response = await fetch(`${apiUrl}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
