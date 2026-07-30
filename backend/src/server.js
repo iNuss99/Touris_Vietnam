@@ -39,6 +39,15 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Root & Status Routes
+app.get('/', (req, res) => {
+  res.json({ success: true, message: 'Touris Vietnam API Server is running' });
+});
+
+app.get('/api', (req, res) => {
+  res.json({ success: true, message: 'Touris Vietnam API Endpoints' });
+});
+
 // Routes
 app.use('/api', authRoutes);
 app.use('/api/tours', toursRoutes);
