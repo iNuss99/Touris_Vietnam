@@ -8,7 +8,7 @@ import imgPhuQuoc from '../../assets/images/places/phu-quoc.webp';
 import imgSaPa from '../../assets/images/places/sapa.webp';
 import imgDaNang from '../../assets/images/places/da-nang.webp';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-api.vercel.app';
 
 const DESTINATION_PRESET_IMAGES = [
   { label: 'Hạ Long', url: 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80', local: imgHaLong },
