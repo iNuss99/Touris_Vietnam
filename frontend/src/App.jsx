@@ -108,11 +108,15 @@ function MainApp() {
 
   // ── Lenis Smooth Scroll ───────────────────────────────────────────────────
   useEffect(() => {
+    // Tắt Lenis nếu người dùng bật chế độ giảm chuyển động
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.0, // Giảm duration để phản hồi tức thì hơn
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
       smoothTouch: false, // Tắt trên mobile để dùng native scroll mượt hơn
+      wheelMultiplier: 1.0,
     });
 
     const bar = document.querySelector('.scroll-progress');
@@ -135,9 +139,7 @@ function MainApp() {
     };
   }, []);
 
-
-
-  // ── Scroll Reveal ─────────────────────────────────────────────────────────
+  // ── Scroll Reveal (Chỉ kích hoạt 1 lần duy nhất để giải phóng bộ nhớ GPU) ───
   useEffect(() => {
     if (!isPageVisible) return;
     let observer;
@@ -145,8 +147,15 @@ function MainApp() {
       const sel = '.reveal,.reveal-up,.reveal-down,.reveal-left,.reveal-right,.reveal-scale,.reveal-blur,.reveal-rotate-left,.reveal-rotate-right';
       const els = document.querySelectorAll(sel);
       observer = new IntersectionObserver(
-        (entries) => entries.forEach(e => e.isIntersecting ? e.target.classList.add('active') : e.target.classList.remove('active')),
-        { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }
+        (entries, obs) => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              e.target.classList.add('active');
+              obs.unobserve(e.target); // Ngăn lặp lại animation & giải phóng GPU layer
+            }
+          });
+        },
+        { threshold: 0.05, rootMargin: '0px 0px -20px 0px' }
       );
       els.forEach(el => observer.observe(el));
     }, 100);
@@ -181,30 +190,59 @@ function MainApp() {
   );
 }
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 phút cache giúp tối ưu tốc độ và không spam BE
+      gcTime: 10 * 60 * 1000, // 10 phút lưu bộ nhớ tạm
+      refetchOnWindowFocus: false, // Tắt tự động refetch khi chuyển tab trình duyệt
+      retry: 1,
+    },
+  },
+});
+
 export default function App() {
   return (
-    <AuthProvider>
-      <LanguageProvider>
-        <BrowserRouter>
-          <Suspense fallback={<LoadingScreen />}>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <LanguageProvider>
+          <BrowserRouter>
             <Routes>
-              <Route path="/" element={<MainApp />} />
-              <Route path="/login" element={<Login />} />
+              <Route path="/" element={
+                <Suspense fallback={<LoadingScreen />}>
+                  <MainApp />
+                </Suspense>
+              } />
+              <Route path="/login" element={
+                <Suspense fallback={null}>
+                  <Login />
+                </Suspense>
+              } />
               <Route path="/change-password" element={
                 <ProtectedRoute>
-                  <ChangePassword />
+                  <Suspense fallback={null}>
+                    <ChangePassword />
+                  </Suspense>
                 </ProtectedRoute>
               } />
               <Route path="/crm" element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Suspense fallback={null}>
+                    <Dashboard />
+                  </Suspense>
                 </ProtectedRoute>
               } />
-              <Route path="*" element={<NotFound />} />
+              <Route path="*" element={
+                <Suspense fallback={null}>
+                  <NotFound />
+                </Suspense>
+              } />
             </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </LanguageProvider>
-    </AuthProvider>
+          </BrowserRouter>
+        </LanguageProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

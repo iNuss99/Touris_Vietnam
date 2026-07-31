@@ -3,6 +3,8 @@ import { Bell, ChevronDown, User, Settings, LogOut, ShieldCheck, Sparkles, UserC
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
+import { normalizeStatus } from './SharedUI';
+
 export default function TopHeader({ adminProfile, setActiveTab, activeTab, leads = [], setSelectedLead, setSearchQuery }) {
   const { user, logout, isSuperAdmin, viewAsRole, setViewAsRole } = useAuth();
   const navigate = useNavigate();
@@ -10,9 +12,26 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab, leads
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showRoleMenu, setShowRoleMenu] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3);
 
-  // Global Search State
+  // State đồng bộ danh sách thông báo đã đọc với LocalStorage
+  const [readNotifIds, setReadNotifIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem('touris_read_notifs');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('touris_read_notifs', JSON.stringify(readNotifIds));
+    } catch (e) {
+      console.warn('Lỗi khi lưu touris_read_notifs:', e);
+    }
+  }, [readNotifIds]);
+
+  // Global Search State & Refs
   const [globalQuery, setGlobalQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchInputRef = useRef(null);
@@ -40,19 +59,20 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab, leads
   // Danh mục Modules hệ thống cho Global Search
   const systemModules = useMemo(() => [
     { id: 'ceo', label: 'Bảng điều khiển CEO', desc: 'Thống kê tài chính & dòng tiền thực thu', icon: LayoutDashboard, roleReq: ['super_admin'] },
-    { id: 'leads', label: 'Quản lý Leads', desc: 'Danh sách 62+ yêu cầu tour & chấm điểm Hot', icon: Users },
-    { id: 'reports', label: 'Báo cáo Thống kê', desc: 'Phân tích tăng trưởng & tỷ lệ chốt', icon: PieChartIcon },
+    { id: 'leads', label: 'Quản lý Leads', desc: 'Danh sách 62+ yêu cầu tour & chấm điểm Hot', icon: Users, roleReq: ['super_admin', 'sales'] },
+    { id: 'reports', label: 'Báo cáo Thống kê', desc: 'Phân tích tăng trưởng & tỷ lệ chốt', icon: PieChartIcon, roleReq: ['super_admin', 'sales', 'viewer'] },
     { id: 'users', label: 'Quản lý Nhân sự', desc: 'Phân quyền tài khoản CRM', icon: UserCog, roleReq: ['super_admin'] },
     { id: 'content', label: 'Quản lý Nội dung', desc: 'Biên tập tour & điểm đến', icon: Newspaper, roleReq: ['super_admin', 'editor'] },
     { id: 'settings', label: 'Cài đặt Tài khoản', desc: 'Thông tin cá nhân & mật khẩu', icon: Settings }
   ], []);
 
-  // Lọc kết quả tìm kiếm xuyên module
+  // Lọc kết quả tìm kiếm xuyên module theo quyền vai trò
   const searchResults = useMemo(() => {
+    const allowedModules = systemModules.filter(m => !m.roleReq || m.roleReq.includes(user?.role));
     const q = globalQuery.trim().toLowerCase();
-    if (!q) return { modules: systemModules, leads: [] };
+    if (!q) return { modules: allowedModules, leads: [] };
 
-    const matchedModules = systemModules.filter(m => 
+    const matchedModules = allowedModules.filter(m => 
       m.label.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q)
     );
 
@@ -64,40 +84,74 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab, leads
     ).slice(0, 5);
 
     return { modules: matchedModules, leads: matchedLeads };
-  }, [globalQuery, systemModules, leads]);
+  }, [globalQuery, systemModules, leads, user?.role]);
 
-  const mockNotifications = [
-    {
-      id: 1,
-      type: 'lead',
-      title: 'Lead mới từ Website',
-      desc: 'Khách hàng Nguyễn Văn Anh vừa yêu cầu báo giá Tour Hạ Long (5 khách).',
-      time: '5 phút trước',
-      unread: true,
-      icon: Sparkles,
-      iconBg: 'bg-teal-50 text-teal-600 border border-teal-100'
-    },
-    {
-      id: 2,
-      type: 'deal',
-      title: 'Hợp đồng mới thành công',
-      desc: 'Deal Khách đoàn Doanh nghiệp FPT (450 Triệu VNĐ) chuyển trạng thái THÀNH CÔNG.',
-      time: '1 giờ trước',
-      unread: true,
-      icon: ShieldCheck,
-      iconBg: 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-    },
-    {
-      id: 3,
+  // Sinh thông báo tự động đồng bộ thực tế từ dữ liệu Leads trong hệ thống
+  const systemNotifications = useMemo(() => {
+    const list = [];
+    
+    if (leads && leads.length > 0) {
+      leads.slice(0, 8).forEach((lead) => {
+        const normStat = normalizeStatus(lead.status);
+        const isWon = normStat === 'WON' || lead.status === 'Thành công';
+        const isNew = normStat === 'NEW' || lead.status === 'Mới';
+
+        let timeLabel = 'Vừa xong';
+        if (lead.submitted_at) {
+          const diffMins = Math.floor((Date.now() - new Date(lead.submitted_at).getTime()) / (1000 * 60));
+          if (diffMins < 60) timeLabel = `${Math.max(1, diffMins)} phút trước`;
+          else if (diffMins < 1440) timeLabel = `${Math.floor(diffMins / 60)} giờ trước`;
+          else timeLabel = `${Math.floor(diffMins / 1440)} ngày trước`;
+        }
+
+        list.push({
+          id: `lead_${lead.id}`,
+          leadData: lead,
+          type: isWon ? 'deal' : 'lead',
+          title: isWon ? 'Hợp đồng tour thành công 🎉' : (isNew ? 'Lead mới từ Website 🌟' : 'Cập nhật yêu cầu tour'),
+          desc: `${lead.full_name || 'Khách hàng'} yêu cầu tour ${lead.destination || 'Việt Nam'}${lead.pax ? ` (${lead.pax} khách)` : ''}.`,
+          time: timeLabel,
+          icon: isWon ? ShieldCheck : Sparkles,
+          iconBg: isWon 
+            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
+            : 'bg-teal-50 text-teal-600 border border-teal-100'
+        });
+      });
+    }
+
+    // Thông báo mặc định của hệ thống
+    list.push({
+      id: 'sys_smtp_ready',
       type: 'user',
-      title: 'Cấp lại mật khẩu thành công',
-      desc: 'Quản trị viên vừa khởi tạo lại mật khẩu mới cho tài khoản kinh doanh.',
-      time: '3 giờ trước',
-      unread: true,
+      title: 'Hệ thống Mail & Bảo mật sẵn sàng',
+      desc: 'Tự động gửi email thông báo mật khẩu cho tài khoản nhân sự CRM đã đồng bộ thành công.',
+      time: 'Hệ thống',
       icon: UserCog,
       iconBg: 'bg-amber-50 text-amber-600 border border-amber-100'
+    });
+
+    return list;
+  }, [leads]);
+
+  // Đếm số thông báo chưa đọc
+  const unreadCount = useMemo(() => {
+    return systemNotifications.filter(n => !readNotifIds.includes(n.id)).length;
+  }, [systemNotifications, readNotifIds]);
+
+  const markAllAsRead = () => {
+    setReadNotifIds(systemNotifications.map(n => n.id));
+  };
+
+  const handleNotifClick = (item) => {
+    if (!readNotifIds.includes(item.id)) {
+      setReadNotifIds(prev => [...prev, item.id]);
     }
-  ];
+    if (item.leadData && setActiveTab) {
+      setActiveTab('leads');
+      if (setSelectedLead) setSelectedLead(item.leadData);
+    }
+    setShowNotifications(false);
+  };
 
   const roleDisplayNames = {
     super_admin: 'Super Admin',
@@ -157,19 +211,19 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab, leads
       </div>
 
       {/* Center: Global Cross-Module Search Bar */}
-      <div className="relative flex-1 max-w-lg mx-4 hidden sm:block" ref={searchContainerRef}>
+      <div className={`relative transition-all duration-300 hidden sm:block ${isSearchOpen ? 'w-80 md:w-96' : 'w-56 md:w-72'}`} ref={searchContainerRef}>
         <div 
           onClick={() => {
             setIsSearchOpen(true);
             searchInputRef.current?.focus();
           }}
-          className={`flex items-center gap-2.5 px-3.5 py-2 rounded-xl border text-xs transition-all cursor-text ${
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs transition-all cursor-text ${
             isSearchOpen 
-              ? 'bg-white border-teal-500 ring-2 ring-teal-500/20 shadow-md' 
-              : 'bg-slate-100/70 border-slate-200/80 hover:bg-slate-100 hover:border-slate-300 text-slate-400'
+              ? 'bg-white border-teal-500/80 ring-3 ring-teal-500/10 shadow-sm' 
+              : 'bg-slate-100/70 border-slate-200/70 hover:bg-slate-100 hover:border-slate-300/80 text-slate-400'
           }`}
         >
-          <Search size={16} className={isSearchOpen ? 'text-teal-600' : 'text-slate-400'} />
+          <Search size={14} className={`shrink-0 transition-colors ${isSearchOpen ? 'text-teal-600' : 'text-slate-400'}`} />
           <input
             ref={searchInputRef}
             type="text"
@@ -179,8 +233,8 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab, leads
               setIsSearchOpen(true);
             }}
             onFocus={() => setIsSearchOpen(true)}
-            placeholder="Tìm nhanh xuyên module (Leads, Khách hàng, Báo cáo)..."
-            className="w-full bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 text-xs font-medium"
+            placeholder="Tìm kiếm..."
+            className="w-full bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 text-xs font-normal"
           />
           {globalQuery ? (
             <button 
@@ -188,13 +242,13 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab, leads
                 e.stopPropagation();
                 setGlobalQuery('');
               }} 
-              className="text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+              className="text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer rounded-full hover:bg-slate-200/60 transition-colors"
             >
-              <X size={14} />
+              <X size={13} />
             </button>
           ) : (
-            <div className="hidden lg:flex items-center gap-1 bg-white border border-slate-200 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-slate-400 shadow-2xs">
-              <Command size={10} />
+            <div className="hidden lg:flex items-center gap-0.5 bg-slate-200/60 text-slate-500 px-1.5 py-0.5 rounded text-[10px] font-mono shrink-0 font-medium">
+              <Command size={9} />
               <span>K</span>
             </div>
           )}
@@ -395,8 +449,8 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab, leads
                 </div>
                 {unreadCount > 0 && (
                   <button 
-                    onClick={() => setUnreadCount(0)}
-                    className="text-xs text-teal-600 hover:text-teal-700 font-semibold cursor-pointer"
+                    onClick={markAllAsRead}
+                    className="text-xs text-teal-600 hover:text-teal-700 font-semibold cursor-pointer transition-colors"
                   >
                     Đánh dấu đã đọc
                   </button>
@@ -404,20 +458,32 @@ export default function TopHeader({ adminProfile, setActiveTab, activeTab, leads
               </div>
 
               <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
-                {mockNotifications.map((item) => {
+                {systemNotifications.map((item) => {
                   const IconComp = item.icon;
+                  const isUnread = !readNotifIds.includes(item.id);
                   return (
-                    <div key={item.id} className="p-4 hover:bg-slate-50 transition-colors flex gap-3 cursor-pointer">
+                    <div 
+                      key={item.id} 
+                      onClick={() => handleNotifClick(item)}
+                      className={`p-4 transition-colors flex gap-3 cursor-pointer ${
+                        isUnread ? 'bg-teal-50/40 hover:bg-teal-50/70' : 'hover:bg-slate-50'
+                      }`}
+                    >
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${item.iconBg}`}>
                         <IconComp size={18} />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs font-bold text-slate-800">{item.title}</p>
-                          <span className="text-[10px] text-slate-400">{item.time}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <p className={`text-xs ${isUnread ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
+                            {item.title}
+                          </p>
+                          <span className="text-[10px] text-slate-400 shrink-0">{item.time}</span>
                         </div>
-                        <p className="text-xs text-slate-600 mt-1 leading-snug">{item.desc}</p>
+                        <p className="text-xs text-slate-600 mt-1 leading-snug line-clamp-2">{item.desc}</p>
                       </div>
+                      {isUnread && (
+                        <div className="w-2 h-2 rounded-full bg-teal-500 shrink-0 self-center" />
+                      )}
                     </div>
                   );
                 })}

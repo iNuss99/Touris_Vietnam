@@ -34,8 +34,13 @@ export default function Sidebar({
           <NavItem icon={<TrendingUp size={18} />} label="Bảng điều khiển CEO" active={activeTab === 'ceo'} isOpen={isSidebarOpen} onClick={() => setActiveTab('ceo')} />
         )}
         
-        <NavItem icon={<Users size={18} />} label="Quản lý Leads" active={activeTab === 'leads'} isOpen={isSidebarOpen} onClick={() => setActiveTab('leads')} />
-        <NavItem icon={<PieChartIcon size={18} />} label="Báo cáo" active={activeTab === 'reports'} isOpen={isSidebarOpen} onClick={() => setActiveTab('reports')} />
+        {(user?.role === 'super_admin' || user?.role === 'sales') && (
+          <NavItem icon={<Users size={18} />} label="Quản lý Leads" active={activeTab === 'leads'} isOpen={isSidebarOpen} onClick={() => setActiveTab('leads')} />
+        )}
+
+        {(user?.role === 'super_admin' || user?.role === 'sales' || user?.role === 'viewer') && (
+          <NavItem icon={<PieChartIcon size={18} />} label="Báo cáo" active={activeTab === 'reports'} isOpen={isSidebarOpen} onClick={() => setActiveTab('reports')} />
+        )}
         
         {user?.role === 'super_admin' && (
           <NavItem icon={<UserCog size={18} />} label="Nhân sự" active={activeTab === 'users'} isOpen={isSidebarOpen} onClick={() => setActiveTab('users')} />

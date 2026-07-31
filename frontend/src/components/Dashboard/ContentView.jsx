@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Edit2, Trash2, Plus, Map, Image as ImageIcon, Loader2, Star, CheckCircle } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import imgHaLong from '../../assets/images/places/halong-bay.webp';
 import imgHoiAn from '../../assets/images/places/hoi-an.webp';
@@ -20,30 +21,76 @@ const DESTINATION_PRESET_IMAGES = [
 ];
 
 export default function ContentView() {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('tours');
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
+  const [deleteConfirmItem, setDeleteConfirmItem] = useState(null);
 
-  useEffect(() => {
-    fetchItems();
-  }, [activeTab]);
-
-  const fetchItems = async () => {
-    setLoading(true);
-    try {
+  // 1. TanStack Query: Tải danh sách Tour/Điểm đến với cơ chế cache tức thì 5 phút
+  const { data: items = [], isLoading, error } = useQuery({
+    queryKey: ['content', activeTab],
+    queryFn: async () => {
       const res = await fetch(`${BACKEND_URL}/api/${activeTab}`);
       if (!res.ok) throw new Error('Failed to fetch ' + activeTab);
-      const data = await res.json();
-      setItems(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // 2. TanStack Mutation: Xóa sản phẩm
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const token = sessionStorage.getItem('touris_token');
+      const res = await fetch(`${BACKEND_URL}/api/${activeTab}/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Lỗi không thể xóa');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['content', activeTab] });
+      setDeleteConfirmItem(null);
+    },
+    onError: (err) => {
+      alert('Lỗi khi xóa: ' + err.message);
     }
-  };
+  });
+
+  // 3. TanStack Mutation: Thêm mới hoặc Cập nhật sản phẩm
+  const saveMutation = useMutation({
+    mutationFn: async (item) => {
+      const token = sessionStorage.getItem('touris_token');
+      const method = item.id ? 'PUT' : 'POST';
+      const url = item.id 
+        ? `${BACKEND_URL}/api/${activeTab}/${item.id}`
+        : `${BACKEND_URL}/api/${activeTab}`;
+        
+      const payload = {
+        ...item,
+        image_url: item.image_url || getDisplayImage(item)
+      };
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['content', activeTab] });
+      setIsEditing(false);
+    },
+    onError: (err) => {
+      alert('Lỗi lưu: ' + err.message);
+    }
+  });
 
   const getDisplayImage = (item) => {
     if (!item) return imgHaLong;
@@ -73,53 +120,19 @@ export default function ContentView() {
     setIsEditing(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa mục này?')) return;
-    try {
-      const token = sessionStorage.getItem('touris_token');
-      const res = await fetch(`${BACKEND_URL}/api/${activeTab}/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (!res.ok) throw new Error('Failed to delete');
-      setItems(items.filter(item => item.id !== id));
-    } catch (err) {
-      alert('Lỗi khi xóa: ' + err.message);
+  const handleDelete = (item) => {
+    setDeleteConfirmItem(item);
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirmItem) {
+      deleteMutation.mutate(deleteConfirmItem.id);
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      const token = sessionStorage.getItem('touris_token');
-      const method = currentItem.id ? 'PUT' : 'POST';
-      const url = currentItem.id 
-        ? `${BACKEND_URL}/api/${activeTab}/${currentItem.id}`
-        : `${BACKEND_URL}/api/${activeTab}`;
-        
-      // Ensure image_url has fallback if empty
-      const payload = {
-        ...currentItem,
-        image_url: currentItem.image_url || getDisplayImage(currentItem)
-      };
-
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!res.ok) throw new Error('Failed to save');
-      await fetchItems();
-      setIsEditing(false);
-    } catch (err) {
-      alert('Lỗi lưu: ' + err.message);
-    }
+    saveMutation.mutate(currentItem);
   };
 
   const renderForm = () => {
@@ -332,11 +345,11 @@ export default function ContentView() {
                           {item.unit && <span className="text-[11px] font-normal text-slate-400"> / {item.unit}</span>}
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex justify-end gap-2 transition-opacity">
                             <button onClick={() => handleEdit(item)} className="p-2 text-sky-600 hover:bg-sky-50 rounded-xl transition-colors border border-transparent hover:border-sky-200" title="Chỉnh sửa">
                               <Edit2 size={16} />
                             </button>
-                            <button onClick={() => handleDelete(item.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors border border-transparent hover:border-red-200" title="Xóa">
+                            <button onClick={() => handleDelete(item)} className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors border border-transparent hover:border-red-200" title="Xóa">
                               <Trash2 size={16} />
                             </button>
                           </div>
@@ -347,6 +360,46 @@ export default function ContentView() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Pop-up Xác Nhận Xóa Nhỏ Gọn & Hiện Đại */}
+      {deleteConfirmItem && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-500 border border-red-100 flex items-center justify-center mx-auto mb-4 shadow-xs">
+              <Trash2 size={22} />
+            </div>
+            <h3 className="text-base font-bold text-slate-800 mb-1">Xác nhận xóa?</h3>
+            <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+              Bạn có chắc chắn muốn xóa <strong className="text-slate-800">"{deleteConfirmItem.title || deleteConfirmItem.name}"</strong>? Thao tác này không thể hoàn tác.
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmItem(null)}
+                disabled={deleteMutation.isPending}
+                className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={deleteMutation.isPending}
+                className="flex-1 py-2.5 px-4 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+              >
+                {deleteMutation.isPending ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Đang xóa...</span>
+                  </>
+                ) : (
+                  <span>Xóa vĩnh viễn</span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

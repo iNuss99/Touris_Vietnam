@@ -66,7 +66,7 @@ export default function Culture() {
             className="font-serif text-white mb-4"
             style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 600, lineHeight: 1.1 }}
           />
-          <p className="text-white/40 font-light text-sm max-w-lg mx-auto leading-relaxed" style={{ fontWeight: 300 }}>
+          <p className="text-white/80 font-normal text-sm md:text-base max-w-xl mx-auto leading-relaxed">
             {culture.sectionDesc}
           </p>
           <div style={{ width: '40px', height: '1px', background: 'linear-gradient(90deg, transparent, #0f9d8a, transparent)', margin: '24px auto 0' }} />
@@ -89,35 +89,35 @@ export default function Culture() {
               />
             ))}
 
-            {/* Gradient overlay */}
+            {/* Gradient overlay - Tăng độ đậm lớp đệm tối bên dưới để chữ nổi bật 100% */}
             <div className="absolute inset-0"
-              style={{ background: 'linear-gradient(160deg, rgba(4,8,15,0.95) 0%, rgba(4,8,15,0.5) 40%, rgba(4,8,15,0.15) 70%, rgba(4,8,15,0.3) 100%)' }}
+              style={{ background: 'linear-gradient(180deg, rgba(4,8,15,0.45) 0%, rgba(4,8,15,0.2) 30%, rgba(4,8,15,0.85) 70%, rgba(4,8,15,0.98) 100%)' }}
             />
 
             {/* Text content */}
             <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{ background: `${activeAccent}20`, border: `1px solid ${activeAccent}40`, color: activeAccent }}>
+                  style={{ background: `${activeAccent}30`, border: `1px solid ${activeAccent}60`, color: activeAccent }}>
                   {activeIcon}
                 </div>
-                <span className="text-[10px] uppercase tracking-[0.3em] font-semibold" style={{ color: `${activeAccent}cc` }}>
+                <span className="text-[11px] uppercase tracking-[0.3em] font-bold drop-shadow-sm" style={{ color: activeAccent }}>
                   {active.subtitle}
                 </span>
               </div>
 
-              <h3 className="font-serif text-white mb-4 leading-tight"
+              <h3 className="font-serif text-white mb-4 leading-tight drop-shadow-md"
                 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 600 }}>
                 {active.title}
               </h3>
 
-              <p className="text-white/55 font-light leading-relaxed mb-6 text-sm" style={{ maxWidth: '520px', fontWeight: 300 }}>
+              <p className="text-white/90 font-normal leading-relaxed mb-6 text-sm md:text-base drop-shadow-sm" style={{ maxWidth: '540px' }}>
                 {active.description}
               </p>
 
-              <a href="#dat-tour" className="flex items-center gap-2 text-sm font-medium w-fit group/link"
-                style={{ color: `${activeAccent}dd` }}>
-                <span className="border-b pb-0.5 transition-colors" style={{ borderColor: `${activeAccent}40` }}>{culture.exploreLink}</span>
+              <a href="#dat-tour" className="flex items-center gap-2 text-sm font-semibold w-fit group/link"
+                style={{ color: activeAccent }}>
+                <span className="border-b pb-0.5 transition-colors" style={{ borderColor: `${activeAccent}60` }}>{culture.exploreLink}</span>
                 <ArrowUpRight size={16} className="group-hover/link:translate-x-1 group-hover/link:-translate-y-1 transition-transform duration-300" />
               </a>
             </div>
@@ -135,33 +135,33 @@ export default function Culture() {
                   className="flex items-center gap-4 p-4 rounded-2xl text-left transition-all duration-400 group/tab w-full"
                   style={{
                     background: isActive
-                      ? `linear-gradient(135deg, ${itemAccent}10, rgba(10,17,32,0.8))`
-                      : 'rgba(10,17,32,0.4)',
-                    border: `1px solid ${isActive ? `${itemAccent}35` : 'rgba(255,255,255,0.04)'}`,
-                    boxShadow: isActive ? `0 8px 30px -10px ${itemAccent}20` : 'none',
+                      ? `linear-gradient(135deg, ${itemAccent}18, rgba(10,17,32,0.9))`
+                      : 'rgba(10,17,32,0.65)',
+                    border: `1px solid ${isActive ? `${itemAccent}60` : 'rgba(255,255,255,0.08)'}`,
+                    boxShadow: isActive ? `0 8px 30px -10px ${itemAccent}30` : 'none',
                   }}
                 >
                   {/* Thumbnail anh nho */}
                   <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 relative">
                     <img src={IMAGE_MAP[item.id]} alt={item.title} loading="lazy" width="64" height="64" className="w-full h-full object-cover transition-transform duration-500 group-hover/tab:scale-110" />
                     {isActive && (
-                      <div className="absolute inset-0 rounded-xl" style={{ border: `2px solid ${itemAccent}60` }} />
+                      <div className="absolute inset-0 rounded-xl" style={{ border: `2px solid ${itemAccent}80` }} />
                     )}
                   </div>
 
                   {/* Text info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span style={{ color: isActive ? itemAccent : 'rgba(255,255,255,0.35)' }} className="transition-colors">
+                      <span style={{ color: isActive ? itemAccent : 'rgba(255,255,255,0.55)' }} className="transition-colors">
                         {ICON_MAP[item.id]}
                       </span>
-                      <span className="text-[9px] uppercase tracking-widest font-medium transition-colors"
-                        style={{ color: isActive ? `${itemAccent}aa` : 'rgba(255,255,255,0.25)' }}>
+                      <span className="text-[10px] uppercase tracking-widest font-semibold transition-colors"
+                        style={{ color: isActive ? itemAccent : 'rgba(255,255,255,0.60)' }}>
                         {item.subtitle}
                       </span>
                     </div>
-                    <h4 className="font-serif text-sm font-semibold truncate transition-colors"
-                      style={{ color: isActive ? 'white' : 'rgba(255,255,255,0.5)' }}>
+                    <h4 className="font-serif text-sm md:text-base font-semibold truncate transition-colors"
+                      style={{ color: isActive ? '#ffffff' : 'rgba(255,255,255,0.85)' }}>
                       {item.title}
                     </h4>
                   </div>
@@ -170,7 +170,7 @@ export default function Culture() {
                   <div className="w-1.5 rounded-full shrink-0 transition-all duration-300"
                     style={{
                       height: isActive ? '32px' : '16px',
-                      background: isActive ? `linear-gradient(180deg, ${itemAccent}, ${itemAccent}40)` : 'rgba(255,255,255,0.08)',
+                      background: isActive ? `linear-gradient(180deg, ${itemAccent}, ${itemAccent}60)` : 'rgba(255,255,255,0.15)',
                     }}
                   />
                 </button>

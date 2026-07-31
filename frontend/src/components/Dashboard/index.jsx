@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef, useDeferredValue } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useDeferredValue } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Sidebar from './Sidebar';
 import TopHeader from './TopHeader';
 import LeadsView from './LeadsView';
@@ -14,16 +15,12 @@ import { useAuth } from '../../context/AuthContext';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-api.vercel.app';
 const ITEMS_PER_PAGE = 8;
-const CACHE_TTL_MS = 2 * 60 * 1000; // Cache leads trong 2 phut
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { logout, user, isSuperAdmin, viewAsRole, setViewAsRole } = useAuth();
-  const [leads, setLeads] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const lastFetchedRef = useRef(0);
-  
+
   // States cho Filter, Search & Pagination
   const [searchQuery, setSearchQuery] = useState('');
   const deferredSearchQuery = useDeferredValue(searchQuery);
@@ -41,7 +38,8 @@ export default function Dashboard() {
     if (user?.role === 'super_admin') return 'ceo';
     if (user?.role === 'editor') return 'content';
     if (user?.role === 'viewer') return 'reports';
-    return 'leads';
+    if (user?.role === 'sales') return 'leads';
+    return 'settings';
   });
   
   // State cho Admin Profile
@@ -71,63 +69,52 @@ export default function Dashboard() {
     }
   }, [adminProfile, user?.id]);
 
-  const fetchLeads = useCallback(async (isManualRefresh = false) => {
-    const now = Date.now();
-    // Su dung cache neu da co du lieu va chua het TTL (tru khi nguoi dung nhan Lam moi)
-    if (!isManualRefresh && leads.length > 0 && (now - lastFetchedRef.current < CACHE_TTL_MS)) {
-      setIsLoading(false);
-      return;
-    }
+  // 1. TanStack Query: Fetch Leads với cache 5 phút tự động & chống spam BE
+  const canReadLeads = ['super_admin', 'sales', 'viewer', 'admin'].includes(user?.role);
 
-    setIsLoading(true);
-    try {
+  const {
+    data: leads = [],
+    isLoading,
+    error: queryError,
+    refetch: fetchLeads
+  } = useQuery({
+    queryKey: ['leads'],
+    queryFn: async () => {
       const token = sessionStorage.getItem('touris_token');
       const res = await fetch(`${BACKEND_URL}/api/leads`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.status === 401) {
         logout();
         navigate('/login');
-        return;
+        throw new Error('Unauthorized');
       }
       if (!res.ok) throw new Error('Failed to fetch leads');
-      const data = await res.json();
-      setLeads(data);
-      lastFetchedRef.current = now;
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [leads.length, logout, navigate]);
+      return res.json();
+    },
+    enabled: canReadLeads,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  // Trigger fetchLeads khi activeTab thay doi
+  const error = queryError ? queryError.message : null;
+
+  // Tự động kiểm tra và chuyển tab phù hợp theo quyền nhân sự hiện tại
   useEffect(() => {
-    if (user?.role === 'super_admin' || user?.role === 'sales' || user?.role === 'viewer' || user?.role === 'admin') {
-      if (['leads', 'reports', 'ceo'].includes(activeTab)) {
-        fetchLeads(false);
-      }
-    } else {
-      setIsLoading(false);
-      if (user?.role === 'editor') {
-        setActiveTab('content');
-      }
+    const roleTabs = {
+      super_admin: ['ceo', 'leads', 'reports', 'users', 'content', 'settings'],
+      sales: ['leads', 'reports', 'settings'],
+      editor: ['content', 'settings'],
+      viewer: ['reports', 'settings']
+    };
+    const allowed = roleTabs[user?.role] || ['settings'];
+    if (!allowed.includes(activeTab)) {
+      setActiveTab(allowed[0]);
     }
-  }, [user, activeTab, fetchLeads]);
+  }, [user?.role, activeTab]);
 
-  // Optimistic status update — Khong load ngat trang UI khi cap nhat trang thai
-  const handleStatusChange = async (id, newStatus) => {
-    const previousLeads = [...leads];
-    // Cap nhat local state tuc thi
-    setLeads(prev => prev.map(lead => lead.id === id ? { ...lead, status: newStatus } : lead));
-    if (selectedLead && selectedLead.id === id) {
-      setSelectedLead(prev => prev ? { ...prev, status: newStatus } : null);
-    }
-
-    try {
+  // 2. TanStack Mutation: Optimistic status update (0ms lag UI)
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, newStatus }) => {
       const token = sessionStorage.getItem('touris_token');
       const res = await fetch(`${BACKEND_URL}/api/leads/${id}/status`, {
         method: 'PUT',
@@ -138,12 +125,35 @@ export default function Dashboard() {
         body: JSON.stringify({ status: newStatus })
       });
       if (!res.ok) throw new Error('Failed to update status');
-    } catch (err) {
-      console.error('Lỗi cập nhật trạng thái:', err);
-      // Revert lai state neu backend bi loi
-      setLeads(previousLeads);
+      return res.json();
+    },
+    onMutate: async ({ id, newStatus }) => {
+      await queryClient.cancelQueries({ queryKey: ['leads'] });
+      const previousLeads = queryClient.getQueryData(['leads']);
+
+      queryClient.setQueryData(['leads'], (old = []) =>
+        old.map(lead => (lead.id === id ? { ...lead, status: newStatus } : lead))
+      );
+
+      if (selectedLead && selectedLead.id === id) {
+        setSelectedLead(prev => prev ? { ...prev, status: newStatus } : null);
+      }
+
+      return { previousLeads };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousLeads) {
+        queryClient.setQueryData(['leads'], context.previousLeads);
+      }
       alert('Lỗi cập nhật trạng thái: ' + err.message);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
     }
+  });
+
+  const handleStatusChange = (id, newStatus) => {
+    updateStatusMutation.mutate({ id, newStatus });
   };
 
   // Lấy danh sách điểm đến chuẩn 6 Tour chính cho Filter
@@ -334,7 +344,7 @@ export default function Dashboard() {
         )}
 
         <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto flex-1 w-full">
-          {activeTab === 'leads' && (
+          {activeTab === 'leads' && (user?.role === 'super_admin' || user?.role === 'sales') && (
             <LeadsView
               leads={leads}
               totalLeads={totalLeads}
@@ -370,7 +380,7 @@ export default function Dashboard() {
             <CeoDashboardView />
           )}
 
-          {activeTab === 'reports' && (
+          {activeTab === 'reports' && (user?.role === 'super_admin' || user?.role === 'sales' || user?.role === 'viewer') && (
             <ReportsView 
               totalLeads={totalLeads}
               converted={converted}

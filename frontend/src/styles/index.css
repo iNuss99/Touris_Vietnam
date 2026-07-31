@@ -1,9 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
-  /* thay the font serif cu bang Cormorant Garamond giup hien thi tieng viet muot ma hon */
-  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Be Vietnam Pro', sans-serif;
+  --font-serif: 'Playfair Display', serif;
   
   --color-luxury-dark:    #04080f;
   --color-luxury-surface: #0a1120;
@@ -31,7 +30,7 @@ body {
   background-color: #04080f;
   color: #e8e4d8;
   overflow-x: hidden;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
@@ -212,6 +211,11 @@ input, textarea, [contenteditable="true"] {
   transform: translateY(0) rotate(0) scale(1);
 }
 
+/* Giải phóng lớp bộ nhớ GPU (demote compositing layer) ngay sau khi xuất hiện */
+.reveal.active, .reveal-up.active, .reveal-down.active, .reveal-left.active, .reveal-right.active, .reveal-scale.active, .reveal-blur.active, .reveal-rotate-left.active, .reveal-rotate-right.active {
+  will-change: auto;
+}
+
 /* cac class phu tro de tao hieu ung xuat hien lan luot khi cuon trang (staggered delay) */
 .delay-100 { transition-delay: 100ms !important; }
 .delay-200 { transition-delay: 200ms !important; }
@@ -311,6 +315,8 @@ input, textarea, [contenteditable="true"] {
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(201, 168, 76, 0.1);
   transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 .glass-card:hover {
   border-color: rgba(201, 168, 76, 0.3);
@@ -321,6 +327,8 @@ input, textarea, [contenteditable="true"] {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* ==============================================

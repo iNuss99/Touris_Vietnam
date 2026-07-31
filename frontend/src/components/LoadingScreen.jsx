@@ -10,9 +10,9 @@ export default function LoadingScreen({ onReveal, onComplete }) {
   const loading = t('loading');
 
   useEffect(() => {
-    // Counter: 0 → 100 over 450ms using requestAnimationFrame for 60fps smoothness
+    // Counter: 0 → 100 over 1200ms using requestAnimationFrame for 60fps luxury smoothness
     let start = null;
-    const duration = 450;
+    const duration = 1200;
     let rafId;
 
     const step = (timestamp) => {
@@ -28,16 +28,16 @@ export default function LoadingScreen({ onReveal, onComplete }) {
     };
     rafId = requestAnimationFrame(step);
 
-    // Phase 1: Reveal curtain after 500ms
+    // Phase 1: Reveal curtain after 1300ms
     const t1 = setTimeout(() => {
       setPhase('reveal');
       if (onReveal) onReveal();
-    }, 500);
-    // Phase 2: Complete curtain transition after 900ms
+    }, 1300);
+    // Phase 2: Complete curtain transition after 2400ms
     const t2 = setTimeout(() => {
       setPhase('done');
       if (onComplete) onComplete();
-    }, 900);
+    }, 2400);
     return () => { cancelAnimationFrame(rafId); clearTimeout(t1); clearTimeout(t2); };
   }, [onReveal, onComplete]);
 
@@ -60,7 +60,7 @@ export default function LoadingScreen({ onReveal, onComplete }) {
         style={{
           background: 'linear-gradient(to right, #8a6e2a, #c9a84c)',
           transform: phase === 'reveal' ? 'translateX(-100%)' : 'translateX(0)',
-          transition: 'transform 1.0s cubic-bezier(0.76, 0, 0.24, 1)',
+          transition: 'transform 1.2s cubic-bezier(0.76, 0, 0.24, 1)',
           zIndex: 11,
         }}
       />
@@ -69,7 +69,7 @@ export default function LoadingScreen({ onReveal, onComplete }) {
         style={{
           background: 'linear-gradient(to left, #8a6e2a, #c9a84c)',
           transform: phase === 'reveal' ? 'translateX(100%)' : 'translateX(0)',
-          transition: 'transform 1.0s cubic-bezier(0.76, 0, 0.24, 1)',
+          transition: 'transform 1.2s cubic-bezier(0.76, 0, 0.24, 1)',
           zIndex: 11,
         }}
       />
@@ -80,7 +80,7 @@ export default function LoadingScreen({ onReveal, onComplete }) {
         style={{
           background: '#04080f',
           transform: phase === 'reveal' ? 'translateX(-100%)' : 'translateX(0)',
-          transition: 'transform 1.1s cubic-bezier(0.76, 0, 0.24, 1) 120ms',
+          transition: 'transform 1.3s cubic-bezier(0.76, 0, 0.24, 1) 150ms',
           zIndex: 12,
         }}
       />
@@ -89,7 +89,7 @@ export default function LoadingScreen({ onReveal, onComplete }) {
         style={{
           background: '#04080f',
           transform: phase === 'reveal' ? 'translateX(100%)' : 'translateX(0)',
-          transition: 'transform 1.1s cubic-bezier(0.76, 0, 0.24, 1) 120ms',
+          transition: 'transform 1.3s cubic-bezier(0.76, 0, 0.24, 1) 150ms',
           zIndex: 12,
         }}
       />

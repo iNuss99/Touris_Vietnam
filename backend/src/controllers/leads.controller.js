@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { logAuditEvent } = require('../services/audit_service');
 
 /**
  * Tự động tính toán Điểm tiềm năng (Score), Phân loại (Grade) & Giá trị ước tính (Estimated Value)
@@ -65,10 +66,51 @@ function calculateLeadScoreAndGrade({ phone, email, guests, serviceClass, depart
   return { score, grade, estimatedValue };
 }
 
+/**
+ * Che dấu PII (SĐT, Email) cho role Editor và Viewer
+ */
+function maskPII(lead) {
+  let maskedPhone = lead.phone || 'Chưa cung cấp';
+  if (maskedPhone && maskedPhone.length >= 6) {
+    maskedPhone = '***-***-' + maskedPhone.slice(-4);
+  } else {
+    maskedPhone = '***-***-****';
+  }
+
+  let maskedEmail = lead.email || 'Chưa cung cấp';
+  if (maskedEmail.includes('@')) {
+    const [local, domain] = maskedEmail.split('@');
+    const maskedLocal = local.length > 2 ? local.slice(0, 2) + '***' : '***';
+    maskedEmail = `${maskedLocal}@${domain}`;
+  } else {
+    maskedEmail = '***@***.***';
+  }
+
+  return {
+    ...lead,
+    phone: maskedPhone,
+    email: maskedEmail
+  };
+}
+
 const getLeads = async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM leads ORDER BY submitted_at DESC');
+    const userRole = req.user?.role;
+    const userId = req.user?.id;
+
+    let query = 'SELECT * FROM leads ORDER BY submitted_at DESC';
+    let values = [];
+
+    // Tầng DB Filtering: Sales chỉ được xem Lead phân công cho mình hoặc chưa gán
+    if (userRole === 'sales') {
+      query = 'SELECT * FROM leads WHERE assigned_to = $1 OR assigned_to IS NULL ORDER BY submitted_at DESC';
+      values = [userId];
+    }
+
+    const result = await pool.query(query, values);
+
     const leads = result.rows.map(lead => {
+      let processedLead = lead;
       if (!lead.score || lead.score === 0 || !lead.grade) {
         const { score, grade, estimatedValue } = calculateLeadScoreAndGrade({
           phone: lead.phone,
@@ -78,15 +120,22 @@ const getLeads = async (req, res) => {
           departureDate: lead.departure_date,
           message: lead.message
         });
-        return {
+        processedLead = {
           ...lead,
           score,
           grade,
           estimated_value: lead.estimated_value && String(lead.estimated_value) !== '0' ? lead.estimated_value : estimatedValue
         };
       }
-      return lead;
+
+      // Ẩn PII thông tin cá nhân khách hàng cho Editor và Viewer
+      if (userRole === 'editor' || userRole === 'viewer') {
+        return maskPII(processedLead);
+      }
+
+      return processedLead;
     });
+
     res.json(leads);
   } catch (err) {
     console.error('Error fetching leads:', err);
@@ -97,7 +146,6 @@ const getLeads = async (req, res) => {
 const createLead = async (req, res) => {
   const { fullName, zalo, email, destination, date, guests, serviceClass, message } = req.body;
   try {
-    // Đảm bảo dữ liệu không bị lỗi NOT NULL
     const safeFullName = fullName || "Khách hàng";
     const safePhone = zalo || "Chưa cung cấp";
     const safeEmail = email || "Chưa cung cấp";
@@ -128,6 +176,16 @@ const createLead = async (req, res) => {
     const values = [safeFullName, safePhone, safeEmail, destination, date, parsedGuests, serviceClass, message, score, grade, estimatedValue];
     const result = await pool.query(query, values);
 
+    // Ghi Audit Log cho hệ thống
+    await logAuditEvent({
+      actorId: 0,
+      actorEmail: 'system@website.public',
+      action: 'CREATE_LEAD_WEB',
+      resourceType: 'LEAD',
+      resourceId: result.rows[0].id,
+      afterValue: { full_name: safeFullName, destination }
+    });
+
     res.status(201).json({ success: true, lead: result.rows[0] });
   } catch (err) {
     console.error('Error inserting lead:', err);
@@ -143,7 +201,7 @@ const updateLeadStatus = async (req, res) => {
     return res.status(400).json({ success: false, error: 'Status is required' });
   }
 
-  // Normalize status value to standard uppercase key
+  // Normalize status value
   let normStatus = String(status).toUpperCase().trim();
   if (normStatus === 'THÀNH CÔNG' || normStatus === 'CHỐT' || normStatus === 'SUCCESS') normStatus = 'CONVERTED';
   else if (normStatus === 'ĐANG XỬ LÝ' || normStatus === 'ĐANG ĐÀM PHÁN') normStatus = 'IN_PROGRESS';
@@ -151,15 +209,29 @@ const updateLeadStatus = async (req, res) => {
   else if (normStatus === 'HỦY BỎ' || normStatus === 'HỦY') normStatus = 'LOST';
 
   try {
+    const existing = await pool.query('SELECT * FROM leads WHERE id = $1', [id]);
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Lead not found' });
+    }
+
+    const oldLead = existing.rows[0];
+
     const result = await pool.query(
       'UPDATE leads SET status = $1 WHERE id = $2 RETURNING *',
       [normStatus, id]
     );
     
-    if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, error: 'Lead not found' });
-    }
-    
+    // Ghi Audit Log append-only
+    await logAuditEvent({
+      actorId: req.user.id,
+      actorEmail: req.user.email,
+      action: 'UPDATE_LEAD_STATUS',
+      resourceType: 'LEAD',
+      resourceId: id,
+      beforeValue: { status: oldLead.status },
+      afterValue: { status: normStatus }
+    });
+
     res.json({ success: true, lead: result.rows[0] });
   } catch (err) {
     console.error('Error updating lead status:', err);
@@ -167,8 +239,59 @@ const updateLeadStatus = async (req, res) => {
   }
 };
 
+/**
+ * Editor Đề xuất đổi trạng thái (Lead Flagging)
+ */
+const createLeadFlag = async (req, res) => {
+  const { id } = req.params;
+  const { proposedStatus, reason } = req.body;
+
+  if (!proposedStatus) {
+    return res.status(400).json({ success: false, error: 'proposedStatus là bắt buộc.' });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO lead_flags (lead_id, editor_id, editor_name, proposed_status, reason)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [id, req.user.id, req.user.name || req.user.email, proposedStatus, reason || '']
+    );
+
+    // Audit Log cho đề xuất của Editor
+    await logAuditEvent({
+      actorId: req.user.id,
+      actorEmail: req.user.email,
+      action: 'PROPOSE_LEAD_STATUS_FLAG',
+      resourceType: 'LEAD_FLAG',
+      resourceId: result.rows[0].id,
+      afterValue: { lead_id: id, proposed_status: proposedStatus, reason }
+    });
+
+    res.status(201).json({ success: true, flag: result.rows[0] });
+  } catch (err) {
+    console.error('Error creating lead flag:', err);
+    res.status(500).json({ success: false, error: 'Lỗi tạo đề xuất đổi trạng thái.' });
+  }
+};
+
+/**
+ * Danh sách đề xuất đổi trạng thái
+ */
+const getLeadFlags = async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM lead_flags ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching lead flags:', err);
+    res.status(500).json({ success: false, error: 'Lỗi tải danh sách đề xuất.' });
+  }
+};
+
 module.exports = {
   getLeads,
   createLead,
-  updateLeadStatus
+  updateLeadStatus,
+  createLeadFlag,
+  getLeadFlags
 };

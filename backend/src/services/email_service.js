@@ -1,3 +1,5 @@
+const nodemailer = require('nodemailer');
+
 function getTransporter() {
   const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASSWORD;
