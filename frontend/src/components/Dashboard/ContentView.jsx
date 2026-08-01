@@ -282,7 +282,7 @@ export default function ContentView() {
 
       {isEditing && renderForm()}
 
-      {loading && !isEditing ? (
+      {isLoading && !isEditing ? (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400">
           <Loader2 size={32} className="animate-spin text-teal-500 mb-4" />
           <p>Đang tải dữ liệu sản phẩm...</p>

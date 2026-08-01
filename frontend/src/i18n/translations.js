@@ -468,8 +468,8 @@ const translations = {
           a: 'You can cancel free of charge up to 14 days before departure (100% refund). Cancellations between 7-14 days will be refunded 50%. Cancellations under 7 days are non-refundable. We encourage you to notify us as early as possible if any issues arise.'
         },
         {
-          q: 'How much deposit is required to hold a spot?',
-          a: 'To confirm your reservation and issue tickets, you only need to pay a 30-50% deposit of the total tour value (depending on the specific program). The remaining balance will be paid 3 days before departure or directly to the guide on the departure day.'
+          q: 'How much deposit is required and what payment methods are accepted?',
+          a: 'To confirm your reservation, a 30-50% deposit is required (remaining balance paid 3 days prior or directly to the guide). We accept Bank Transfer (VND/USD), Credit Cards (Visa, Mastercard, JCB), E-wallets (Momo, ZaloPay), and cash.'
         },
         {
           q: 'Can I change my travel dates after booking?',
@@ -478,14 +478,6 @@ const translations = {
         {
           q: 'Are the tours suitable for children and the elderly?',
           a: 'Most of our tours are designed with a relaxed pace, perfectly suitable for families with elderly members and small children. Please inform our consultant in advance so we can arrange the most suitable transportation, meals, and accommodations.'
-        },
-        {
-          q: 'What payment methods do you accept?',
-          a: 'We accept a variety of payment methods: Bank Transfer (VND/USD), Credit Cards (Visa, Mastercard, JCB), E-wallets (Momo, ZaloPay), and cash payments at the Touris Vietnam office.'
-        },
-        {
-          q: 'How do I know if the tour is available on my chosen date?',
-          a: 'Seat availability is constantly updated. The fastest way is to chat directly with our staff via the chat box on the right corner or call our Hotline. We will check and respond immediately within 3 minutes.'
         },
       ]
     },
@@ -936,8 +928,8 @@ const translations = {
           a: 'Bạn có thể hủy tour miễn phí trước 14 ngày khởi hành (hoàn tiền 100%). Hủy từ 7-14 ngày hoàn 50%. Hủy dưới 7 ngày sẽ không được hoàn tiền. Chúng tôi khuyến khích bạn thông báo sớm nhất có thể nếu có sự cố phát sinh.'
         },
         {
-          q: 'Cần đặt cọc bao nhiêu % để giữ chỗ?',
-          a: 'Để xác nhận giữ chỗ và xuất vé, bạn chỉ cần thanh toán đặt cọc 30-50% tổng giá trị tour (tùy theo từng chương trình). Số tiền còn lại sẽ được thanh toán trước ngày khởi hành 3 ngày hoặc thanh toán trực tiếp cho HDV vào ngày đi.'
+          q: 'Cần đặt cọc bao nhiêu % và thanh toán bằng những hình thức nào?',
+          a: 'Để xác nhận giữ chỗ, bạn thanh toán đặt cọc 30-50% tổng giá trị tour (số tiền còn lại thanh toán trước ngày đi 3 ngày hoặc cho HDV). Chúng tôi chấp nhận Chuyển khoản ngân hàng (VNĐ/USD), Thẻ tín dụng (Visa, Mastercard, JCB), Ví điện tử (Momo, ZaloPay), và tiền mặt.'
         },
         {
           q: 'Có thể thay đổi ngày đi sau khi đã đặt tour không?',
@@ -946,14 +938,6 @@ const translations = {
         {
           q: 'Tour có phù hợp với trẻ em và người lớn tuổi không?',
           a: 'Đa số các tour của chúng tôi được thiết kế theo tốc độ thư giãn, rất phù hợp cho gia đình có người già và trẻ nhỏ. Vui lòng báo trước với tư vấn viên để chúng tôi sắp xếp xe, suất ăn và phòng nghỉ phù hợp nhất.'
-        },
-        {
-          q: 'Thanh toán qua những hình thức nào?',
-          a: 'Chúng tôi chấp nhận đa dạng hình thức: Chuyển khoản ngân hàng (VNĐ/USD), Thẻ tín dụng (Visa, Mastercard, JCB), Ví điện tử (Momo, ZaloPay), và thanh toán tiền mặt tại văn phòng Touris Vietnam.'
-        },
-        {
-          q: 'Làm sao để biết tour ngày tôi chọn còn chỗ không?',
-          a: 'Tình trạng chỗ được cập nhật liên tục. Nhanh nhất là bạn chat trực tiếp với nhân viên qua khung chat góc phải hoặc gọi Hotline. Chúng tôi sẽ kiểm tra và phản hồi ngay lập tức trong vòng 3 phút.'
         },
       ]
     },
