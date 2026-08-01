@@ -13,7 +13,6 @@ const toursRoutes = require('./routes/tours.routes');
 const destinationsRoutes = require('./routes/destinations.routes');
 const usersRoutes = require('./routes/users.routes');
 const leadsRoutes = require('./routes/leads.routes');
-const chatRoutes = require('./routes/chat.routes');
 const ceoRoutes = require('./routes/ceo.routes');
 
 const app = express();
@@ -55,7 +54,6 @@ app.use('/api/tours', toursRoutes);
 app.use('/api/destinations', destinationsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/leads', leadsRoutes);
-app.use('/api/chat', chatRoutes);
 app.use('/api/ceo', ceoRoutes);
 
 if (require.main === module) {

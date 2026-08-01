@@ -12,8 +12,6 @@ import TourPackages from './components/TourPackages';
 import FAQs from './components/FAQs';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
-import GeminiChatWidget from './components/GeminiChatWidget';
-import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 const Dashboard = React.lazy(() => import('./components/Dashboard'));
@@ -82,11 +80,6 @@ function MainContent({ isLoading, isPageVisible, handleReveal, handleLoadingComp
           <Footer />
         </div>
       </div>
-      {!isLoading && (
-        <ErrorBoundary>
-          <GeminiChatWidget />
-        </ErrorBoundary>
-      )}
     </>
   );
 }

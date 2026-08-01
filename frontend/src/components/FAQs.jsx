@@ -16,8 +16,8 @@ export default function FAQs() {
 
   const handleChatClick = (e) => {
     e.preventDefault();
-    // Mo GeminiChatWidget neu co API hoac trigger event
-    const chatBtn = document.querySelector('.chatbot-toggle-btn');
+    // Mo Dify Chatbot Widget
+    const chatBtn = document.querySelector('#dify-chatbot-bubble-button') || document.querySelector('.chatbot-toggle-btn');
     if (chatBtn) chatBtn.click();
   };
 
