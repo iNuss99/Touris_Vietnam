@@ -108,11 +108,10 @@ export default function TourPackages() {
                   className="relative h-full flex flex-col transition-transform duration-500 overflow-hidden hover:-translate-y-2"
                   style={{
                     background: isPopular
-                      ? 'linear-gradient(170deg, rgba(30,24,8,0.85) 0%, rgba(10,17,32,0.95) 100%)'
-                      : 'rgba(10,17,32,0.5)',
+                      ? 'linear-gradient(170deg, rgba(30,24,8,0.95) 0%, rgba(10,17,32,0.98) 100%)'
+                      : 'rgba(10,17,32,0.92)',
                     borderRadius: '24px',
-                    border: isPopular ? '1px solid rgba(201,168,76,0.45)' : '1px solid rgba(255,255,255,0.06)',
-                    backdropFilter: 'blur(20px)',
+                    border: isPopular ? '1px solid rgba(201,168,76,0.45)' : '1px solid rgba(255,255,255,0.08)',
                     boxShadow: isPopular ? '0 15px 40px -10px rgba(201,168,76,0.15)' : '0 10px 30px -15px rgba(0,0,0,0.5)',
                   }}
                 >

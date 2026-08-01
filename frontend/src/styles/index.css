@@ -86,134 +86,97 @@ input, textarea, [contenteditable="true"] {
 /* hieu ung cuon trang co ban (reveal-up / reveal) */
 .reveal, .reveal-up {
   opacity: 0;
-  filter: blur(5px);
-  transform: translateY(30px);
-  transition: opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 1.3s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 1.3s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform, filter;
+  transform: translateY(24px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal.active, .reveal-up.active {
   opacity: 1;
-  filter: blur(0);
   transform: translateY(0);
 }
 
 /* hieu ung reveal tu tren xuong */
 .reveal-down {
   opacity: 0;
-  filter: blur(5px);
-  transform: translateY(-30px);
-  transition: opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 1.3s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 1.3s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform, filter;
+  transform: translateY(-24px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal-down.active {
   opacity: 1;
-  filter: blur(0);
   transform: translateY(0);
 }
 
 /* hieu ung reveal tu trai sang */
 .reveal-left {
   opacity: 0;
-  filter: blur(5px);
-  transform: translateX(-35px);
-  transition: opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 1.3s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 1.3s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform, filter;
+  transform: translateX(-28px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal-left.active {
   opacity: 1;
-  filter: blur(0);
   transform: translateX(0);
 }
 
 /* hieu ung reveal tu phai sang */
 .reveal-right {
   opacity: 0;
-  filter: blur(5px);
-  transform: translateX(35px);
-  transition: opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 1.3s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 1.3s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform, filter;
+  transform: translateX(28px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal-right.active {
   opacity: 1;
-  filter: blur(0);
   transform: translateX(0);
 }
 
 /* hieu ung phong to nhe tu giua */
 .reveal-scale {
   opacity: 0;
-  filter: blur(4px);
   transform: scale(0.96);
-  transition: opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 1.3s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 1.3s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform, filter;
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal-scale.active {
   opacity: 1;
-  filter: blur(0);
   transform: scale(1);
 }
 
-/* hieu ung reveal ket hop lam mo phong cach glassmorphism sang trong */
+/* hieu ung reveal smooth cho text & card */
 .reveal-blur {
   opacity: 0;
-  filter: blur(12px);
-  transform: translateY(25px) scale(0.98);
-  transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 1.4s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, filter, transform;
+  transform: translateY(20px) scale(0.98);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal-blur.active {
   opacity: 1;
-  filter: blur(0);
   transform: translateY(0) scale(1);
 }
 
 /* hieu ung reveal xoay trai nhe tao net tu nhien nghe thuat */
 .reveal-rotate-left {
   opacity: 0;
-  filter: blur(4px);
-  transform: translateY(30px) rotate(-2deg) scale(0.98);
-  transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 1.4s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 1.4s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform, filter;
+  transform: translateY(24px) rotate(-1.5deg) scale(0.98);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal-rotate-left.active {
   opacity: 1;
-  filter: blur(0);
   transform: translateY(0) rotate(0) scale(1);
 }
 
 /* hieu ung reveal xoay phai nhe tao net tu nhien nghe thuat */
 .reveal-rotate-right {
   opacity: 0;
-  filter: blur(4px);
-  transform: translateY(30px) rotate(2deg) scale(0.98);
-  transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 1.4s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 1.4s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform, filter;
+  transform: translateY(24px) rotate(1.5deg) scale(0.98);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal-rotate-right.active {
   opacity: 1;
-  filter: blur(0);
   transform: translateY(0) rotate(0) scale(1);
-}
-
-/* Giải phóng lớp bộ nhớ GPU (demote compositing layer) ngay sau khi xuất hiện */
-.reveal.active, .reveal-up.active, .reveal-down.active, .reveal-left.active, .reveal-right.active, .reveal-scale.active, .reveal-blur.active, .reveal-rotate-left.active, .reveal-rotate-right.active {
-  will-change: auto;
 }
 
 /* cac class phu tro de tao hieu ung xuat hien lan luot khi cuon trang (staggered delay) */
@@ -246,6 +209,8 @@ input, textarea, [contenteditable="true"] {
   position: relative;
   overflow: hidden;
   min-height: 100vh;
+  contain: layout style; /* ngan browser repaint ra ngoai parallax container */
+  content-visibility: visible; /* override section rule - Hero luon can render */
 }
 
 .parallax-bg {
@@ -509,12 +474,7 @@ input, textarea, [contenteditable="true"] {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  background-size: 200% auto;
-  animation: shimmer 4s linear infinite;
-}
-@keyframes shimmer {
-  0%   { background-position: 0% center; }
-  100% { background-position: 200% center; }
+  /* shimmer bo vi chay constant animation gây GPU overdraw moi frame */
 }
 
 /* ==============================================
@@ -611,6 +571,9 @@ section {
   position: relative;
   padding-top: 7rem !important;
   padding-bottom: 7rem !important;
+  /* content-visibility: auto giup browser bo qua render cac section chua vao viewport */
+  content-visibility: auto;
+  contain-intrinsic-size: 0 800px; /* uoc tinh chieu cao section de scroll bar chinh xac */
 }
 
 @media (max-width: 768px) {
@@ -707,14 +670,11 @@ section {
   left: 0;
   width: 500px;
   height: 500px;
-  /* tao hieu ung anh sang quyen luc vang-emerald nhe nhang khuech tan */
-  background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, rgba(15,157,138,0.02) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, rgba(15,157,138,0.03) 40%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
-  /* di chuyen quan sang duoc cap nhat truc tiep tu JS bang GPU de hoat hoa sieu muot */
   will-change: transform;
-  mix-blend-mode: screen;
   display: none;
 }
 
@@ -753,12 +713,10 @@ section {
   inset: 0;
   z-index: 9997;
   pointer-events: none;
-  opacity: 0.032;
-  mix-blend-mode: overlay;
+  opacity: 0.025;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 128px 128px;
-  /* animation: grainShift 0.15s steps(1) infinite; -- DISABLED FOR PERFORMANCE */
 }
 @keyframes grainShift {
   0%   { background-position: 0 0; }
@@ -784,15 +742,13 @@ section {
   border-radius: inherit;
   z-index: -1;
   opacity: 0;
-  animation: liquidFlow 3s ease infinite;
-  transition: opacity 0.3s ease;
+  /* animation chi bat khi hover - khong chay lien tuc gây GPU waste */
+  transition: opacity 0.3s ease, background-position 1s ease;
   box-shadow: 0 0 15px rgba(201, 168, 76, 0.4);
 }
-.btn-liquid:hover::before { opacity: 1; }
-@keyframes liquidFlow {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.btn-liquid:hover::before {
+  opacity: 1;
+  background-position: 100% 50%;
 }
 
 /* ==============================================
@@ -829,14 +785,19 @@ section {
 .flip-card {
   perspective: 1500px;
   background-color: transparent;
+  /* Containment de GPU layer khong anh huong sang cac flip-card khac */
+  contain: layout;
 }
 .flip-card-inner {
   position: relative;
   width: 100%;
   height: 100%;
   text-align: center;
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
+  /* backface-visibility: hidden giup trang tri phan mat sau khi flip */
+  backface-visibility: hidden;
+  will-change: transform; /* chi dat o day, khong dat o flip-card-front/back */
 }
 .flip-card:hover .flip-card-inner {
   transform: rotateY(180deg);
@@ -898,10 +859,10 @@ section {
 :root {
   --scroll-skew: 0deg;
 }
+/* scroll-skew: xoa will-change vi tao GPU layer thua tren moi card image */
 .scroll-skew {
   transform: skewY(var(--scroll-skew));
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform;
 }
 
 /* === Cinematic Zoom cho Hero Background === */

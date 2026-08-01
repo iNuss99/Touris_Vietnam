@@ -11,24 +11,45 @@ export default function Navbar({ isPageVisible = true }) {
   const { lang, setLang, t } = useLanguage();
   const nav = t('nav');
 
-  // Xu ly doi nen navbar va active section khi cuon trang
+  // Xu ly doi nen navbar va active section khi cuon trang (Optimized with IntersectionObserver & state guards)
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 60);
+    let lastScrolled = false;
 
-      // Xac dinh section dang hien thi de highlight link nav tuong ung
-      const sections = ['kham-pha', 'van-hoa', 'dat-tour', 'lien-he'];
-      const current = sections.find(id => {
-        const el = document.getElementById(id);
-        if (!el) return false;
-        const rect = el.getBoundingClientRect();
-        return rect.top <= 120 && rect.bottom >= 120;
-      });
-      setActiveSection(current || '');
+    const handleScroll = () => {
+      const scrolled = window.scrollY > 60;
+      if (scrolled !== lastScrolled) {
+        lastScrolled = scrolled;
+        setIsScrolled(scrolled);
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    handleScroll();
+
+    // IntersectionObserver để phát hiện active section tự động mà KHÔNG gây layout thrashing
+    const sections = ['kham-pha', 'van-hoa', 'dat-tour', 'lien-he'];
+    const observerMap = new Map();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: '-20% 0px -60% 0px', threshold: 0 }
+    );
+
+    sections.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      observer.disconnect();
+    };
   }, []);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);

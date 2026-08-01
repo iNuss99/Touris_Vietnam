@@ -243,7 +243,14 @@ export default function LeadsView({
                 return (
                   <tr key={lead.id} className="hover:bg-slate-50/80 transition-colors group">
                     <td className="px-6 py-4">
-                      <div className="font-semibold text-slate-800 group-hover:text-teal-600 transition-colors">{lead.full_name}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-slate-800 group-hover:text-teal-600 transition-colors">{lead.full_name}</span>
+                        {lead.source === 'chatbox' && (
+                          <span className="px-1.5 py-0.5 bg-purple-50 text-purple-600 border border-purple-200 rounded text-[10px] font-bold tracking-tight">
+                            💬 Chatbox
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs text-slate-400 mt-1" title={lead.message}>
                         {new Date(lead.submitted_at).toLocaleDateString('vi-VN')}
                       </div>

@@ -13,6 +13,7 @@ import FAQs from './components/FAQs';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import ChatWidget from './components/Chat/ChatWidget';
 
 const Dashboard = React.lazy(() => import('./components/Dashboard'));
 const Login = React.lazy(() => import('./components/Login'));
@@ -57,17 +58,14 @@ function MainContent({ isLoading, isPageVisible, handleReveal, handleLoadingComp
       <div className="cursor-glow" />
       <Navbar isPageVisible={isPageVisible} />
       <div
-        className={`min-h-screen antialiased transition-all duration-[1.2s] ease-[cubic-bezier(0.16,1,0.3,1)] ${isPageVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-[0.98]'
+        className={`min-h-screen antialiased transition-[opacity,transform] duration-[1.2s] ease-[cubic-bezier(0.16,1,0.3,1)] ${isPageVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-[0.98]'
           }`}
         style={{ background: '#04080f', color: '#e8e4d8' }}
       >
         <div
-          className="transition-all duration-300 ease-out"
+          className="transition-opacity duration-300 ease-out"
           style={{
-            opacity: isLangChanging ? 0.35 : 1,
-            filter: isLangChanging ? 'blur(5px)' : 'blur(0)',
-            transform: isLangChanging ? 'scale(0.995)' : 'scale(1)',
-            transitionProperty: 'opacity, filter, transform',
+            opacity: isLangChanging ? 0.5 : 1,
           }}
         >
           <Hero isPageVisible={isPageVisible} />
@@ -105,19 +103,22 @@ function MainApp() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const lenis = new Lenis({
-      duration: 1.0, // Giảm duration để phản hồi tức thì hơn
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      lerp: 0.12,           // 0.085 quá thấp → lag cảm giác. 0.12 mượt + responsive
       smoothWheel: true,
-      smoothTouch: false, // Tắt trên mobile để dùng native scroll mượt hơn
-      wheelMultiplier: 1.0,
+      smoothTouch: false,
+      wheelMultiplier: 1.1, // Tăng nhẹ để trang không bị đứng lag khi lướt
+      touchMultiplier: 2.0,
+      infinite: false,
     });
 
     const bar = document.querySelector('.scroll-progress');
     let rafId;
 
-    lenis.on('scroll', ({ scroll, limit }) => {
+    lenis.on('scroll', ({ scroll, limit, velocity }) => {
       // Progress bar
       if (bar && limit > 0) bar.style.transform = `scaleX(${Math.min(scroll / limit, 1)})`;
+      // Phát scroll position ra window để Hero parallax lắng nghe qua Lenis (không double-listen)
+      window.__lenisScrollY = scroll;
     });
 
     const tick = (time) => {
@@ -126,9 +127,14 @@ function MainApp() {
     };
     rafId = requestAnimationFrame(tick);
 
+    // Expose lenis để Hero có thể dùng
+    window.__lenis = lenis;
+
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
+      window.__lenis = null;
+      window.__lenisScrollY = 0;
     };
   }, []);
 
@@ -179,6 +185,7 @@ function MainApp() {
         handleReveal={handleReveal}
         handleLoadingComplete={handleLoadingComplete}
       />
+      <ChatWidget />
     </>
   );
 }

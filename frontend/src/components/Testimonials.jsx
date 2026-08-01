@@ -63,9 +63,8 @@ export default function Testimonials() {
         >
           <div className="overflow-hidden relative rounded-2xl" 
                style={{ 
-                 background: 'rgba(10,17,32,0.6)', 
-                 border: '1px solid rgba(255,255,255,0.05)',
-                 backdropFilter: 'blur(20px)'
+                 background: 'rgba(10,17,32,0.92)', 
+                 border: '1px solid rgba(255,255,255,0.08)',
                }}>
             
             <Quote size={120} className="absolute -top-6 -left-6 text-white/5 rotate-180" />

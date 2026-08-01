@@ -10,6 +10,7 @@ import LeadDetailsModal from './LeadDetailsModal';
 import UserManagement from './UserManagement';
 import ContentView from './ContentView';
 import CeoDashboardView from './CeoDashboardView';
+import BotAnalyticsView from './BotAnalyticsView';
 import { STATUS_LABELS, normalizeStatus } from './SharedUI';
 import { useAuth } from '../../context/AuthContext';
 
@@ -101,8 +102,8 @@ export default function Dashboard() {
   // Tự động kiểm tra và chuyển tab phù hợp theo quyền nhân sự hiện tại
   useEffect(() => {
     const roleTabs = {
-      super_admin: ['ceo', 'leads', 'reports', 'users', 'content', 'settings'],
-      sales: ['leads', 'reports', 'settings'],
+      super_admin: ['ceo', 'bot', 'leads', 'reports', 'users', 'content', 'settings'],
+      sales: ['bot', 'leads', 'reports', 'settings'],
       editor: ['content', 'settings'],
       viewer: ['reports', 'settings']
     };
@@ -378,6 +379,10 @@ export default function Dashboard() {
 
           {activeTab === 'ceo' && user?.role === 'super_admin' && (
             <CeoDashboardView />
+          )}
+
+          {activeTab === 'bot' && (user?.role === 'super_admin' || user?.role === 'sales') && (
+            <BotAnalyticsView leads={leads} />
           )}
 
           {activeTab === 'reports' && (user?.role === 'super_admin' || user?.role === 'sales' || user?.role === 'viewer') && (

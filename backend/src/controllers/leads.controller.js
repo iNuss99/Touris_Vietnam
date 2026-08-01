@@ -144,11 +144,13 @@ const getLeads = async (req, res) => {
 };
 
 const createLead = async (req, res) => {
-  const { fullName, zalo, email, destination, date, guests, serviceClass, message } = req.body;
+  const { fullName, zalo, email, destination, date, guests, serviceClass, message, source, chatTranscript } = req.body;
   try {
     const safeFullName = fullName || "Khách hàng";
     const safePhone = zalo || "Chưa cung cấp";
     const safeEmail = email || "Chưa cung cấp";
+    const safeSource = source || "website";
+    const safeTranscript = chatTranscript || null;
     
     let parsedGuests = null;
     if (guests) {
@@ -168,22 +170,22 @@ const createLead = async (req, res) => {
     });
 
     const query = `
-      INSERT INTO leads (full_name, phone, email, destination, departure_date, guests, service_class, message, score, grade, estimated_value)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      INSERT INTO leads (full_name, phone, email, destination, departure_date, guests, service_class, message, score, grade, estimated_value, source, chat_transcript)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *
     `;
 
-    const values = [safeFullName, safePhone, safeEmail, destination, date, parsedGuests, serviceClass, message, score, grade, estimatedValue];
+    const values = [safeFullName, safePhone, safeEmail, destination, date, parsedGuests, serviceClass, message, score, grade, estimatedValue, safeSource, safeTranscript];
     const result = await pool.query(query, values);
 
     // Ghi Audit Log cho hệ thống
     await logAuditEvent({
       actorId: 0,
-      actorEmail: 'system@website.public',
-      action: 'CREATE_LEAD_WEB',
+      actorEmail: safeSource === 'chatbox' ? 'bot.gemma4@website.public' : 'system@website.public',
+      action: safeSource === 'chatbox' ? 'CREATE_LEAD_CHATBOX' : 'CREATE_LEAD_WEB',
       resourceType: 'LEAD',
       resourceId: result.rows[0].id,
-      afterValue: { full_name: safeFullName, destination }
+      afterValue: { full_name: safeFullName, destination, source: safeSource }
     });
 
     res.status(201).json({ success: true, lead: result.rows[0] });
