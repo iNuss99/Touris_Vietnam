@@ -1,3 +1,5 @@
 .vercel
-.agents/
-.env*
+.env
+.env.*
+!.env.example
+

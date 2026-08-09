@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies and Build
 node_modules
 dist
 dist-ssr
@@ -23,11 +24,10 @@ dist-ssr
 *.sln
 *.sw?
 
+# Deployment caches & local secrets
 .vercel
-.env*
+.env
+.env.*
+!.env.example
 
-# Internal documentation and agent files
-*.md
-.agents/
-docs/
 
