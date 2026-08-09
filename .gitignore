@@ -1,5 +1,41 @@
-# Logs
-logs
+# ==============================================================================
+# 1. BẢO MẬT & BIẾN MÔI TRƯỜNG (ENVIRONMENT & SECRETS)
+# Tuyệt đối không commit file chứa credentials/API key thật lên Git
+# ==============================================================================
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.vercel*
+
+# Ngoại lệ: Cho phép commit file mẫu để team clone về tham khảo cấu hình
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# Khóa bí mật & chứng chỉ (Certificates & Keys)
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+
+# ==============================================================================
+# 2. THƯ MỤC DEPENDENCIES & BUILD OUTPUT
+# ==============================================================================
+node_modules/
+dist/
+dist-ssr/
+build/
+.vercel/
+
+# ==============================================================================
+# 3. LOGS & NHẬT KÝ LỖI
+# ==============================================================================
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,27 +43,20 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Dependencies and Build
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# ==============================================================================
+# 4. HỆ ĐIỀU HÀNH & EDITOR CỦA LẬP TRÌNH VIÊN (OS & IDE FILES)
+# ==============================================================================
+.DS_Store
+Thumbs.db
+.idea/
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.bak
 
-# Deployment caches & local secrets
-.vercel
-.env
-.env.*
-!.env.example
 
 

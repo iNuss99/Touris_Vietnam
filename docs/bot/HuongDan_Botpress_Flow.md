@@ -131,7 +131,7 @@ Sau khối **Lấy Thông Tin** (ở Bước 3):
      } catch (err) {
        console.error('Lỗi đồng bộ API: ', err.message);
        // Fallback: Gửi về Google Sheets nếu backend lỗi
-       const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxPEtkA2xnO83NfViqUBA3y0EPt7CBgoBXrUOc0VNtq06o2VzvftiyAANbIR_NFRCUF/exec';
+       const SHEETS_URL = 'https://script.google.com/macros/s/<YOUR_GOOGLE_APPS_SCRIPT_ID>/exec';
        try {
          await fetch(SHEETS_URL, {
            method: 'POST',

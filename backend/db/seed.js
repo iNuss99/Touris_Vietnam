@@ -1,4 +1,7 @@
-const { Pool } = require('pg'); const pool = new Pool({ connectionString: 'postgresql://neondb_owner:npg_ap7OnRLFjZ8q@ep-dark-firefly-azj7ve04-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require' });
+require('dotenv').config();
+const { Pool } = require('pg');
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+
 const seed = async () => {
   const check = await pool.query('SELECT COUNT(*) FROM leads');
   if (parseInt(check.rows[0].count) > 0) { console.log('Data exists'); return pool.end(); }

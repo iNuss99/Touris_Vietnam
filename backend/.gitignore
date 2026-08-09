@@ -1,5 +1,13 @@
-.vercel
+# Biến môi trường & bí mật
 .env
 .env.*
+.env.local
+.env.vercel*
 !.env.example
+
+# Dependencies & Vercel cache
+node_modules/
+.vercel/
+npm-debug.log*
+
 
