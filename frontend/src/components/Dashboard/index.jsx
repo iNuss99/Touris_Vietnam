@@ -1,18 +1,27 @@
-import React, { useState, useEffect, useMemo, useRef, useDeferredValue } from 'react';
+import React, { useState, useEffect, useMemo, useDeferredValue, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Sidebar from './Sidebar';
 import TopHeader from './TopHeader';
 import LeadsView from './LeadsView';
-import ReportsView from './ReportsView';
 import SettingsView from './SettingsView';
 import LeadDetailsModal from './LeadDetailsModal';
-import UserManagement from './UserManagement';
-import ContentView from './ContentView';
 import CeoDashboardView from './CeoDashboardView';
-import BotAnalyticsView from './BotAnalyticsView';
 import { STATUS_LABELS, normalizeStatus } from './SharedUI';
 import { useAuth } from '../../context/AuthContext';
+
+const ReportsView = React.lazy(() => import('./ReportsView'));
+const BotAnalyticsView = React.lazy(() => import('./BotAnalyticsView'));
+const ContentView = React.lazy(() => import('./ContentView'));
+const UserManagement = React.lazy(() => import('./UserManagement'));
+
+function ViewSpinner() {
+  return (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-8 h-8 border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
+    </div>
+  );
+}
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://touris-vietnam-api.vercel.app';
 const ITEMS_PER_PAGE = 8;
@@ -201,7 +210,7 @@ export default function Dashboard() {
     }
     
     return result;
-  }, [leads, searchQuery, statusFilter, destFilter, sortConfig]);
+  }, [leads, deferredSearchQuery, statusFilter, destFilter, sortConfig]);
 
   // Reset trang về 1 khi đổi filter hoặc sort
   useEffect(() => {
@@ -377,51 +386,53 @@ export default function Dashboard() {
             />
           )}
 
-          {activeTab === 'ceo' && user?.role === 'super_admin' && (
-            <CeoDashboardView />
-          )}
+          <Suspense fallback={<ViewSpinner />}>
+            {activeTab === 'ceo' && user?.role === 'super_admin' && (
+              <CeoDashboardView />
+            )}
 
-          {activeTab === 'bot' && (user?.role === 'super_admin' || user?.role === 'sales') && (
-            <BotAnalyticsView leads={leads} />
-          )}
+            {activeTab === 'bot' && (user?.role === 'super_admin' || user?.role === 'sales') && (
+              <BotAnalyticsView leads={leads} />
+            )}
 
-          {activeTab === 'reports' && (user?.role === 'super_admin' || user?.role === 'sales' || user?.role === 'viewer') && (
-            <ReportsView 
-              totalLeads={totalLeads}
-              converted={converted}
-              newLeads={newLeads}
-              inProgress={inProgress}
-              leads={leads}
-              leadsByDate={leadsByDate}
-              fetchLeads={fetchLeads}
-            />
-          )}
+            {activeTab === 'reports' && (user?.role === 'super_admin' || user?.role === 'sales' || user?.role === 'viewer') && (
+              <ReportsView 
+                totalLeads={totalLeads}
+                converted={converted}
+                newLeads={newLeads}
+                inProgress={inProgress}
+                leads={leads}
+                leadsByDate={leadsByDate}
+                fetchLeads={fetchLeads}
+              />
+            )}
 
-          {activeTab === 'settings' && (
-            <SettingsView 
-              adminProfile={adminProfile} 
-              setAdminProfile={setAdminProfile} 
-              handleLogout={handleLogout}
-            />
-          )}
+            {activeTab === 'settings' && (
+              <SettingsView 
+                adminProfile={adminProfile} 
+                setAdminProfile={setAdminProfile} 
+                handleLogout={handleLogout}
+              />
+            )}
 
-          {activeTab === 'users' && user?.role === 'super_admin' && (
-            <div className="max-w-4xl mx-auto animate-fade-in pb-12">
-              <div className="flex justify-between items-end mb-8">
-                <div>
-                  <h2 className="text-4xl font-sans text-slate-800 tracking-tight mb-2">Quản lý nhân sự</h2>
-                  <p className="text-slate-500 text-sm">Phân quyền và quản lý tài khoản truy cập CRM.</p>
+            {activeTab === 'users' && user?.role === 'super_admin' && (
+              <div className="max-w-4xl mx-auto animate-fade-in pb-12">
+                <div className="flex justify-between items-end mb-8">
+                  <div>
+                    <h2 className="text-4xl font-sans text-slate-800 tracking-tight mb-2">Quản lý nhân sự</h2>
+                    <p className="text-slate-500 text-sm">Phân quyền và quản lý tài khoản truy cập CRM.</p>
+                  </div>
                 </div>
+                <UserManagement />
               </div>
-              <UserManagement />
-            </div>
-          )}
-          
-          {activeTab === 'content' && (user?.role === 'super_admin' || user?.role === 'editor') && (
-            <div className="max-w-7xl mx-auto animate-fade-in pb-12">
-              <ContentView />
-            </div>
-          )}
+            )}
+            
+            {activeTab === 'content' && (user?.role === 'super_admin' || user?.role === 'editor') && (
+              <div className="max-w-7xl mx-auto animate-fade-in pb-12">
+                <ContentView />
+              </div>
+            )}
+          </Suspense>
         </div>
       </main>
 

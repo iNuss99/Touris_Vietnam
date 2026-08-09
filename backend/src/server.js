@@ -56,6 +56,22 @@ app.use('/api/users', usersRoutes);
 app.use('/api/leads', leadsRoutes);
 app.use('/api/ceo', ceoRoutes);
 
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: 'API Endpoint Not Found' });
+});
+
+// Global Error Handler Middleware
+app.use((err, req, res, next) => {
+  console.error('[SERVER ERROR]', err.stack || err);
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  });
+});
+
 if (require.main === module) {
   app.listen(port, () => {
     console.log(`Backend server running on port ${port}`);

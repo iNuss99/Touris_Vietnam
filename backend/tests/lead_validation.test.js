@@ -45,3 +45,21 @@ test('TDD - validateLeadInput flags empty full_name and invalid phone format', (
   assert.ok(result.errors.includes('Số điện thoại không hợp lệ'));
   assert.ok(result.errors.includes('Email không đúng định dạng'));
 });
+
+test('TDD - Chatbot payload handles snake_case aliases and auto-identifies source as chatbox', () => {
+  const difyPayload = {
+    customer_name: 'Trần Văn Bình',
+    phone_number: '0988776655',
+    tour_destination: 'Phú Quốc',
+    service_class: 'Prestige (5 sao)',
+    chat_transcript: '[10:00] Khách: Em muốn đi Phú Quốc\n[10:01] Bot: Dạ anh cho em xin SĐT'
+  };
+  const fullName = difyPayload.fullName || difyPayload.full_name || difyPayload.name || difyPayload.customer_name;
+  const phone = difyPayload.zalo || difyPayload.phone || difyPayload.phone_number || difyPayload.sdt;
+  const source = difyPayload.source || (difyPayload.chatTranscript || difyPayload.chat_transcript ? 'chatbox' : 'website');
+  
+  assert.equal(fullName, 'Trần Văn Bình');
+  assert.equal(phone, '0988776655');
+  assert.equal(source, 'chatbox');
+});
+

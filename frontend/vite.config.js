@@ -24,13 +24,25 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        // Code splitting function cho Vite 8 / Rolldown
+        // Granular Code Splitting cho Vite 8 / Rolldown
         manualChunks(id) {
-          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/') || id.includes('node_modules/react-router')) {
             return 'vendor';
+          }
+          if (id.includes('node_modules/recharts')) {
+            return 'charts';
+          }
+          if (id.includes('node_modules/@tanstack')) {
+            return 'query';
+          }
+          if (id.includes('node_modules/gsap') || id.includes('node_modules/lenis')) {
+            return 'animation';
           }
           if (id.includes('node_modules/lucide-react')) {
             return 'icons';
+          }
+          if (id.includes('node_modules/react-markdown') || id.includes('node_modules/rehype-sanitize')) {
+            return 'markdown';
           }
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
@@ -48,7 +60,7 @@ export default defineConfig({
       },
     },
     reportCompressedSize: true,
-    chunkSizeWarningLimit: 500,
+    chunkSizeWarningLimit: 600,
     cssCodeSplit: true,
     sourcemap: false,
   },

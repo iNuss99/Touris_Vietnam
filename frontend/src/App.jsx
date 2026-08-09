@@ -12,8 +12,8 @@ import TourPackages from './components/TourPackages';
 import FAQs from './components/FAQs';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
+import StickyContact from './components/StickyContact';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import ChatWidget from './components/Chat/ChatWidget';
 
 const Dashboard = React.lazy(() => import('./components/Dashboard'));
 const Login = React.lazy(() => import('./components/Login'));
@@ -185,7 +185,7 @@ function MainApp() {
         handleReveal={handleReveal}
         handleLoadingComplete={handleLoadingComplete}
       />
-      <ChatWidget />
+      <StickyContact />
     </>
   );
 }

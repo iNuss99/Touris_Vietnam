@@ -144,10 +144,21 @@ const getLeads = async (req, res) => {
 };
 
 const createLead = async (req, res) => {
-  const { fullName, zalo, email, destination, date, guests, serviceClass, message, source, chatTranscript } = req.body;
+  const body = req.body || {};
+  const fullName = body.fullName || body.full_name || body.name || body.customer_name;
+  const phone = body.zalo || body.phone || body.phone_number || body.sdt;
+  const email = body.email;
+  const destination = body.destination || body.tour_destination || body.diem_den;
+  const date = body.date || body.departure_date || body.departureDate || body.ngay_di;
+  const guests = body.guests || body.num_guests || body.guest_count || body.so_luong;
+  const serviceClass = body.serviceClass || body.service_class || body.hang_dich_vu;
+  const message = body.message || body.note || body.notes || body.loi_nhan;
+  const source = body.source || (body.chatTranscript || body.chat_transcript ? 'chatbox' : 'website');
+  const chatTranscript = body.chatTranscript || body.chat_transcript || body.transcript;
+
   try {
     const safeFullName = fullName || "Khách hàng";
-    const safePhone = zalo || "Chưa cung cấp";
+    const safePhone = phone || "Chưa cung cấp";
     const safeEmail = email || "Chưa cung cấp";
     const safeSource = source || "website";
     const safeTranscript = chatTranscript || null;

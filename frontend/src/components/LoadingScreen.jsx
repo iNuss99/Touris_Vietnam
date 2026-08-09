@@ -35,13 +35,13 @@ export default function LoadingScreen({ onReveal, onComplete }) {
     // Phase 1: start curtain reveal after 1000ms
     const t1 = setTimeout(() => {
       setPhase('reveal');
-      if (onReveal) onReveal();
+      if (typeof onReveal === 'function') onReveal();
     }, 1000);
 
     // Phase 2: unmount after curtain completes at 1800ms
     const t2 = setTimeout(() => {
       setPhase('done');
-      if (onComplete) onComplete();
+      if (typeof onComplete === 'function') onComplete();
     }, 1800);
 
     return () => {
