@@ -1,6 +1,6 @@
 # ==============================================================================
 # 1. BẢO MẬT & BIẾN MÔI TRƯỜNG (ENVIRONMENT & SECRETS)
-# Tuyệt đối không commit file chứa credentials/API key thật lên Git
+# Tuyệt đối không commit file chứa credentials / API key / database URI thật lên Git
 # ==============================================================================
 .env
 .env.*
@@ -10,7 +10,7 @@
 .env.production.local
 .env.vercel*
 
-# Ngoại lệ: Cho phép commit file mẫu để team clone về tham khảo cấu hình
+# Ngoại lệ: Cho phép commit file mẫu để tham khảo cấu hình
 !.env.example
 !backend/.env.example
 !frontend/.env.example
@@ -33,7 +33,23 @@ build/
 .vercel/
 
 # ==============================================================================
-# 3. LOGS & NHẬT KÝ LỖI
+# 3. TÀI LIỆU NỘI BỘ, KNOWLEDGE BASE & AI AGENTS / PROMPTS (.MD & BOT SPECS)
+# Giữ an toàn và bảo mật tài liệu phân tích nội bộ, prompts và bot datasets
+# ==============================================================================
+.agents/
+CLAUDE.md
+KB.bot/
+kb/
+docs/reports/
+docs/bot/
+docs/google-sheet/
+TV_KB.md
+touris-vietnam-knowledge-base.md
+RBAC-Quyet-Dinh-Kien-Truc.md
+scripts/temp_*.js
+
+# ==============================================================================
+# 4. LOGS & NHẬT KÝ LỖI
 # ==============================================================================
 logs/
 *.log
@@ -44,7 +60,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # ==============================================================================
-# 4. HỆ ĐIỀU HÀNH & EDITOR CỦA LẬP TRÌNH VIÊN (OS & IDE FILES)
+# 5. HỆ ĐIỀU HÀNH & EDITOR CỦA LẬP TRÌNH VIÊN (OS & IDE FILES)
 # ==============================================================================
 .DS_Store
 Thumbs.db
@@ -57,6 +73,3 @@ Thumbs.db
 *.sln
 *.sw?
 *.bak
-
-
-
