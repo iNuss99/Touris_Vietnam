@@ -11,7 +11,7 @@
 
 **Trải nghiệm du lịch 5 sao cao cấp kết hợp Trợ lý AI cá nhân hóa và Hệ thống quản trị CRM toàn diện.**
 
-[🌐 Trải Nghiệm Trực Tuyến](https://touris-vietnam.vercel.app/) • [📊 Cổng Quản Trị CRM](https://touris-vietnam.vercel.app/crm)
+[🌐 Trải Nghiệm Trực Tuyến](https://tour-vietnam.vercel.app/) • [📊 Cổng Quản Trị CRM](https://tour-vietnam.vercel.app/crm)
 
 </div>
 
