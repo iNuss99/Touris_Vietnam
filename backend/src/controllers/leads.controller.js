@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 const { logAuditEvent } = require('../services/audit_service');
+const { sendBookingConfirmationEmail } = require('../services/email_service');
 
 /**
  * Tự động tính toán Điểm tiềm năng (Score), Phân loại (Grade) & Giá trị ước tính (Estimated Value)
@@ -198,6 +199,22 @@ const createLead = async (req, res) => {
       resourceId: result.rows[0].id,
       afterValue: { full_name: safeFullName, destination, source: safeSource }
     });
+
+    // Gửi email xác nhận đặt tour tự động (non-blocking) nếu khách hàng cung cấp email
+    if (safeEmail && safeEmail.includes('@') && safeEmail !== 'Chưa cung cấp') {
+      sendBookingConfirmationEmail({
+        to: safeEmail,
+        fullName: safeFullName,
+        phone: safePhone,
+        destination,
+        departureDate: date,
+        guests: parsedGuests,
+        serviceClass,
+        message
+      }).catch((err) => {
+        console.warn('[SMTP] Không thể gửi email xác nhận đặt tour:', err.message);
+      });
+    }
 
     res.status(201).json({ success: true, lead: result.rows[0] });
   } catch (err) {

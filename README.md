@@ -5,7 +5,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Production-Live_Demo-00C853?style=for-the-badge&logo=vercel&logoColor=white)](https://tour-vietnam.vercel.app/)
 [![CRM Portal](https://img.shields.io/badge/CRM_Portal-Access_Now-FF6F00?style=for-the-badge&logo=google-cloud&logoColor=white)](https://tour-vietnam.vercel.app/crm)
-[![Tests Passing](https://img.shields.io/badge/Tests-44%2F44_Passed-success?style=for-the-badge&logo=node.js&logoColor=white)](https://github.com/iNuss99/Touris_Vietnam)
+[![Tests Passing](https://img.shields.io/badge/Tests-50%2F50_Passed-success?style=for-the-badge&logo=node.js&logoColor=white)](https://github.com/iNuss99/Touris_Vietnam)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
 <br/>
@@ -417,7 +417,7 @@ npm test
 cd backend && npm test
 ```
 
-### 📋 Kết Quả Kiểm Thử: **44/44 Tests Passed (100%)**
+### 📋 Kết Quả Kiểm Thử: **50/50 Tests Passed (100%)**
 
 ```
 ✔ Integration Test Suite - Database Connection (Neon SSL Pool)
@@ -438,6 +438,12 @@ cd backend && npm test
 ✔ authMiddleware - Calls next() and sets req.user for valid token
 ✔ requireRole - Return 403 when user role is not authorized
 ✔ requireRole - Calls next() when user role matches allowed roles
+✔ emailService - Throws when credentials are not configured
+✔ emailService - Creates transport when Gmail credentials provided
+✔ emailService - Creates custom SMTP transport when SMTP_HOST provided
+✔ emailService - getDefaultFrom returns proper sender
+✔ emailService - sendBookingConfirmationEmail validates email input
+✔ emailService - Gracefully handles send errors without crashing
 ✔ TDD - Financial Aggregation: Correct revenue and cashflow calculation
 ✔ TDD - Financial Aggregation: Empty leads list produces zero metrics
 ✔ normalizeStatus - Maps CONVERTED / IN_PROGRESS / LOST variations
@@ -457,7 +463,6 @@ cd backend && npm test
 ✔ Validation Middleware - validateLogin flags invalid emails & missing passwords
 ✔ Validation Middleware - validateChangePassword requires minimum 8 chars
 ✔ Validation Middleware - validateCreateLead validates phone, email, guest count
-✔ Validation Middleware - validateLeadStatus ensures valid lifecycle transitions
 ✔ Validation Middleware - validateCreateUser and validateUserRole enforce RBAC matrix
 ✔ Validation Middleware - validateUserStatus checks allowed status values
 ✔ Token Lifecycle - Verify & Refresh Token endpoints
