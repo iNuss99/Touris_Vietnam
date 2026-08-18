@@ -70,15 +70,15 @@ function calculateLeadScoreAndGrade({ phone, email, guests, serviceClass, depart
  * Che dấu PII (SĐT, Email) cho role Editor và Viewer
  */
 function maskPII(lead) {
-  let maskedPhone = lead.phone || 'Chưa cung cấp';
-  if (maskedPhone && maskedPhone.length >= 6) {
+  let maskedPhone = lead.phone;
+  if (maskedPhone && maskedPhone !== 'Chưa cung cấp' && maskedPhone.length >= 6) {
     maskedPhone = '***-***-' + maskedPhone.slice(-4);
   } else {
     maskedPhone = '***-***-****';
   }
 
-  let maskedEmail = lead.email || 'Chưa cung cấp';
-  if (maskedEmail.includes('@')) {
+  let maskedEmail = lead.email;
+  if (maskedEmail && maskedEmail !== 'Chưa cung cấp' && maskedEmail.includes('@')) {
     const [local, domain] = maskedEmail.split('@');
     const maskedLocal = local.length > 2 ? local.slice(0, 2) + '***' : '***';
     maskedEmail = `${maskedLocal}@${domain}`;

@@ -68,7 +68,69 @@ const changePassword = async (req, res) => {
   }
 };
 
+const verifyToken = async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, email, full_name, role, status, must_change_password FROM admins WHERE id = $1', [req.user.id]);
+    if (result.rows.length === 0) {
+      return res.status(401).json({ success: false, error: 'Tài khoản không tồn tại' });
+    }
+
+    const user = result.rows[0];
+    if (user.status !== 'active') {
+      return res.status(403).json({ success: false, error: 'Tài khoản đã bị tạm khóa' });
+    }
+
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.full_name,
+        role: user.role,
+        must_change_password: user.must_change_password
+      }
+    });
+  } catch (err) {
+    console.error('Lỗi xác thực token:', err);
+    res.status(500).json({ success: false, error: 'Lỗi máy chủ' });
+  }
+};
+
+const refreshToken = async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, email, full_name, role, status, must_change_password FROM admins WHERE id = $1', [req.user.id]);
+    if (result.rows.length === 0 || result.rows[0].status !== 'active') {
+      return res.status(401).json({ success: false, error: 'Không thể làm mới token cho tài khoản này' });
+    }
+
+    const user = result.rows[0];
+    const newToken = jwt.sign(
+      { 
+        role: user.role, 
+        email: user.email, 
+        id: user.id,
+        name: user.full_name
+      }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      success: true,
+      token: newToken,
+      role: user.role,
+      name: user.full_name,
+      must_change_password: user.must_change_password
+    });
+  } catch (err) {
+    console.error('Lỗi làm mới token:', err);
+    res.status(500).json({ success: false, error: 'Lỗi máy chủ' });
+  }
+};
+
 module.exports = {
   login,
-  changePassword
+  changePassword,
+  verifyToken,
+  refreshToken
 };

@@ -91,84 +91,22 @@
 <body class="bg-luxury-dark text-slate-100 antialiased">
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
-  <!-- ===== DIFY CHATBOT OFFICIAL WIDGET ===== -->
-  <script>
-    window.difyChatbotConfig = {
-      token: 'E5ZeOWy2LOCHQ6fB',
-      baseUrl: 'https://udify.app',
-      inputs: {},
-      systemVariables: {},
-      userVariables: {},
-    }
-  </script>
-  <script
-    src="https://udify.app/embed.min.js"
-    id="E5ZeOWy2LOCHQ6fB"
-    defer>
-  </script>
+
+  <!-- ===== SHARED 2.0s PULSE RING ANIMATION ===== -->
   <style>
-    /* ===== DIFY CHATBOT BUBBLE BUTTON (EXACT LOGO CHAMPAGNE GOLD) ===== */
-    #dify-chatbot-bubble-button {
-      position: fixed !important;
-      bottom: 1.5rem !important;
-      right: 1.5rem !important;
-      z-index: 999999 !important;
-      background-color: #c9a84c !important;
-      background: linear-gradient(135deg, #f0d080 0%, #c9a84c 100%) !important;
-      border: 1px solid rgba(240, 208, 128, 0.5) !important;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
-      color: #0b0f19 !important;
-      transition: transform 0.3s ease !important;
-      overflow: visible !important;
-    }
-
-    #dify-chatbot-bubble-button:hover {
-      transform: scale(1.1) !important;
-    }
-
-    /* ===== SHARED 2.0s PULSE RING ANIMATION ===== */
     @keyframes pulse-ring-sync {
       0% {
         transform: scale(1);
-        opacity: 0.45;
+        opacity: 0.55;
       }
-      75%, 100% {
-        transform: scale(1.6);
+      70%, 100% {
+        transform: scale(1.68);
         opacity: 0;
       }
     }
 
     .animate-pulse-ring-sync {
       animation: pulse-ring-sync 2s cubic-bezier(0, 0, 0.2, 1) infinite !important;
-    }
-
-    /* ===== DIFY CHATBOT BUBBLE WINDOW ===== */
-    #dify-chatbot-bubble-window {
-      position: fixed !important;
-      bottom: 5.5rem !important;
-      right: 1.5rem !important;
-      z-index: 999998 !important;
-      width: 25rem !important;
-      height: 40rem !important;
-      max-width: calc(100vw - 2rem) !important;
-      max-height: calc(100vh - 7rem) !important;
-      border-radius: 1.25rem !important;
-      border: 1px solid rgba(201, 168, 76, 0.4) !important;
-      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.85) !important;
-      overflow: hidden !important;
-      background-color: #ffffff !important;
-    }
-
-    /* IFRAME HIGH-CONTRAST CLEAN STYLING */
-    #dify-chatbot-bubble-window iframe,
-    iframe[src*="udify.app"],
-    iframe#dify-chatbot-bubble-window-iframe {
-      width: 100% !important;
-      height: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      border: none !important;
-      border-radius: 1.25rem !important;
     }
   </style>
 </body>
