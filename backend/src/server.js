@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ override: true });
 
 if (!process.env.JWT_SECRET) {
   console.warn("WARNING: JWT_SECRET is not defined in environment variables. Using default fallback secret.");
