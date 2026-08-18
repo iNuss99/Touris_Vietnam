@@ -200,20 +200,22 @@ const createLead = async (req, res) => {
       afterValue: { full_name: safeFullName, destination, source: safeSource }
     });
 
-    // Gửi email xác nhận đặt tour tự động (non-blocking) nếu khách hàng cung cấp email
+    // Gửi email xác nhận đặt tour tự động cho khách hàng (await để đảm bảo môi trường Serverless không ngắt kết nối trước khi gửi xong)
     if (safeEmail && safeEmail.includes('@') && safeEmail !== 'Chưa cung cấp') {
-      sendBookingConfirmationEmail({
-        to: safeEmail,
-        fullName: safeFullName,
-        phone: safePhone,
-        destination,
-        departureDate: date,
-        guests: parsedGuests,
-        serviceClass,
-        message
-      }).catch((err) => {
-        console.warn('[SMTP] Không thể gửi email xác nhận đặt tour:', err.message);
-      });
+      try {
+        await sendBookingConfirmationEmail({
+          to: safeEmail,
+          fullName: safeFullName,
+          phone: safePhone,
+          destination,
+          departureDate: date,
+          guests: parsedGuests,
+          serviceClass,
+          message
+        });
+      } catch (mailErr) {
+        console.warn('[SMTP] Không thể gửi email xác nhận đặt tour:', mailErr.message);
+      }
     }
 
     res.status(201).json({ success: true, lead: result.rows[0] });
