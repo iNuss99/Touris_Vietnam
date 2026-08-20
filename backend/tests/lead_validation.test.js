@@ -7,7 +7,8 @@ function validateLeadInput(data) {
   if (!data.full_name || typeof data.full_name !== 'string' || data.full_name.trim().length === 0) {
     errors.push('Họ tên không được để trống');
   }
-  if (!data.phone || typeof data.phone !== 'string' || !/^(0|\+84)[0-9]{9,10}$/.test(data.phone.trim())) {
+  const cleanPhone = data.phone && typeof data.phone === 'string' ? data.phone.replace(/[\s\-\.\(\)]/g, '') : '';
+  if (!data.phone || typeof data.phone !== 'string' || !/^(0|\+?84)[0-9]{8,10}$/.test(cleanPhone)) {
     errors.push('Số điện thoại không hợp lệ');
   }
   if (data.email && typeof data.email === 'string' && data.email.trim() !== '') {
@@ -21,15 +22,19 @@ function validateLeadInput(data) {
   };
 }
 
-test('TDD - validateLeadInput returns valid for correct input', () => {
-  const input = {
-    full_name: 'Nguyen Van A',
-    phone: '0912345678',
-    email: 'test@example.com'
-  };
-  const result = validateLeadInput(input);
-  assert.equal(result.isValid, true);
-  assert.equal(result.errors.length, 0);
+test('TDD - validateLeadInput returns valid for correct input and formatted phones', () => {
+  const inputs = [
+    { full_name: 'Nguyen Van A', phone: '0912345678', email: 'test@example.com' },
+    { full_name: 'Tran Van B', phone: '0931 143 830', email: 'test2@example.com' },
+    { full_name: 'Le Van C', phone: '+84 931 143 830', email: 'test3@example.com' },
+    { full_name: 'Pham Van D', phone: '0931-143-830', email: 'test4@example.com' },
+  ];
+
+  for (const input of inputs) {
+    const result = validateLeadInput(input);
+    assert.equal(result.isValid, true, `Failed for phone: ${input.phone}`);
+    assert.equal(result.errors.length, 0);
+  }
 });
 
 test('TDD - validateLeadInput flags empty full_name and invalid phone format', () => {

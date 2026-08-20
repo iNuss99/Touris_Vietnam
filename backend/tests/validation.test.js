@@ -100,6 +100,19 @@ test('Validation Middleware - validateCreateLead validates phone, email, and gue
   });
   validateCreateLead(ctx3.req, ctx3.res, ctx3.next);
   assert.equal(ctx3.nextCalled, true);
+
+  // Valid lead input with formatted phone numbers (spaces, +84, dashes)
+  const formattedPhones = ['0931 143 830', '+84 931 143 830', '0931-143-830'];
+  for (const phone of formattedPhones) {
+    const ctxFormatted = createMockContext({
+      fullName: 'Test User',
+      zalo: phone,
+      email: 'test@example.com',
+      guests: 2
+    });
+    validateCreateLead(ctxFormatted.req, ctxFormatted.res, ctxFormatted.next);
+    assert.equal(ctxFormatted.nextCalled, true, `validateCreateLead should pass for phone: ${phone}`);
+  }
 });
 
 test('Validation Middleware - validateLeadStatus ensures valid lifecycle transitions', () => {

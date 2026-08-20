@@ -4,7 +4,7 @@
  */
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_REGEX = /^(0|\+84)[0-9]{9,10}$/;
+const PHONE_REGEX = /^(0|\+?84)[0-9]{8,10}$/;
 const VALID_ROLES = ['super_admin', 'sales', 'editor', 'viewer'];
 const VALID_USER_STATUSES = ['active', 'inactive', 'suspended'];
 const VALID_LEAD_STATUSES = ['NEW', 'IN_PROGRESS', 'CONVERTED', 'LOST', 'MỚI', 'ĐANG ĐÀM PHÁN', 'ĐANG XỬ LÝ', 'THÀNH CÔNG', 'CHỐT', 'HỦY', 'HỦY BỎ'];
@@ -43,7 +43,8 @@ const validateCreateLead = (req, res, next) => {
   }
 
   if (zalo && typeof zalo === 'string' && zalo.trim() !== '' && zalo !== 'Chưa cung cấp') {
-    if (!PHONE_REGEX.test(zalo.trim())) {
+    const cleanZalo = zalo.replace(/[\s\-\.\(\)]/g, '');
+    if (!PHONE_REGEX.test(cleanZalo)) {
       return res.status(400).json({ success: false, error: 'Số điện thoại/Zalo không hợp lệ' });
     }
   }

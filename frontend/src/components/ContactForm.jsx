@@ -140,7 +140,8 @@ export default function ContactForm() {
       });
 
       if (!res.ok) {
-        throw new Error(`Lỗi kết nối tới Server: ${res.status}`);
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Lỗi kết nối tới Server: ${res.status}`);
       }
 
       setStatus({ type: 'success' });
